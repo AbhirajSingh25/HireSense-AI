@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes.dashboard import router as dashboard_router
 
 from sqlalchemy.orm import Session
 from fastapi import Depends
@@ -32,6 +33,9 @@ Base.metadata.create_all(
 
 
 app = FastAPI()
+app.include_router(
+    dashboard_router
+)
 
 
 app.add_middleware(

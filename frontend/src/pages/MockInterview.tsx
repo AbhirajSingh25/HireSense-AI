@@ -272,8 +272,7 @@ function MockInterview() {
 
       await saveInterview({
 
-        user_id:
-          user?.id,
+        user_id: user.id,
 
         transcript,
 

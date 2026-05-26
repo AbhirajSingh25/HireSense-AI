@@ -1,8 +1,12 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Float
-from sqlalchemy import ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    ForeignKey,
+)
+
+from sqlalchemy.orm import relationship
 
 from app.db.database import Base
 
@@ -11,10 +15,11 @@ class Interview(Base):
 
     __tablename__ = "interviews"
 
+
     id = Column(
         Integer,
         primary_key=True,
-        index=True
+        index=True,
     )
 
     user_id = Column(
@@ -24,30 +29,36 @@ class Interview(Base):
 
     transcript = Column(
         String,
-        nullable=False
+        nullable=True,
     )
 
     confidence_score = Column(
         Float,
-        default=0
+        default=0,
     )
 
     communication_score = Column(
         Float,
-        default=0
+        default=0,
     )
 
     words_per_minute = Column(
         Float,
-        default=0
+        default=0,
     )
 
     eye_contact_score = Column(
         Float,
-        default=0
+        default=0,
     )
 
     attention_status = Column(
         String,
-        default="Focused"
+        default="Focused",
+    )
+
+
+    user = relationship(
+        "User",
+        back_populates="interviews"
     )
