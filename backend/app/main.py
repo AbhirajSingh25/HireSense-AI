@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.dashboard import router as dashboard_router
-
+from app.api.routes.analytics import router as analytics_router
 from sqlalchemy.orm import Session
 from fastapi import Depends
 
@@ -37,7 +37,9 @@ app.include_router(
     dashboard_router
 )
 
-
+app.include_router(
+    analytics_router
+)
 app.add_middleware(
 
     CORSMiddleware,

@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from fastapi import Depends
 
 from pydantic import BaseModel
 
 from sqlalchemy.orm import Session
+
+from fastapi import Depends
 
 from app.db.dependencies import get_db
 
@@ -18,7 +19,7 @@ router = APIRouter(
 
 class SignupRequest(BaseModel):
 
-    name: str
+    username: str
     email: str
     password: str
 
@@ -37,57 +38,50 @@ def signup(
     db: Session = Depends(get_db)
 ):
 
-    existing_user = db.query(User).filter(
+    existing_user = (
 
-        User.email == data.email
+        db.query(User)
 
-    ).first()
+        .filter(
+            User.email == data.email
+        )
 
+        .first()
+    )
 
     if existing_user:
 
         return {
-
-            "success": False,
-
             "message":
                 "User already exists"
         }
 
 
-    user = User(
+    new_user = User(
 
-        name=data.name,
+        username=data.username,
 
         email=data.email,
 
-        password=data.password
+        password=data.password,
     )
 
-    db.add(user)
+    db.add(new_user)
 
     db.commit()
 
-    db.refresh(user)
+    db.refresh(new_user)
 
     return {
 
-        "success": True,
+        "id":
+            new_user.id,
 
-        "message":
-            "Signup successful",
+        "username":
+            new_user.username,
 
-        "user": {
-
-            "id":
-                user.id,
-
-            "name":
-                user.name,
-
-            "email":
-                user.email,
-        }
+        "email":
+            new_user.email,
     }
 
 
@@ -99,42 +93,41 @@ def login(
     db: Session = Depends(get_db)
 ):
 
-    user = db.query(User).filter(
+    user = (
 
-        User.email == data.email,
+        db.query(User)
 
-        User.password == data.password
+        .filter(
+            User.email == data.email
+        )
 
-    ).first()
-
+        .first()
+    )
 
     if not user:
 
         return {
-
-            "success": False,
-
             "message":
-                "Invalid credentials"
+                "User not found"
+        }
+
+
+    if user.password != data.password:
+
+        return {
+            "message":
+                "Invalid password"
         }
 
 
     return {
 
-        "success": True,
+        "id":
+            user.id,
 
-        "message":
-            "Login successful",
+        "username":
+            user.username,
 
-        "user": {
-
-            "id":
-                user.id,
-
-            "name":
-                user.name,
-
-            "email":
-                user.email,
-        }
+        "email":
+            user.email,
     }

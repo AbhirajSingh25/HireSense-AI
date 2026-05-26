@@ -6,23 +6,24 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  motion,
-} from "framer-motion";
+  useAuth,
+} from "../context/AuthContext";
 
 import {
-  Activity,
-  Brain,
-  Mic,
-  Eye,
-} from "lucide-react";
-
-import {
-  getInterviewSessions,
+  getAnalytics,
 } from "../services/api";
 
 import {
-  useAuth,
-} from "../context/AuthContext";
+
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+
+} from "recharts";
 
 
 function Analytics() {
@@ -33,184 +34,36 @@ function Analytics() {
 
 
   const [
-    interviews,
-    setInterviews,
+    analytics,
+    setAnalytics,
   ] = useState<any[]>([]);
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
 
 
   useEffect(() => {
 
-    if (user?.id) {
+    async function loadAnalytics() {
 
-      loadAnalytics();
+      if (!user?.id) return;
+
+      try {
+
+        const data =
+
+          await getAnalytics(
+            user.id
+          );
+
+        setAnalytics(data);
+
+      } catch (error) {
+
+        console.error(error);
+      }
     }
+
+    loadAnalytics();
 
   }, [user]);
-
-
-  async function loadAnalytics() {
-
-    try {
-
-      const data =
-        await getInterviewSessions(
-          user!.id
-        );
-
-      setInterviews(data);
-
-    } catch (error) {
-
-      console.error(error);
-
-    } finally {
-
-      setLoading(false);
-    }
-  }
-
-
-  const averageConfidence =
-
-    interviews.length > 0
-
-      ? Math.round(
-
-          interviews.reduce(
-
-            (
-              acc,
-              item
-            ) =>
-
-              acc +
-
-              (
-                item.confidence_score ||
-                0
-              ),
-
-            0
-          ) /
-
-          interviews.length
-        )
-
-      : 0;
-
-
-  const averageCommunication =
-
-    interviews.length > 0
-
-      ? Math.round(
-
-          interviews.reduce(
-
-            (
-              acc,
-              item
-            ) =>
-
-              acc +
-
-              (
-                item.communication_score ||
-                0
-              ),
-
-            0
-          ) /
-
-          interviews.length
-        )
-
-      : 0;
-
-
-  const averageEyeContact =
-
-    interviews.length > 0
-
-      ? Math.round(
-
-          interviews.reduce(
-
-            (
-              acc,
-              item
-            ) =>
-
-              acc +
-
-              (
-                item.eye_contact_score ||
-                0
-              ),
-
-            0
-          ) /
-
-          interviews.length
-        )
-
-      : 0;
-
-
-  const averageWPM =
-
-    interviews.length > 0
-
-      ? Math.round(
-
-          interviews.reduce(
-
-            (
-              acc,
-              item
-            ) =>
-
-              acc +
-
-              (
-                item.words_per_minute ||
-                0
-              ),
-
-            0
-          ) /
-
-          interviews.length
-        )
-
-      : 0;
-
-
-  if (loading) {
-
-    return (
-
-      <MainLayout>
-
-        <div
-          className="
-            text-white
-            p-10
-          "
-        >
-
-          Loading analytics...
-
-        </div>
-
-      </MainLayout>
-    );
-  }
 
 
   return (
@@ -225,346 +78,26 @@ function Analytics() {
         "
       >
 
-        <div className="mb-14">
+        <div className="mb-12">
 
           <h1
             className="
-              text-7xl
+              text-6xl
               font-black
               mb-4
             "
           >
-            AI Analytics
+            Analytics
           </h1>
 
           <p
             className="
               text-zinc-400
-              text-2xl
+              text-xl
             "
           >
-            Real interview intelligence metrics
+            Real interview performance trends
           </p>
-
-        </div>
-
-
-        <div
-          className="
-            grid
-            md:grid-cols-2
-            gap-8
-            mb-12
-          "
-        >
-
-          <motion.div
-
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-
-            className="
-              bg-cyan-400/10
-              border
-              border-cyan-400/20
-              rounded-3xl
-              p-10
-            "
-          >
-
-            <Brain
-              className="
-                text-cyan-400
-                mb-6
-              "
-              size={50}
-            />
-
-            <div
-              className="
-                text-zinc-400
-                mb-4
-              "
-            >
-              Average Confidence
-            </div>
-
-            <div
-              className="
-                text-7xl
-                font-black
-                mb-4
-              "
-            >
-
-              {
-                averageConfidence
-              }
-
-            </div>
-
-            <div
-              className="
-                w-full
-                h-4
-                bg-black/30
-                rounded-full
-                overflow-hidden
-              "
-            >
-
-              <div
-                className="
-                  h-full
-                  bg-cyan-400
-                "
-                style={{
-                  width:
-                    `${averageConfidence}%`,
-                }}
-              />
-
-            </div>
-
-          </motion.div>
-
-
-          <motion.div
-
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-
-            transition={{
-              delay: 0.1,
-            }}
-
-            className="
-              bg-purple-400/10
-              border
-              border-purple-400/20
-              rounded-3xl
-              p-10
-            "
-          >
-
-            <Activity
-              className="
-                text-purple-400
-                mb-6
-              "
-              size={50}
-            />
-
-            <div
-              className="
-                text-zinc-400
-                mb-4
-              "
-            >
-              Communication
-            </div>
-
-            <div
-              className="
-                text-7xl
-                font-black
-                mb-4
-              "
-            >
-
-              {
-                averageCommunication
-              }
-
-            </div>
-
-            <div
-              className="
-                w-full
-                h-4
-                bg-black/30
-                rounded-full
-                overflow-hidden
-              "
-            >
-
-              <div
-                className="
-                  h-full
-                  bg-purple-400
-                "
-                style={{
-                  width:
-                    `${averageCommunication}%`,
-                }}
-              />
-
-            </div>
-
-          </motion.div>
-
-
-          <motion.div
-
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-
-            transition={{
-              delay: 0.2,
-            }}
-
-            className="
-              bg-green-400/10
-              border
-              border-green-400/20
-              rounded-3xl
-              p-10
-            "
-          >
-
-            <Mic
-              className="
-                text-green-400
-                mb-6
-              "
-              size={50}
-            />
-
-            <div
-              className="
-                text-zinc-400
-                mb-4
-              "
-            >
-              Speaking Speed
-            </div>
-
-            <div
-              className="
-                text-7xl
-                font-black
-                mb-4
-              "
-            >
-
-              {
-                averageWPM
-              }
-
-            </div>
-
-            <div
-              className="
-                text-zinc-400
-              "
-            >
-              Words Per Minute
-            </div>
-
-          </motion.div>
-
-
-          <motion.div
-
-            initial={{
-              opacity: 0,
-              y: 20,
-            }}
-
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-
-            transition={{
-              delay: 0.3,
-            }}
-
-            className="
-              bg-yellow-400/10
-              border
-              border-yellow-400/20
-              rounded-3xl
-              p-10
-            "
-          >
-
-            <Eye
-              className="
-                text-yellow-400
-                mb-6
-              "
-              size={50}
-            />
-
-            <div
-              className="
-                text-zinc-400
-                mb-4
-              "
-            >
-              Eye Contact
-            </div>
-
-            <div
-              className="
-                text-7xl
-                font-black
-                mb-4
-              "
-            >
-
-              {
-                averageEyeContact
-              }
-
-            </div>
-
-            <div
-              className="
-                w-full
-                h-4
-                bg-black/30
-                rounded-full
-                overflow-hidden
-              "
-            >
-
-              <div
-                className="
-                  h-full
-                  bg-yellow-400
-                "
-                style={{
-                  width:
-                    `${averageEyeContact}%`,
-                }}
-              />
-
-            </div>
-
-          </motion.div>
 
         </div>
 
@@ -579,61 +112,57 @@ function Analytics() {
           "
         >
 
-          <h2
-            className="
-              text-4xl
-              font-bold
-              mb-8
-            "
-          >
-            Performance Summary
-          </h2>
-
-
           <div
             className="
-              text-zinc-300
-              leading-10
-              text-xl
+              h-[500px]
             "
           >
 
-            You have completed
-
-            <span
-              className="
-                text-cyan-400
-                font-bold
-              "
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
             >
-              {" "}
-              {interviews.length}{" "}
-            </span>
 
-            AI interviews with an average confidence
-            score of
+              <LineChart
+                data={analytics}
+              >
 
-            <span
-              className="
-                text-purple-400
-                font-bold
-              "
-            >
-              {" "}
-              {averageConfidence}%{" "}
-            </span>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                />
 
-            and communication rating of
+                <XAxis
+                  dataKey="session"
+                />
 
-            <span
-              className="
-                text-green-400
-                font-bold
-              "
-            >
-              {" "}
-              {averageCommunication}%.
-            </span>
+                <YAxis />
+
+                <Tooltip />
+
+                <Line
+                  type="monotone"
+                  dataKey="confidence"
+                  stroke="#22d3ee"
+                  strokeWidth={3}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="communication"
+                  stroke="#4ade80"
+                  strokeWidth={3}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="eye_contact"
+                  stroke="#f472b6"
+                  strokeWidth={3}
+                />
+
+              </LineChart>
+
+            </ResponsiveContainer>
 
           </div>
 

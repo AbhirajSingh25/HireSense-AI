@@ -8,9 +8,9 @@ import {
 
 import toast from "react-hot-toast";
 
-
-const API_URL =
-  import.meta.env.VITE_API_URL;
+import {
+  signup,
+} from "../services/api";
 
 
 function Signup() {
@@ -20,8 +20,8 @@ function Signup() {
 
 
   const [
-    name,
-    setName,
+    username,
+    setUsername,
   ] = useState("");
 
   const [
@@ -34,80 +34,84 @@ function Signup() {
     setPassword,
   ] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
 
-
-  async function handleSignup(
-    e: React.FormEvent
-  ) {
-
-    e.preventDefault();
+  async function handleSignup() {
 
     try {
 
-      setLoading(true);
+      if (
 
-      const response =
-        await fetch(
-
-          `${API_URL}/auth/signup`,
-
-          {
-            method: "POST",
-
-            headers: {
-
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-
-              name,
-              email,
-              password,
-            }),
-          }
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!data.success) {
+        !username ||
+        !email ||
+        !password
+      ) {
 
         toast.error(
-          data.message ||
-          "Signup failed"
+          "Please fill all fields"
         );
 
         return;
       }
 
 
-      toast.success(
-        "Signup successful"
+      toast.loading(
+        "Creating account...",
+        {
+          id: "signup",
+        }
       );
 
-      navigate(
-        "/login"
-      );
+
+      const data =
+
+        await signup(
+
+          username,
+          email,
+          password
+        );
+
+
+      if (
+        data?.id
+      ) {
+
+        toast.success(
+          "Signup successful",
+          {
+            id: "signup",
+          }
+        );
+
+        navigate("/login");
+
+      } else {
+
+        toast.error(
+
+          typeof data?.message ===
+          "string"
+
+            ? data.message
+
+            : "Signup failed",
+
+          {
+            id: "signup",
+          }
+        );
+      }
 
     } catch (error) {
 
       console.error(error);
 
       toast.error(
-        "Signup failed"
+        "Signup failed",
+        {
+          id: "signup",
+        }
       );
-
-    } finally {
-
-      setLoading(false);
     }
   }
 
@@ -117,22 +121,19 @@ function Signup() {
     <div
       className="
         min-h-screen
+        bg-black
+        text-white
         flex
         items-center
         justify-center
-        bg-black
-        text-white
         px-6
       "
     >
 
-      <form
-        onSubmit={
-          handleSignup
-        }
+      <div
         className="
           w-full
-          max-w-md
+          max-w-xl
           bg-white/5
           border
           border-white/10
@@ -146,21 +147,24 @@ function Signup() {
             text-5xl
             font-black
             mb-10
-            text-center
           "
         >
-          Signup
+          Create Account
         </h1>
 
 
-        <div className="space-y-6">
+        <div
+          className="
+            space-y-6
+          "
+        >
 
           <input
             type="text"
-            placeholder="Name"
-            value={name}
+            placeholder="Username"
+            value={username}
             onChange={(e) =>
-              setName(
+              setUsername(
                 e.target.value
               )
             }
@@ -168,7 +172,7 @@ function Signup() {
               w-full
               p-5
               rounded-2xl
-              bg-black/40
+              bg-black/30
               border
               border-white/10
             "
@@ -188,7 +192,7 @@ function Signup() {
               w-full
               p-5
               rounded-2xl
-              bg-black/40
+              bg-black/30
               border
               border-white/10
             "
@@ -208,7 +212,7 @@ function Signup() {
               w-full
               p-5
               rounded-2xl
-              bg-black/40
+              bg-black/30
               border
               border-white/10
             "
@@ -216,33 +220,27 @@ function Signup() {
 
 
           <button
-            type="submit"
-            disabled={loading}
+            onClick={
+              handleSignup
+            }
             className="
               w-full
               bg-cyan-400
               hover:bg-cyan-300
               text-black
               font-bold
-              py-4
+              py-5
               rounded-2xl
-              disabled:opacity-50
             "
           >
 
-            {
-              loading
-
-                ? "Creating account..."
-
-                : "Create Account"
-            }
+            Sign Up
 
           </button>
 
         </div>
 
-      </form>
+      </div>
 
     </div>
   );

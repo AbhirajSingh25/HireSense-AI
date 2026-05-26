@@ -233,3 +233,16 @@ export async function getDashboardStats(
 
   return response.json();
 }
+export async function getAnalytics(
+  userId: number
+) {
+
+  const response =
+
+    await fetch(
+
+      `${API_URL}/analytics/${userId}`
+    );
+
+  return response.json();
+}
