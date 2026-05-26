@@ -2,7 +2,7 @@ const API_URL =
 
   import.meta.env.VITE_API_URL ||
 
-  "http://127.0.0.1:8000";
+  "https://hiresense-ai-3jl0.onrender.com";
 
 
 export async function signup(
@@ -35,7 +35,12 @@ export async function signup(
       }
     );
 
-  return response.json();
+
+  const data =
+    await response.json();
+
+
+  return data;
 }
 
 
@@ -67,102 +72,12 @@ export async function login(
       }
     );
 
-  return response.json();
-}
+
+  const data =
+    await response.json();
 
 
-export async function generateQuestions(
-
-  role: string,
-  level: string,
-  resumeAnalysis: string
-) {
-
-  const response =
-
-    await fetch(
-
-      `${API_URL}/generate-questions?role=${role}&level=${level}&resume=${resumeAnalysis}`
-    );
-
-  return response.json();
-}
-
-
-export async function evaluateAnswer(
-  answer: string
-) {
-
-  const response =
-
-    await fetch(
-
-      `${API_URL}/evaluate-answer`,
-
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          answer,
-        }),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function generateFollowupQuestion(
-
-  question: string,
-  answer: string,
-  role: string,
-  level: string
-) {
-
-  const response =
-
-    await fetch(
-
-      `${API_URL}/followup-question`,
-
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-
-          question,
-          answer,
-          role,
-          level,
-        }),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function getFinalReport() {
-
-  const response =
-
-    await fetch(
-
-      `${API_URL}/final-report`
-    );
-
-  return response.json();
+  return data;
 }
 
 
@@ -220,6 +135,8 @@ export async function getHistory(
 
   return response.json();
 }
+
+
 export async function getDashboardStats(
   userId: number
 ) {
@@ -233,6 +150,8 @@ export async function getDashboardStats(
 
   return response.json();
 }
+
+
 export async function getAnalytics(
   userId: number
 ) {
