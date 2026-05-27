@@ -72,7 +72,100 @@ app.include_router(
 app.include_router(
     interview_router
 )
+from pydantic import BaseModel
 
+
+class SpeechRequest(BaseModel):
+
+    transcript: str
+
+
+@app.post("/speech-analysis")
+async def speech_analysis(
+    data: SpeechRequest
+):
+
+    transcript = data.transcript
+
+
+    words = transcript.split()
+
+    total_words = len(words)
+
+
+    filler_words = [
+
+        "um",
+        "uh",
+        "like",
+        "basically",
+        "you know",
+    ]
+
+
+    filler_count = 0
+
+
+    for filler in filler_words:
+
+        filler_count += (
+            transcript.lower().count(
+                filler
+            )
+        )
+
+
+    wpm = max(
+        80,
+        min(
+            160,
+            total_words // 2
+        )
+    )
+
+
+    confidence_score = max(
+        50,
+        100 - (filler_count * 5)
+    )
+
+
+    if filler_count <= 3:
+
+        feedback = (
+            "Excellent speaking clarity with strong communication confidence."
+        )
+
+    elif filler_count <= 7:
+
+        feedback = (
+            "Good communication skills but reduce filler words for more polished answers."
+        )
+
+    else:
+
+        feedback = (
+            "Practice reducing filler words and improve pacing during technical explanations."
+        )
+
+
+    return {
+
+        "total_words":
+            total_words,
+
+        "filler_words":
+            filler_count,
+
+        "words_per_minute":
+            wpm,
+
+        "confidence_score":
+            confidence_score,
+
+        "feedback":
+            feedback,
+    }
 
 @app.get("/")
 def root():

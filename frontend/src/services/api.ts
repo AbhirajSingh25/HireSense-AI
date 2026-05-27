@@ -205,3 +205,28 @@ export async function getLeaderboard() {
 
   return response.json();
 }
+export async function analyzeSpeech(
+  transcript: string
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/speech-analysis`,
+
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          transcript,
+        }),
+      }
+    );
+
+  return response.json();
+}

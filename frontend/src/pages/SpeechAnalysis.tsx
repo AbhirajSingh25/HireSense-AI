@@ -5,12 +5,14 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-
   Upload,
   Mic,
   Brain,
-
 } from "lucide-react";
+
+import {
+  analyzeSpeech as analyzeSpeechAPI,
+} from "../services/api";
 
 
 function SpeechAnalysis() {
@@ -26,67 +28,22 @@ function SpeechAnalysis() {
   ] = useState<any>(null);
 
 
-  function analyzeSpeech() {
+  async function analyzeSpeech() {
 
-    const words =
-      transcript
-        .split(" ")
-        .length;
+  try {
 
-    const fillerWords =
-      [
-        "um",
-        "uh",
-        "like",
-        "basically",
-      ];
-
-
-    let fillerCount = 0;
-
-    fillerWords.forEach((word) => {
-
-      const regex =
-        new RegExp(
-          `\\b${word}\\b`,
-          "gi"
-        );
-
-      const matches =
-        transcript.match(regex);
-
-      fillerCount +=
-        matches
-          ? matches.length
-          : 0;
-    });
-
-
-    const wpm =
-      Math.floor(
-        words / 2
+    const data =
+      await analyzeSpeechAPI(
+        transcript
       );
 
+    setAnalysis(data);
 
-    setAnalysis({
+  } catch (error) {
 
-      words,
-      fillerCount,
-      wpm,
-
-      confidence:
-        fillerCount < 5
-          ? 85
-          : 65,
-
-      feedback:
-        fillerCount < 5
-
-          ? "Strong speaking clarity with minimal filler words."
-
-          : "Reduce filler words for more professional communication.",
-    });
+    console.error(error);
   }
+}
 
 
   return (
