@@ -9,6 +9,15 @@ import {
   getHistory,
 } from "../services/api";
 
+import {
+
+  Brain,
+  Clock3,
+  Eye,
+  MessageSquare,
+
+} from "lucide-react";
+
 
 function History() {
 
@@ -20,36 +29,34 @@ function History() {
 
   useEffect(() => {
 
-    async function loadHistory() {
-
-      try {
-
-        const user =
-          JSON.parse(
-
-            localStorage.getItem(
-              "user"
-            ) || "{}"
-          );
-
-
-        const data =
-          await getHistory(
-            user.id || 1
-          );
-
-
-        setInterviews(data);
-
-      } catch (error) {
-
-        console.error(error);
-      }
-    }
-
     loadHistory();
 
   }, []);
+
+
+  async function loadHistory() {
+
+    try {
+
+      const user =
+        JSON.parse(
+          localStorage.getItem("user") || "{}"
+        );
+
+
+      const data =
+        await getHistory(
+          user.id || 1
+        );
+
+
+      setInterviews(data);
+
+    } catch (error) {
+
+      console.error(error);
+    }
+  }
 
 
   return (
@@ -72,7 +79,7 @@ function History() {
           <h1
             className="
               text-4xl
-              font-bold
+              font-black
               text-white
               mb-3
             "
@@ -85,7 +92,7 @@ function History() {
               text-gray-400
             "
           >
-            Your previous interview sessions
+            Review your previous interview sessions
           </p>
 
         </div>
@@ -93,7 +100,8 @@ function History() {
 
         <div
           className="
-            space-y-6
+            grid
+            gap-6
           "
         >
 
@@ -105,7 +113,7 @@ function History() {
                 bg-white/5
                 border
                 border-white/10
-                rounded-2xl
+                rounded-3xl
                 p-6
               "
             >
@@ -113,182 +121,261 @@ function History() {
               <div
                 className="
                   flex
-                  justify-between
-                  items-center
-                  mb-4
-                "
-              >
-
-                <h2
-                  className="
-                    text-2xl
-                    font-semibold
-                    text-white
-                  "
-                >
-                  Interview #
-                  {item.id}
-                </h2>
-
-
-                <div
-                  className="
-                    px-4
-                    py-2
-                    rounded-xl
-                    bg-cyan-400
-                    text-black
-                    font-semibold
-                  "
-                >
-
-                  {
-                    item.attention_status
-                  }
-
-                </div>
-
-              </div>
-
-
-              <div
-                className="
-                  grid
-                  grid-cols-2
-                  md:grid-cols-4
-                  gap-4
+                  flex-col
+                  lg:flex-row
+                  lg:items-center
+                  lg:justify-between
+                  gap-5
                   mb-6
                 "
               >
 
-                <div
-                  className="
-                    bg-black/30
-                    rounded-xl
-                    p-4
-                  "
-                >
+                <div>
 
-                  <p
-                    className="
-                      text-gray-400
-                      text-sm
-                      mb-1
-                    "
-                  >
-                    Confidence
-                  </p>
-
-                  <h3
+                  <h2
                     className="
                       text-2xl
                       font-bold
-                      text-cyan-400
+                      text-white
+                      mb-2
                     "
                   >
+                    Interview #
+                    {item.id}
+                  </h2>
+
+                  <div
+                    className="
+                      inline-flex
+                      px-4
+                      py-2
+                      rounded-xl
+                      bg-cyan-400
+                      text-black
+                      font-semibold
+                    "
+                  >
+
                     {
-                      item.confidence_score
-                    }%
-                  </h3>
-
-                </div>
-
-
-                <div
-                  className="
-                    bg-black/30
-                    rounded-xl
-                    p-4
-                  "
-                >
-
-                  <p
-                    className="
-                      text-gray-400
-                      text-sm
-                      mb-1
-                    "
-                  >
-                    Communication
-                  </p>
-
-                  <h3
-                    className="
-                      text-2xl
-                      font-bold
-                      text-green-400
-                    "
-                  >
-                    {
-                      item.communication_score
-                    }%
-                  </h3>
-
-                </div>
-
-
-                <div
-                  className="
-                    bg-black/30
-                    rounded-xl
-                    p-4
-                  "
-                >
-
-                  <p
-                    className="
-                      text-gray-400
-                      text-sm
-                      mb-1
-                    "
-                  >
-                    WPM
-                  </p>
-
-                  <h3
-                    className="
-                      text-2xl
-                      font-bold
-                      text-orange-400
-                    "
-                  >
-                    {
-                      item.words_per_minute
+                      item.attention_status
                     }
-                  </h3>
+
+                  </div>
 
                 </div>
 
 
                 <div
                   className="
-                    bg-black/30
-                    rounded-xl
-                    p-4
+                    grid
+                    grid-cols-2
+                    md:grid-cols-4
+                    gap-4
                   "
                 >
 
-                  <p
+                  <div
                     className="
-                      text-gray-400
-                      text-sm
-                      mb-1
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
                     "
                   >
-                    Eye Contact
-                  </p>
 
-                  <h3
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        mb-2
+                      "
+                    >
+
+                      <Brain
+                        size={18}
+                        className="
+                          text-cyan-400
+                        "
+                      />
+
+                      <span
+                        className="
+                          text-gray-400
+                          text-sm
+                        "
+                      >
+                        Confidence
+                      </span>
+
+                    </div>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-white
+                      "
+                    >
+                      {
+                        item.confidence_score
+                      }%
+                    </h3>
+
+                  </div>
+
+
+                  <div
                     className="
-                      text-2xl
-                      font-bold
-                      text-pink-400
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
                     "
                   >
-                    {
-                      item.eye_contact_score
-                    }%
-                  </h3>
+
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        mb-2
+                      "
+                    >
+
+                      <MessageSquare
+                        size={18}
+                        className="
+                          text-green-400
+                        "
+                      />
+
+                      <span
+                        className="
+                          text-gray-400
+                          text-sm
+                        "
+                      >
+                        Communication
+                      </span>
+
+                    </div>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-white
+                      "
+                    >
+                      {
+                        item.communication_score
+                      }%
+                    </h3>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
+                    "
+                  >
+
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        mb-2
+                      "
+                    >
+
+                      <Clock3
+                        size={18}
+                        className="
+                          text-orange-400
+                        "
+                      />
+
+                      <span
+                        className="
+                          text-gray-400
+                          text-sm
+                        "
+                      >
+                        WPM
+                      </span>
+
+                    </div>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-white
+                      "
+                    >
+                      {
+                        item.words_per_minute
+                      }
+                    </h3>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
+                    "
+                  >
+
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        mb-2
+                      "
+                    >
+
+                      <Eye
+                        size={18}
+                        className="
+                          text-pink-400
+                        "
+                      />
+
+                      <span
+                        className="
+                          text-gray-400
+                          text-sm
+                        "
+                      >
+                        Eye Contact
+                      </span>
+
+                    </div>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-white
+                      "
+                    >
+                      {
+                        item.eye_contact_score
+                      }%
+                    </h3>
+
+                  </div>
 
                 </div>
 
@@ -298,7 +385,7 @@ function History() {
               <div
                 className="
                   bg-black/20
-                  rounded-xl
+                  rounded-2xl
                   p-5
                 "
               >
@@ -306,8 +393,7 @@ function History() {
                 <p
                   className="
                     text-gray-400
-                    text-sm
-                    mb-2
+                    mb-3
                   "
                 >
                   Transcript
@@ -316,7 +402,7 @@ function History() {
                 <p
                   className="
                     text-gray-300
-                    leading-7
+                    leading-8
                   "
                 >
 
@@ -337,12 +423,12 @@ function History() {
             <div
               className="
                 text-center
-                text-gray-400
                 py-20
+                text-gray-400
               "
             >
 
-              No interviews found
+              No interview history found
 
             </div>
           )}
