@@ -4,6 +4,8 @@ import {
   Route,
 } from "react-router-dom";
 
+import SpeechAnalysis from "./pages/SpeechAnalysis";
+
 import LandingPage from "./pages/LandingPage";
 
 import Login from "./pages/Login";
@@ -93,7 +95,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+  path="/speech-analysis"
+  element={
+    <ProtectedRoute>
+      <SpeechAnalysis />
+    </ProtectedRoute>
+  }
+/>
           <Route
             path="/reports"
             element={

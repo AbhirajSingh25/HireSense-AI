@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   LogOut,
+  Mic,
 
 } from "lucide-react";
 
@@ -84,7 +85,11 @@ function MainLayout({
       icon:
         <FileText size={20} />,
     },
-
+    {
+  name: "Speech Analysis",
+  path: "/speech-analysis",
+  icon: <Mic size={20} />,
+},
     {
       name: "Analytics",
       path: "/analytics",
@@ -137,7 +142,7 @@ function MainLayout({
           top-0
           left-0
           h-screen
-          w-[250px]
+          w-62.5
           bg-[#0b1120]
           border-r
           border-white/10
