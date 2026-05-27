@@ -6,27 +6,20 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
+
   Brain,
   Trophy,
   Activity,
-  Eye,
+  Sparkles,
+
 } from "lucide-react";
 
 import {
   getDashboardStats,
 } from "../services/api";
 
-import {
-  useAuth,
-} from "../context/AuthContext";
-
 
 function Dashboard() {
-
-  const {
-    user,
-  } = useAuth();
-
 
   const [
     stats,
@@ -38,14 +31,20 @@ function Dashboard() {
 
     async function loadStats() {
 
-      if (!user?.id) return;
-
       try {
 
-        const data =
+        const user =
+          JSON.parse(
 
+            localStorage.getItem(
+              "user"
+            ) || "{}"
+          );
+
+
+        const data =
           await getDashboardStats(
-            user.id
+            user.id || 1
           );
 
         setStats(data);
@@ -58,27 +57,86 @@ function Dashboard() {
 
     loadStats();
 
-  }, [user]);
+  }, []);
+
+
+  const cards = [
+
+    {
+      title:
+        "Total Interviews",
+
+      value:
+        stats?.total_interviews || 0,
+
+      icon:
+        <Brain size={34} />,
+
+      color:
+        "from-cyan-500 to-blue-500",
+    },
+
+    {
+      title:
+        "Confidence",
+
+      value:
+        stats?.average_confidence || 0,
+
+      icon:
+        <Sparkles size={34} />,
+
+      color:
+        "from-pink-500 to-purple-500",
+    },
+
+    {
+      title:
+        "Communication",
+
+      value:
+        stats?.average_communication || 0,
+
+      icon:
+        <Activity size={34} />,
+
+      color:
+        "from-green-500 to-emerald-500",
+    },
+
+    {
+      title:
+        "Latest Score",
+
+      value:
+        stats?.latest_score || 0,
+
+      icon:
+        <Trophy size={34} />,
+
+      color:
+        "from-orange-500 to-yellow-500",
+    },
+  ];
 
 
   return (
 
     <MainLayout>
 
-      <div
-        className="
-          min-h-screen
-          text-white
-          p-10
-        "
-      >
+      <div>
 
-        <div className="mb-12">
+        <div
+          className="
+            mb-10
+          "
+        >
 
           <h1
             className="
               text-6xl
               font-black
+              text-white
               mb-4
             "
           >
@@ -87,11 +145,11 @@ function Dashboard() {
 
           <p
             className="
-              text-zinc-400
-              text-xl
+              text-gray-400
+              text-lg
             "
           >
-            Real-time AI interview analytics
+            Welcome back to your AI interview workspace
           </p>
 
         </div>
@@ -107,6 +165,89 @@ function Dashboard() {
           "
         >
 
+          {cards.map((card) => (
+
+            <div
+              key={card.title}
+              className="
+                relative
+                overflow-hidden
+                rounded-3xl
+                p-px
+                bg-linear-to-br
+                from-white/20
+                to-white/5
+              "
+            >
+
+              <div
+                className="
+                  bg-[#0b1120]
+                  rounded-3xl
+                  p-8
+                  h-full
+                "
+              >
+
+                <div
+                  className={`
+                    w-16
+                    h-16
+                    rounded-2xl
+                    bg-linear-to-br
+                    ${card.color}
+
+                    flex
+                    items-center
+                    justify-center
+                    mb-6
+                  `}
+                >
+
+                  {card.icon}
+
+                </div>
+
+
+                <p
+                  className="
+                    text-gray-400
+                    mb-3
+                    text-lg
+                  "
+                >
+                  {card.title}
+                </p>
+
+
+                <h2
+                  className="
+                    text-5xl
+                    font-black
+                    text-white
+                  "
+                >
+                  {card.value}
+                </h2>
+
+              </div>
+
+            </div>
+          ))}
+
+        </div>
+
+
+        <div
+          className="
+            mt-12
+            grid
+            grid-cols-1
+            xl:grid-cols-2
+            gap-8
+          "
+        >
+
           <div
             className="
               bg-white/5
@@ -117,32 +258,113 @@ function Dashboard() {
             "
           >
 
-            <Brain
-              className="
-                text-cyan-400
-                mb-6
-              "
-              size={40}
-            />
-
             <h2
               className="
-                text-zinc-400
-                mb-3
+                text-3xl
+                font-bold
+                mb-6
               "
             >
-              Total Interviews
+              Performance Overview
             </h2>
 
             <div
               className="
-                text-5xl
-                font-black
+                space-y-5
               "
             >
-              {
-                stats?.total_interviews || 0
-              }
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span>
+                    Confidence
+                  </span>
+
+                  <span>
+                    {
+                      stats?.average_confidence || 0
+                    }%
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    rounded-full
+                    bg-white/10
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    style={{
+                      width: `${stats?.average_confidence || 0}%`
+                    }}
+                    className="
+                      h-full
+                      bg-cyan-400
+                    "
+                  />
+
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span>
+                    Communication
+                  </span>
+
+                  <span>
+                    {
+                      stats?.average_communication || 0
+                    }%
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    rounded-full
+                    bg-white/10
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    style={{
+                      width: `${stats?.average_communication || 0}%`
+                    }}
+                    className="
+                      h-full
+                      bg-green-400
+                    "
+                  />
+
+                </div>
+
+              </div>
+
             </div>
 
           </div>
@@ -150,123 +372,47 @@ function Dashboard() {
 
           <div
             className="
-              bg-white/5
-              border
-              border-white/10
+              bg-linear-to-br
+              from-cyan-500
+              to-blue-600
               rounded-3xl
               p-8
+              text-black
             "
           >
 
-            <Trophy
-              className="
-                text-yellow-400
-                mb-6
-              "
-              size={40}
-            />
-
             <h2
               className="
-                text-zinc-400
-                mb-3
+                text-4xl
+                font-black
+                mb-4
               "
             >
-              Confidence Score
+              AI Interview Ready
             </h2>
 
-            <div
+            <p
               className="
-                text-5xl
-                font-black
+                text-lg
+                mb-8
               "
             >
-              {
-                stats?.avg_confidence || 0
-              }
-            </div>
-
-          </div>
+              Continue improving your interview performance with real-time AI feedback and analytics.
+            </p>
 
 
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-3xl
-              p-8
-            "
-          >
-
-            <Activity
+            <button
               className="
-                text-green-400
-                mb-6
-              "
-              size={40}
-            />
-
-            <h2
-              className="
-                text-zinc-400
-                mb-3
+                bg-black
+                text-white
+                px-8
+                py-4
+                rounded-2xl
+                font-bold
               "
             >
-              Communication
-            </h2>
-
-            <div
-              className="
-                text-5xl
-                font-black
-              "
-            >
-              {
-                stats?.avg_communication || 0
-              }
-            </div>
-
-          </div>
-
-
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-3xl
-              p-8
-            "
-          >
-
-            <Eye
-              className="
-                text-pink-400
-                mb-6
-              "
-              size={40}
-            />
-
-            <h2
-              className="
-                text-zinc-400
-                mb-3
-              "
-            >
-              Eye Contact
-            </h2>
-
-            <div
-              className="
-                text-5xl
-                font-black
-              "
-            >
-              {
-                stats?.avg_eye_contact || 0
-              }
-            </div>
+              Start New Interview
+            </button>
 
           </div>
 

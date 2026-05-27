@@ -4,7 +4,8 @@ from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.analytics import router as analytics_router
 from sqlalchemy.orm import Session
 from fastapi import Depends
-
+from app.api.routes.leaderboard import router as leaderboard_router
+from app.api.routes.dashboard import router as dashboard_router
 from app.db.database import (
     Base,
     engine,
@@ -35,6 +36,14 @@ Base.metadata.create_all(
 app = FastAPI()
 app.include_router(
     dashboard_router
+)
+
+app.include_router(
+    dashboard_router
+)
+
+app.include_router(
+    leaderboard_router
 )
 
 app.include_router(

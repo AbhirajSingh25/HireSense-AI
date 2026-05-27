@@ -6,95 +6,50 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  FileText,
-  Brain,
-  Eye,
-  Mic,
-} from "lucide-react";
-
-import {
-  motion,
-} from "framer-motion";
-
-import {
   getInterviewSessions,
 } from "../services/api";
-
-import {
-  useAuth,
-} from "../context/AuthContext";
 
 
 function Reports() {
 
-  const {
-    user,
-  } = useAuth();
-
-
   const [
-    interviews,
-    setInterviews,
+    reports,
+    setReports,
   ] = useState<any[]>([]);
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
 
 
   useEffect(() => {
 
-    if (user?.id) {
+    async function loadReports() {
 
-      loadReports();
+      try {
+
+        const user =
+          JSON.parse(
+
+            localStorage.getItem(
+              "user"
+            ) || "{}"
+          );
+
+
+        const data =
+          await getInterviewSessions(
+            user.id || 1
+          );
+
+
+        setReports(data);
+
+      } catch (error) {
+
+        console.error(error);
+      }
     }
 
-  }, [user]);
+    loadReports();
 
-
-  async function loadReports() {
-
-    try {
-
-      const data =
-        await getInterviewSessions(
-          user!.id
-        );
-
-      setInterviews(data);
-
-    } catch (error) {
-
-      console.error(error);
-
-    } finally {
-
-      setLoading(false);
-    }
-  }
-
-
-  if (loading) {
-
-    return (
-
-      <MainLayout>
-
-        <div
-          className="
-            text-white
-            p-10
-          "
-        >
-
-          Loading reports...
-
-        </div>
-
-      </MainLayout>
-    );
-  }
+  }, []);
 
 
   return (
@@ -103,31 +58,34 @@ function Reports() {
 
       <div
         className="
-          min-h-screen
-          text-white
-          p-10
+          max-w-6xl
+          mx-auto
         "
       >
 
-        <div className="mb-14">
+        <div
+          className="
+            mb-10
+          "
+        >
 
           <h1
             className="
-              text-7xl
-              font-black
-              mb-4
+              text-4xl
+              font-bold
+              text-white
+              mb-3
             "
           >
-            Recruiter Reports
+            Interview Reports
           </h1>
 
           <p
             className="
-              text-zinc-400
-              text-2xl
+              text-gray-400
             "
           >
-            AI-generated interview intelligence reports
+            Detailed AI interview performance reports
           </p>
 
         </div>
@@ -135,371 +93,283 @@ function Reports() {
 
         <div
           className="
-            space-y-10
+            space-y-8
           "
         >
 
-          {
-            interviews
-              .slice()
-              .reverse()
-              .map(
-                (
-                  item,
-                  index
-                ) => (
+          {reports.map((report) => (
 
-                  <motion.div
+            <div
+              key={report.id}
+              className="
+                bg-white/5
+                border
+                border-white/10
+                rounded-3xl
+                overflow-hidden
+              "
+            >
 
-                    key={index}
+              <div
+                className="
+                  p-6
+                  border-b
+                  border-white/10
+                  flex
+                  justify-between
+                  items-center
+                "
+              >
 
-                    initial={{
-                      opacity: 0,
-                      y: 20,
-                    }}
+                <div>
 
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-
-                    transition={{
-                      delay:
-                        index * 0.05,
-                    }}
-
+                  <h2
                     className="
-                      bg-white/5
-                      border
-                      border-white/10
-                      rounded-3xl
-                      p-10
+                      text-2xl
+                      font-bold
+                      text-white
+                    "
+                  >
+                    Interview Report #
+                    {report.id}
+                  </h2>
+
+                  <p
+                    className="
+                      text-gray-400
+                      mt-1
+                    "
+                  >
+                    AI-generated interview analysis
+                  </p>
+
+                </div>
+
+
+                <div
+                  className="
+                    px-4
+                    py-2
+                    rounded-xl
+                    bg-cyan-400
+                    text-black
+                    font-semibold
+                  "
+                >
+
+                  {
+                    report.attention_status
+                  }
+
+                </div>
+
+              </div>
+
+
+              <div
+                className="
+                  p-6
+                "
+              >
+
+                <div
+                  className="
+                    grid
+                    grid-cols-2
+                    md:grid-cols-4
+                    gap-5
+                    mb-8
+                  "
+                >
+
+                  <div
+                    className="
+                      bg-black/30
+                      rounded-2xl
+                      p-5
                     "
                   >
 
-                    <div
+                    <p
                       className="
-                        flex
-                        justify-between
-                        items-center
-                        mb-10
+                        text-gray-400
+                        text-sm
+                        mb-2
                       "
                     >
+                      Confidence
+                    </p>
 
-                      <div
-                        className="
-                          flex
-                          items-center
-                          gap-5
-                        "
-                      >
-
-                        <FileText
-                          className="
-                            text-cyan-400
-                          "
-                          size={42}
-                        />
-
-                        <div>
-
-                          <h2
-                            className="
-                              text-4xl
-                              font-bold
-                            "
-                          >
-
-                            Interview Report #
-                            {item.id}
-
-                          </h2>
-
-                          <div
-                            className="
-                              text-zinc-400
-                              mt-2
-                            "
-                          >
-
-                            Attention Status:
-                            {" "}
-                            {item.attention_status}
-
-                          </div>
-
-                        </div>
-
-                      </div>
-
-
-                      <div
-                        className="
-                          bg-cyan-400/10
-                          text-cyan-400
-                          px-5
-                          py-3
-                          rounded-2xl
-                          font-bold
-                        "
-                      >
-
-                        AI Evaluated
-
-                      </div>
-
-                    </div>
-
-
-                    <div
+                    <h3
                       className="
-                        grid
-                        md:grid-cols-3
-                        gap-8
-                        mb-10
+                        text-3xl
+                        font-bold
+                        text-cyan-400
                       "
                     >
+                      {
+                        report.confidence_score
+                      }%
+                    </h3>
 
-                      <div
-                        className="
-                          bg-cyan-400/10
-                          rounded-3xl
-                          p-8
-                        "
-                      >
-
-                        <Brain
-                          className="
-                            text-cyan-400
-                            mb-5
-                          "
-                          size={38}
-                        />
-
-                        <div
-                          className="
-                            text-zinc-400
-                            mb-3
-                          "
-                        >
-                          Confidence
-                        </div>
-
-                        <div
-                          className="
-                            text-6xl
-                            font-black
-                            text-cyan-400
-                          "
-                        >
-
-                          {
-                            item.confidence_score
-                          }
-
-                        </div>
-
-                      </div>
+                  </div>
 
 
-                      <div
-                        className="
-                          bg-purple-400/10
-                          rounded-3xl
-                          p-8
-                        "
-                      >
+                  <div
+                    className="
+                      bg-black/30
+                      rounded-2xl
+                      p-5
+                    "
+                  >
 
-                        <Mic
-                          className="
-                            text-purple-400
-                            mb-5
-                          "
-                          size={38}
-                        />
-
-                        <div
-                          className="
-                            text-zinc-400
-                            mb-3
-                          "
-                        >
-                          Communication
-                        </div>
-
-                        <div
-                          className="
-                            text-6xl
-                            font-black
-                            text-purple-400
-                          "
-                        >
-
-                          {
-                            item.communication_score
-                          }
-
-                        </div>
-
-                      </div>
-
-
-                      <div
-                        className="
-                          bg-yellow-400/10
-                          rounded-3xl
-                          p-8
-                        "
-                      >
-
-                        <Eye
-                          className="
-                            text-yellow-400
-                            mb-5
-                          "
-                          size={38}
-                        />
-
-                        <div
-                          className="
-                            text-zinc-400
-                            mb-3
-                          "
-                        >
-                          Eye Contact
-                        </div>
-
-                        <div
-                          className="
-                            text-6xl
-                            font-black
-                            text-yellow-400
-                          "
-                        >
-
-                          {
-                            item.eye_contact_score
-                          }
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-
-                    <div
+                    <p
                       className="
-                        bg-black/30
-                        rounded-3xl
-                        p-8
-                        mb-8
+                        text-gray-400
+                        text-sm
+                        mb-2
                       "
                     >
+                      Communication
+                    </p>
 
-                      <div
-                        className="
-                          text-2xl
-                          font-bold
-                          mb-5
-                        "
-                      >
-                        Transcript
-                      </div>
-
-                      <div
-                        className="
-                          text-zinc-300
-                          leading-9
-                        "
-                      >
-
-                        {
-                          item.transcript
-                        }
-
-                      </div>
-
-                    </div>
-
-
-                    <div
+                    <h3
                       className="
-                        bg-green-400/10
-                        border
-                        border-green-400/20
-                        rounded-3xl
-                        p-8
+                        text-3xl
+                        font-bold
+                        text-green-400
                       "
                     >
+                      {
+                        report.communication_score
+                      }%
+                    </h3>
 
-                      <div
-                        className="
-                          text-2xl
-                          font-bold
-                          text-green-400
-                          mb-4
-                        "
-                      >
-                        Recruiter AI Summary
-                      </div>
+                  </div>
 
-                      <div
-                        className="
-                          text-zinc-300
-                          leading-9
-                        "
-                      >
 
-                        Candidate demonstrated
+                  <div
+                    className="
+                      bg-black/30
+                      rounded-2xl
+                      p-5
+                    "
+                  >
 
-                        <span
-                          className="
-                            text-cyan-400
-                            font-bold
-                          "
-                        >
-                          {" "}
-                          {
-                            item.communication_score > 80
+                    <p
+                      className="
+                        text-gray-400
+                        text-sm
+                        mb-2
+                      "
+                    >
+                      WPM
+                    </p>
 
-                              ? "strong"
+                    <h3
+                      className="
+                        text-3xl
+                        font-bold
+                        text-orange-400
+                      "
+                    >
+                      {
+                        report.words_per_minute
+                      }
+                    </h3>
 
-                              : "moderate"
-                          }{" "}
-                        </span>
+                  </div>
 
-                        communication skills with
 
-                        <span
-                          className="
-                            text-purple-400
-                            font-bold
-                          "
-                        >
-                          {" "}
-                          {
-                            item.confidence_score > 80
+                  <div
+                    className="
+                      bg-black/30
+                      rounded-2xl
+                      p-5
+                    "
+                  >
 
-                              ? "high"
+                    <p
+                      className="
+                        text-gray-400
+                        text-sm
+                        mb-2
+                      "
+                    >
+                      Eye Contact
+                    </p>
 
-                              : "average"
-                          }{" "}
-                        </span>
+                    <h3
+                      className="
+                        text-3xl
+                        font-bold
+                        text-pink-400
+                      "
+                    >
+                      {
+                        report.eye_contact_score
+                      }%
+                    </h3>
 
-                        confidence levels during the interview.
-                        Attention tracking and speaking metrics
-                        indicate stable engagement throughout
-                        the session.
+                  </div>
 
-                      </div>
+                </div>
 
-                    </div>
 
-                  </motion.div>
-                )
-              )
-          }
+                <div
+                  className="
+                    bg-black/20
+                    rounded-2xl
+                    p-6
+                  "
+                >
+
+                  <h3
+                    className="
+                      text-xl
+                      font-semibold
+                      text-white
+                      mb-4
+                    "
+                  >
+                    Transcript
+                  </h3>
+
+                  <p
+                    className="
+                      text-gray-300
+                      leading-8
+                    "
+                  >
+
+                    {
+                      report.transcript
+                    }
+
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+          ))}
+
+
+          {!reports.length && (
+
+            <div
+              className="
+                text-center
+                text-gray-400
+                py-20
+              "
+            >
+
+              No reports available
+
+            </div>
+          )}
 
         </div>
 

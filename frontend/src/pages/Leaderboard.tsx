@@ -7,128 +7,41 @@ import MainLayout from "../components/MainLayout";
 
 import {
   Trophy,
-  Crown,
-  Medal,
 } from "lucide-react";
 
 import {
-  motion,
-} from "framer-motion";
-
-import {
-  getInterviewSessions,
+  getLeaderboard,
 } from "../services/api";
 
 
 function Leaderboard() {
 
   const [
-    leaderboard,
-    setLeaderboard,
+    users,
+    setUsers,
   ] = useState<any[]>([]);
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
 
 
   useEffect(() => {
 
+    async function loadLeaderboard() {
+
+      try {
+
+        const data =
+          await getLeaderboard();
+
+        setUsers(data);
+
+      } catch (error) {
+
+        console.error(error);
+      }
+    }
+
     loadLeaderboard();
 
   }, []);
-
-
-  async function loadLeaderboard() {
-
-    try {
-
-      const data =
-        await getInterviewSessions();
-
-
-      const ranked =
-        data.map(
-          (
-            item: any
-          ) => {
-
-            const overallScore =
-              (
-
-                item.confidence_score +
-
-                item.communication_score +
-
-                item.eye_contact_score
-
-              ) / 3;
-
-
-            return {
-
-              ...item,
-
-              overallScore:
-                overallScore.toFixed(1),
-            };
-          }
-        );
-
-
-      ranked.sort(
-
-        (
-          a: any,
-          b: any
-        ) =>
-
-          Number(
-            b.overallScore
-          ) -
-
-          Number(
-            a.overallScore
-          )
-      );
-
-
-      setLeaderboard(
-        ranked
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-    } finally {
-
-      setLoading(false);
-    }
-  }
-
-
-  if (loading) {
-
-    return (
-
-      <MainLayout>
-
-        <div
-          className="
-            text-white
-            p-10
-          "
-        >
-
-          Loading leaderboard...
-
-        </div>
-
-      </MainLayout>
-    );
-  }
 
 
   return (
@@ -137,49 +50,34 @@ function Leaderboard() {
 
       <div
         className="
-          min-h-screen
-          text-white
-          p-10
+          max-w-6xl
+          mx-auto
         "
       >
 
-        <div className="mb-14">
+        <div
+          className="
+            mb-10
+          "
+        >
 
-          <div
+          <h1
             className="
-              flex
-              items-center
-              gap-5
-              mb-4
+              text-4xl
+              font-bold
+              text-white
+              mb-3
             "
           >
-
-            <Trophy
-              className="
-                text-yellow-400
-              "
-              size={56}
-            />
-
-            <h1
-              className="
-                text-7xl
-                font-black
-              "
-            >
-              AI Leaderboard
-            </h1>
-
-          </div>
-
+            Leaderboard
+          </h1>
 
           <p
             className="
-              text-zinc-400
-              text-2xl
+              text-gray-400
             "
           >
-            Ranked interview performance analytics
+            Top interview performers
           </p>
 
         </div>
@@ -187,293 +85,216 @@ function Leaderboard() {
 
         <div
           className="
-            space-y-8
+            space-y-5
           "
         >
 
-          {
-            leaderboard.map(
-              (
-                user,
-                index
-              ) => {
+          {users.map(
 
-                const isTop =
-                  index === 0;
+            (
+              user,
+              index
+            ) => (
 
-                const isSecond =
-                  index === 1;
+            <div
+              key={user.username}
+              className="
+                bg-white/5
+                border
+                border-white/10
+                rounded-2xl
+                p-6
+                flex
+                flex-col
+                md:flex-row
+                md:items-center
+                md:justify-between
+                gap-6
+              "
+            >
 
-                const isThird =
-                  index === 2;
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-5
+                "
+              >
+
+                <div
+                  className="
+                    w-14
+                    h-14
+                    rounded-2xl
+                    bg-yellow-400
+                    text-black
+                    font-black
+                    flex
+                    items-center
+                    justify-center
+                    text-xl
+                  "
+                >
+
+                  {index + 1}
+
+                </div>
 
 
-                return (
+                <div>
 
-                  <motion.div
-
-                    key={index}
-
-                    initial={{
-                      opacity: 0,
-                      y: 20,
-                    }}
-
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-
-                    transition={{
-                      delay:
-                        index * 0.08,
-                    }}
-
-                    className={`
-                      rounded-3xl
-                      p-8
-                      border
-                      flex
-                      items-center
-                      justify-between
-
-                      ${
-                        isTop
-
-                          ? "bg-yellow-400/10 border-yellow-400/20"
-
-                          : isSecond
-
-                          ? "bg-zinc-400/10 border-zinc-400/20"
-
-                          : isThird
-
-                          ? "bg-orange-400/10 border-orange-400/20"
-
-                          : "bg-white/5 border-white/10"
-                      }
-                    `}
+                  <h2
+                    className="
+                      text-2xl
+                      font-bold
+                      text-white
+                    "
                   >
+                    {user.username}
+                  </h2>
 
-                    <div
-                      className="
-                        flex
-                        items-center
-                        gap-6
-                      "
-                    >
+                  <p
+                    className="
+                      text-gray-400
+                    "
+                  >
+                    {
+                      user.total_interviews
+                    }
+                    {" "}
+                    interviews completed
+                  </p>
 
-                      <div
-                        className="
-                          text-5xl
-                          font-black
-                          w-20
-                        "
-                      >
+                </div>
 
-                        #
-                        {index + 1}
-
-                      </div>
+              </div>
 
 
-                      <div>
+              <div
+                className="
+                  flex
+                  flex-wrap
+                  gap-4
+                "
+              >
 
-                        <div
-                          className="
-                            flex
-                            items-center
-                            gap-3
-                            mb-3
-                          "
-                        >
+                <div
+                  className="
+                    bg-black/30
+                    rounded-xl
+                    px-5
+                    py-3
+                  "
+                >
 
-                          {
-                            isTop && (
+                  <p
+                    className="
+                      text-sm
+                      text-gray-400
+                    "
+                  >
+                    Confidence
+                  </p>
 
-                              <Crown
-                                className="
-                                  text-yellow-400
-                                "
-                              />
-                            )
-                          }
+                  <h3
+                    className="
+                      text-xl
+                      font-bold
+                      text-cyan-400
+                    "
+                  >
+                    {
+                      user.avg_confidence
+                    }%
+                  </h3>
 
-                          {
-                            (
-                              isSecond ||
-
-                              isThird
-                            ) && (
-
-                              <Medal
-                                className="
-                                  text-zinc-300
-                                "
-                              />
-                            )
-                          }
-
-
-                          <div
-                            className="
-                              text-3xl
-                              font-bold
-                            "
-                          >
-
-                            Interview #
-                            {user.id}
-
-                          </div>
-
-                        </div>
+                </div>
 
 
-                        <div
-                          className="
-                            text-zinc-400
-                          "
-                        >
+                <div
+                  className="
+                    bg-black/30
+                    rounded-xl
+                    px-5
+                    py-3
+                  "
+                >
 
-                          {
-                            user.attention_status
-                          }
+                  <p
+                    className="
+                      text-sm
+                      text-gray-400
+                    "
+                  >
+                    Communication
+                  </p>
 
-                        </div>
+                  <h3
+                    className="
+                      text-xl
+                      font-bold
+                      text-green-400
+                    "
+                  >
+                    {
+                      user.avg_communication
+                    }%
+                  </h3>
 
-                      </div>
-
-                    </div>
-
-
-                    <div
-                      className="
-                        grid
-                        grid-cols-4
-                        gap-10
-                        text-center
-                      "
-                    >
-
-                      <div>
-
-                        <div
-                          className="
-                            text-zinc-400
-                            mb-2
-                          "
-                        >
-                          Confidence
-                        </div>
-
-                        <div
-                          className="
-                            text-3xl
-                            font-black
-                            text-cyan-400
-                          "
-                        >
-
-                          {
-                            user.confidence_score
-                          }
-
-                        </div>
-
-                      </div>
+                </div>
 
 
-                      <div>
+                <div
+                  className="
+                    bg-black/30
+                    rounded-xl
+                    px-5
+                    py-3
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
 
-                        <div
-                          className="
-                            text-zinc-400
-                            mb-2
-                          "
-                        >
-                          Communication
-                        </div>
+                  <Trophy
+                    size={20}
+                    className="
+                      text-yellow-400
+                    "
+                  />
 
-                        <div
-                          className="
-                            text-3xl
-                            font-black
-                            text-purple-400
-                          "
-                        >
+                  <span
+                    className="
+                      text-white
+                      font-semibold
+                    "
+                  >
+                    Rank #
+                    {index + 1}
+                  </span>
 
-                          {
-                            user.communication_score
-                          }
+                </div>
 
-                        </div>
+              </div>
 
-                      </div>
-
-
-                      <div>
-
-                        <div
-                          className="
-                            text-zinc-400
-                            mb-2
-                          "
-                        >
-                          Eye Contact
-                        </div>
-
-                        <div
-                          className="
-                            text-3xl
-                            font-black
-                            text-green-400
-                          "
-                        >
-
-                          {
-                            user.eye_contact_score
-                          }
-
-                        </div>
-
-                      </div>
+            </div>
+          ))}
 
 
-                      <div>
+          {!users.length && (
 
-                        <div
-                          className="
-                            text-zinc-400
-                            mb-2
-                          "
-                        >
-                          Overall
-                        </div>
+            <div
+              className="
+                text-center
+                text-gray-400
+                py-20
+              "
+            >
 
-                        <div
-                          className="
-                            text-4xl
-                            font-black
-                            text-yellow-400
-                          "
-                        >
+              No leaderboard data yet
 
-                          {
-                            user.overallScore
-                          }
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  </motion.div>
-                );
-              }
-            )
-          }
+            </div>
+          )}
 
         </div>
 

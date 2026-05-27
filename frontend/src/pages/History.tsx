@@ -6,93 +6,50 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  Clock,
-  Brain,
-} from "lucide-react";
-
-import {
-  motion,
-} from "framer-motion";
-
-import {
-  getInterviewSessions,
+  getHistory,
 } from "../services/api";
-
-import {
-  useAuth,
-} from "../context/AuthContext";
 
 
 function History() {
-
-  const {
-    user,
-  } = useAuth();
-
 
   const [
     interviews,
     setInterviews,
   ] = useState<any[]>([]);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
-
 
   useEffect(() => {
 
-    if (user?.id) {
+    async function loadHistory() {
 
-      fetchHistory();
+      try {
+
+        const user =
+          JSON.parse(
+
+            localStorage.getItem(
+              "user"
+            ) || "{}"
+          );
+
+
+        const data =
+          await getHistory(
+            user.id || 1
+          );
+
+
+        setInterviews(data);
+
+      } catch (error) {
+
+        console.error(error);
+      }
     }
 
-  }, [user]);
+    loadHistory();
 
-
-  async function fetchHistory() {
-
-    try {
-
-      const data =
-        await getInterviewSessions(
-          user!.id
-        );
-
-      setInterviews(data);
-
-    } catch (error) {
-
-      console.error(error);
-
-    } finally {
-
-      setLoading(false);
-    }
-  }
-
-
-  if (loading) {
-
-    return (
-
-      <MainLayout>
-
-        <div
-          className="
-            text-white
-            p-10
-          "
-        >
-
-          Loading history...
-
-        </div>
-
-      </MainLayout>
-    );
-  }
+  }, []);
 
 
   return (
@@ -101,19 +58,23 @@ function History() {
 
       <div
         className="
-          min-h-screen
-          text-white
-          p-10
+          max-w-6xl
+          mx-auto
         "
       >
 
-        <div className="mb-12">
+        <div
+          className="
+            mb-10
+          "
+        >
 
           <h1
             className="
-              text-7xl
-              font-black
-              mb-4
+              text-4xl
+              font-bold
+              text-white
+              mb-3
             "
           >
             Interview History
@@ -121,11 +82,10 @@ function History() {
 
           <p
             className="
-              text-zinc-400
-              text-2xl
+              text-gray-400
             "
           >
-            Your saved AI interview sessions
+            Your previous interview sessions
           </p>
 
         </div>
@@ -133,286 +93,259 @@ function History() {
 
         <div
           className="
-            space-y-8
+            space-y-6
           "
         >
 
-          {
-            interviews.map(
-              (
-                item,
-                index
-              ) => (
+          {interviews.map((item) => (
 
-                <motion.div
+            <div
+              key={item.id}
+              className="
+                bg-white/5
+                border
+                border-white/10
+                rounded-2xl
+                p-6
+              "
+            >
 
-                  key={index}
+              <div
+                className="
+                  flex
+                  justify-between
+                  items-center
+                  mb-4
+                "
+              >
 
-                  initial={{
-                    opacity: 0,
-                    y: 20,
-                  }}
-
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-
-                  transition={{
-                    delay:
-                      index * 0.08,
-                  }}
-
+                <h2
                   className="
-                    bg-white/5
-                    border
-                    border-white/10
-                    rounded-3xl
-                    p-8
+                    text-2xl
+                    font-semibold
+                    text-white
+                  "
+                >
+                  Interview #
+                  {item.id}
+                </h2>
+
+
+                <div
+                  className="
+                    px-4
+                    py-2
+                    rounded-xl
+                    bg-cyan-400
+                    text-black
+                    font-semibold
                   "
                 >
 
-                  <div
+                  {
+                    item.attention_status
+                  }
+
+                </div>
+
+              </div>
+
+
+              <div
+                className="
+                  grid
+                  grid-cols-2
+                  md:grid-cols-4
+                  gap-4
+                  mb-6
+                "
+              >
+
+                <div
+                  className="
+                    bg-black/30
+                    rounded-xl
+                    p-4
+                  "
+                >
+
+                  <p
                     className="
-                      flex
-                      justify-between
-                      items-center
-                      mb-6
+                      text-gray-400
+                      text-sm
+                      mb-1
                     "
                   >
+                    Confidence
+                  </p>
 
-                    <div
-                      className="
-                        flex
-                        items-center
-                        gap-4
-                      "
-                    >
-
-                      <Brain
-                        className="
-                          text-cyan-400
-                        "
-                        size={36}
-                      />
-
-                      <div>
-
-                        <h2
-                          className="
-                            text-3xl
-                            font-bold
-                          "
-                        >
-
-                          Interview #
-                          {item.id}
-
-                        </h2>
-
-                        <div
-                          className="
-                            text-zinc-400
-                            mt-2
-                          "
-                        >
-
-                          {
-                            item.attention_status
-                          }
-
-                        </div>
-
-                      </div>
-
-                    </div>
-
-
-                    <div
-                      className="
-                        flex
-                        items-center
-                        gap-3
-                        text-zinc-400
-                      "
-                    >
-
-                      <Clock />
-
-                      Completed
-
-                    </div>
-
-                  </div>
-
-
-                  <div
+                  <h3
                     className="
-                      grid
-                      md:grid-cols-4
-                      gap-6
-                      mb-8
+                      text-2xl
+                      font-bold
+                      text-cyan-400
                     "
                   >
-
-                    <div
-                      className="
-                        bg-cyan-400/10
-                        rounded-2xl
-                        p-5
-                      "
-                    >
-
-                      <div
-                        className="
-                          text-zinc-400
-                          mb-2
-                        "
-                      >
-                        Confidence
-                      </div>
-
-                      <div
-                        className="
-                          text-4xl
-                          font-black
-                          text-cyan-400
-                        "
-                      >
-
-                        {
-                          item.confidence_score
-                        }
-
-                      </div>
-
-                    </div>
-
-
-                    <div
-                      className="
-                        bg-purple-400/10
-                        rounded-2xl
-                        p-5
-                      "
-                    >
-
-                      <div
-                        className="
-                          text-zinc-400
-                          mb-2
-                        "
-                      >
-                        Communication
-                      </div>
-
-                      <div
-                        className="
-                          text-4xl
-                          font-black
-                          text-purple-400
-                        "
-                      >
-
-                        {
-                          item.communication_score
-                        }
-
-                      </div>
-
-                    </div>
-
-
-                    <div
-                      className="
-                        bg-green-400/10
-                        rounded-2xl
-                        p-5
-                      "
-                    >
-
-                      <div
-                        className="
-                          text-zinc-400
-                          mb-2
-                        "
-                      >
-                        WPM
-                      </div>
-
-                      <div
-                        className="
-                          text-4xl
-                          font-black
-                          text-green-400
-                        "
-                      >
-
-                        {
-                          item.words_per_minute
-                        }
-
-                      </div>
-
-                    </div>
-
-
-                    <div
-                      className="
-                        bg-yellow-400/10
-                        rounded-2xl
-                        p-5
-                      "
-                    >
-
-                      <div
-                        className="
-                          text-zinc-400
-                          mb-2
-                        "
-                      >
-                        Eye Contact
-                      </div>
-
-                      <div
-                        className="
-                          text-4xl
-                          font-black
-                          text-yellow-400
-                        "
-                      >
-
-                        {
-                          item.eye_contact_score
-                        }
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-
-                  <div
-                    className="
-                      bg-black/30
-                      rounded-2xl
-                      p-6
-                      text-zinc-300
-                      leading-8
-                    "
-                  >
-
                     {
-                      item.transcript
+                      item.confidence_score
+                    }%
+                  </h3>
+
+                </div>
+
+
+                <div
+                  className="
+                    bg-black/30
+                    rounded-xl
+                    p-4
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      text-sm
+                      mb-1
+                    "
+                  >
+                    Communication
+                  </p>
+
+                  <h3
+                    className="
+                      text-2xl
+                      font-bold
+                      text-green-400
+                    "
+                  >
+                    {
+                      item.communication_score
+                    }%
+                  </h3>
+
+                </div>
+
+
+                <div
+                  className="
+                    bg-black/30
+                    rounded-xl
+                    p-4
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      text-sm
+                      mb-1
+                    "
+                  >
+                    WPM
+                  </p>
+
+                  <h3
+                    className="
+                      text-2xl
+                      font-bold
+                      text-orange-400
+                    "
+                  >
+                    {
+                      item.words_per_minute
                     }
+                  </h3>
 
-                  </div>
+                </div>
 
-                </motion.div>
-              )
-            )
-          }
+
+                <div
+                  className="
+                    bg-black/30
+                    rounded-xl
+                    p-4
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      text-sm
+                      mb-1
+                    "
+                  >
+                    Eye Contact
+                  </p>
+
+                  <h3
+                    className="
+                      text-2xl
+                      font-bold
+                      text-pink-400
+                    "
+                  >
+                    {
+                      item.eye_contact_score
+                    }%
+                  </h3>
+
+                </div>
+
+              </div>
+
+
+              <div
+                className="
+                  bg-black/20
+                  rounded-xl
+                  p-5
+                "
+              >
+
+                <p
+                  className="
+                    text-gray-400
+                    text-sm
+                    mb-2
+                  "
+                >
+                  Transcript
+                </p>
+
+                <p
+                  className="
+                    text-gray-300
+                    leading-7
+                  "
+                >
+
+                  {
+                    item.transcript
+                  }
+
+                </p>
+
+              </div>
+
+            </div>
+          ))}
+
+
+          {!interviews.length && (
+
+            <div
+              className="
+                text-center
+                text-gray-400
+                py-20
+              "
+            >
+
+              No interviews found
+
+            </div>
+          )}
 
         </div>
 

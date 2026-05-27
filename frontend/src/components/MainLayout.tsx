@@ -1,5 +1,6 @@
-import type {
+import {
   ReactNode,
+  useState,
 } from "react";
 
 import {
@@ -9,31 +10,28 @@ import {
 } from "react-router-dom";
 
 import {
+
   LayoutDashboard,
   Brain,
   FileText,
-  History,
-  BarChart3,
   Trophy,
+  BarChart3,
+  History,
+  Menu,
+  X,
   LogOut,
+
 } from "lucide-react";
 
-import {
-  useAuth,
-} from "../context/AuthContext";
 
-
-interface MainLayoutProps {
-
+type Props = {
   children: ReactNode;
-}
+};
 
 
 function MainLayout({
-
   children,
-
-}: MainLayoutProps) {
+}: Props) {
 
   const location =
     useLocation();
@@ -41,47 +39,64 @@ function MainLayout({
   const navigate =
     useNavigate();
 
-  const {
-    logout,
-  } = useAuth();
+  const [
+    mobileOpen,
+    setMobileOpen,
+  ] = useState(false);
 
 
-  const menuItems = [
+  function logout() {
+
+    localStorage.removeItem(
+      "user"
+    );
+
+    navigate("/login");
+  }
+
+
+  const navItems = [
 
     {
       name: "Dashboard",
-      icon: LayoutDashboard,
       path: "/dashboard",
+      icon:
+        <LayoutDashboard size={20} />,
     },
 
     {
       name: "Mock Interview",
-      icon: Brain,
       path: "/mock-interview",
-    },
-
-    {
-      name: "Resume Analyzer",
-      icon: FileText,
-      path: "/resume-analyzer",
+      icon:
+        <Brain size={20} />,
     },
 
     {
       name: "History",
-      icon: History,
       path: "/history",
+      icon:
+        <History size={20} />,
+    },
+
+    {
+      name: "Reports",
+      path: "/reports",
+      icon:
+        <FileText size={20} />,
     },
 
     {
       name: "Analytics",
-      icon: BarChart3,
       path: "/analytics",
+      icon:
+        <BarChart3 size={20} />,
     },
 
     {
       name: "Leaderboard",
-      icon: Trophy,
       path: "/leaderboard",
+      icon:
+        <Trophy size={20} />,
     },
   ];
 
@@ -91,154 +106,157 @@ function MainLayout({
     <div
       className="
         min-h-screen
-        bg-black
-        flex
+        bg-[#050816]
         text-white
+        flex
       "
     >
 
+      {mobileOpen && (
+
+        <div
+          className="
+            fixed
+            inset-0
+            bg-black/70
+            z-40
+            md:hidden
+          "
+          onClick={() =>
+            setMobileOpen(false)
+          }
+        />
+      )}
+
+
       <aside
-        className="
-          w-72
-          bg-white/5
+        className={`
+          fixed
+          md:static
+          z-50
+          top-0
+          left-0
+          h-screen
+          w-[250px]
+          bg-[#0b1120]
           border-r
           border-white/10
-          flex
-          flex-col
-          justify-between
           p-6
-        "
+          transition-all
+          duration-300
+
+          ${
+            mobileOpen
+
+              ? "translate-x-0"
+
+              : "-translate-x-full md:translate-x-0"
+          }
+        `}
       >
 
-        <div>
+        <div
+          className="
+            flex
+            items-center
+            justify-between
+            mb-10
+          "
+        >
 
-          <div className="mb-12">
-
-            <h1
-              className="
-                text-4xl
-                font-black
-                text-cyan-400
-              "
-            >
-              HireSense AI
-            </h1>
-
-            <p
-              className="
-                text-zinc-400
-                mt-2
-              "
-            >
-              AI Interview Platform
-            </p>
-
-          </div>
-
-
-          <nav
+          <h1
             className="
-              space-y-3
+              text-2xl
+              font-black
+              text-cyan-400
             "
           >
-
-            {
-              menuItems.map(
-                (
-                  item,
-                  index
-                ) => {
-
-                  const Icon =
-                    item.icon;
-
-                  const active =
-                    location.pathname ===
-                    item.path;
+            HireSense
+          </h1>
 
 
-                  return (
-
-                    <Link
-                      key={index}
-                      to={item.path}
-                      className={`
-                        flex
-                        items-center
-                        gap-4
-                        px-5
-                        py-4
-                        rounded-2xl
-                        transition-all
-
-                        ${
-                          active
-
-                            ? "bg-cyan-400 text-black font-bold"
-
-                            : "hover:bg-white/10 text-zinc-300"
-                        }
-                      `}
-                    >
-
-                      <Icon
-                        size={24}
-                      />
-
-                      <span
-                        className="
-                          text-lg
-                        "
-                      >
-
-                        {item.name}
-
-                      </span>
-
-                    </Link>
-                  );
-                }
-              )
+          <button
+            className="
+              md:hidden
+            "
+            onClick={() =>
+              setMobileOpen(false)
             }
+          >
 
-          </nav>
+            <X size={22} />
+
+          </button>
+
+        </div>
+
+
+        <div
+          className="
+            space-y-3
+          "
+        >
+
+          {navItems.map((item) => (
+
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() =>
+                setMobileOpen(false)
+              }
+              className={`
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-xl
+                transition-all
+
+                ${
+                  location.pathname ===
+                  item.path
+
+                    ? "bg-cyan-400 text-black font-semibold"
+
+                    : "hover:bg-white/10"
+                }
+              `}
+            >
+
+              {item.icon}
+
+              {item.name}
+
+            </Link>
+          ))}
 
         </div>
 
 
         <button
-          onClick={() => {
-
-            logout();
-
-            navigate("/login");
-          }}
+          onClick={logout}
           className="
+            absolute
+            bottom-6
+            left-6
+            right-6
             flex
             items-center
-            gap-4
-            px-5
-            py-4
-            rounded-2xl
-            bg-red-500/20
-            hover:bg-red-500/30
-            text-red-400
-            transition-all
+            justify-center
+            gap-2
+            bg-red-500
+            hover:bg-red-400
+            py-3
+            rounded-xl
+            font-semibold
           "
         >
 
-          <LogOut
-            size={24}
-          />
+          <LogOut size={18} />
 
-          <span
-            className="
-              text-lg
-              font-semibold
-            "
-          >
-            Logout
-          </span>
+          Logout
 
         </button>
 
@@ -248,11 +266,92 @@ function MainLayout({
       <main
         className="
           flex-1
-          overflow-y-auto
+          min-h-screen
         "
       >
 
-        {children}
+        <header
+          className="
+            h-16
+            border-b
+            border-white/10
+            bg-black/20
+            backdrop-blur-xl
+            flex
+            items-center
+            justify-between
+            px-5
+            md:px-8
+            sticky
+            top-0
+            z-30
+          "
+        >
+
+          <div
+            className="
+              flex
+              items-center
+              gap-4
+            "
+          >
+
+            <button
+              className="
+                md:hidden
+              "
+              onClick={() =>
+                setMobileOpen(true)
+              }
+            >
+
+              <Menu size={24} />
+
+            </button>
+
+
+            <h2
+              className="
+                text-lg
+                md:text-2xl
+                font-bold
+              "
+            >
+              AI Interview Platform
+            </h2>
+
+          </div>
+
+
+          <div
+            className="
+              w-10
+              h-10
+              rounded-full
+              bg-cyan-400
+              flex
+              items-center
+              justify-center
+              text-black
+              font-bold
+            "
+          >
+            A
+          </div>
+
+        </header>
+
+
+        <div
+          className="
+            p-5
+            md:p-8
+          "
+        >
+
+          {children}
+
+        </div>
 
       </main>
 

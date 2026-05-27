@@ -1,8 +1,5 @@
-const API_URL =
-
-  import.meta.env.VITE_API_URL ||
-
-  "https://hiresense-ai-3jl0.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL;
 
 
 export async function signup(
@@ -10,13 +7,13 @@ export async function signup(
   username: string,
   email: string,
   password: string
+
 ) {
 
   const response =
-
     await fetch(
 
-      `${API_URL}/auth/signup`,
+      `${API_BASE_URL}/auth/signup`,
 
       {
         method: "POST",
@@ -35,12 +32,7 @@ export async function signup(
       }
     );
 
-
-  const data =
-    await response.json();
-
-
-  return data;
+  return response.json();
 }
 
 
@@ -48,13 +40,13 @@ export async function login(
 
   email: string,
   password: string
+
 ) {
 
   const response =
-
     await fetch(
 
-      `${API_URL}/auth/login`,
+      `${API_BASE_URL}/auth/login`,
 
       {
         method: "POST",
@@ -72,12 +64,67 @@ export async function login(
       }
     );
 
+  return response.json();
+}
 
-  const data =
-    await response.json();
+
+export async function generateQuestions(
+  role: string
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/generate-questions?role=${role}`
+    );
+
+  return response.json();
+}
 
 
-  return data;
+export async function evaluateAnswer(
+
+  question: string,
+  answer: string
+
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/evaluate-answer`,
+
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+
+          question,
+          answer,
+        }),
+      }
+    );
+
+  return response.json();
+}
+
+
+export async function getFinalReport(
+  p0: {}
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/final-report`
+    );
+
+  return response.json();
 }
 
 
@@ -86,10 +133,9 @@ export async function saveInterview(
 ) {
 
   const response =
-
     await fetch(
 
-      `${API_URL}/interviews/save`,
+      `${API_BASE_URL}/save-interview`,
 
       {
         method: "POST",
@@ -107,30 +153,14 @@ export async function saveInterview(
 }
 
 
-export async function getInterviewSessions(
-  userId: number
-) {
-
-  const response =
-
-    await fetch(
-
-      `${API_URL}/interviews/${userId}`
-    );
-
-  return response.json();
-}
-
-
 export async function getHistory(
   userId: number
 ) {
 
   const response =
-
     await fetch(
 
-      `${API_URL}/interviews/${userId}`
+      `${API_BASE_URL}/interviews/${userId}`
     );
 
   return response.json();
@@ -142,25 +172,33 @@ export async function getDashboardStats(
 ) {
 
   const response =
-
     await fetch(
 
-      `${API_URL}/dashboard/${userId}`
+      `${API_BASE_URL}/dashboard/${userId}`
     );
 
   return response.json();
 }
 
 
-export async function getAnalytics(
+export async function getLeaderboard() {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/leaderboard/`
+    );
+
+  return response.json();
+}
+export async function getInterviewSessions(
   userId: number
 ) {
 
   const response =
-
     await fetch(
 
-      `${API_URL}/analytics/${userId}`
+      `${API_BASE_URL}/interviews/${userId}`
     );
 
   return response.json();

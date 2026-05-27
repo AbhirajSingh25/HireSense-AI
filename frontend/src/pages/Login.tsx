@@ -9,22 +9,14 @@ import {
 import toast from "react-hot-toast";
 
 import {
-  useAuth,
-} from "../context/AuthContext";
-
-
-const API_URL =
-  import.meta.env.VITE_API_URL;
+  login,
+} from "../services/api";
 
 
 function Login() {
 
   const navigate =
     useNavigate();
-
-  const { login } =
-    useAuth();
-
 
   const [
     email,
@@ -36,71 +28,50 @@ function Login() {
     setPassword,
   ] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
 
-
-  async function handleLogin(
-    e: React.FormEvent
-  ) {
-
-    e.preventDefault();
+  async function handleLogin() {
 
     try {
 
-      setLoading(true);
-
-      const response =
-        await fetch(
-
-          `${API_URL}/auth/login`,
-
-          {
-            method: "POST",
-
-            headers: {
-
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-
-              email,
-              password,
-            }),
-          }
+      const data =
+        await login(
+          email,
+          password
         );
 
 
-      const data =
-        await response.json();
+      console.log(data);
 
 
-      if (!data.success) {
+      if (
+        data?.access_token ||
+
+        data?.token ||
+
+        data?.id
+      ) {
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data)
+        );
+
+        toast.success(
+          "Login successful"
+        );
+
+        navigate("/dashboard");
+
+      } else {
 
         toast.error(
-          data.message ||
+          data?.detail ||
+
+          data?.message ||
+
           "Login failed"
         );
-
-        return;
       }
-
-
-      login(
-        data.user
-      );
-
-      toast.success(
-        "Login successful"
-      );
-
-      navigate(
-        "/dashboard"
-      );
 
     } catch (error) {
 
@@ -109,10 +80,6 @@ function Login() {
       toast.error(
         "Login failed"
       );
-
-    } finally {
-
-      setLoading(false);
     }
   }
 
@@ -122,22 +89,18 @@ function Login() {
     <div
       className="
         min-h-screen
+        bg-black
         flex
         items-center
         justify-center
-        bg-black
-        text-white
         px-6
       "
     >
 
-      <form
-        onSubmit={
-          handleLogin
-        }
+      <div
         className="
           w-full
-          max-w-md
+          max-w-xl
           bg-white/5
           border
           border-white/10
@@ -148,10 +111,10 @@ function Login() {
 
         <h1
           className="
+            text-white
             text-5xl
             font-black
             mb-10
-            text-center
           "
         >
           Login
@@ -173,9 +136,10 @@ function Login() {
               w-full
               p-5
               rounded-2xl
-              bg-black/40
+              bg-black
               border
               border-white/10
+              text-white
             "
           />
 
@@ -193,41 +157,36 @@ function Login() {
               w-full
               p-5
               rounded-2xl
-              bg-black/40
+              bg-black
               border
               border-white/10
+              text-white
             "
           />
 
 
           <button
-            type="submit"
-            disabled={loading}
+            onClick={
+              handleLogin
+            }
             className="
               w-full
               bg-cyan-400
               hover:bg-cyan-300
               text-black
               font-bold
-              py-4
+              py-5
               rounded-2xl
-              disabled:opacity-50
             "
           >
 
-            {
-              loading
-
-                ? "Logging in..."
-
-                : "Login"
-            }
+            Login
 
           </button>
 
         </div>
 
-      </form>
+      </div>
 
     </div>
   );

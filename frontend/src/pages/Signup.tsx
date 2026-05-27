@@ -18,7 +18,6 @@ function Signup() {
   const navigate =
     useNavigate();
 
-
   const [
     username,
     setUsername,
@@ -39,29 +38,6 @@ function Signup() {
 
     try {
 
-      if (
-
-        !username ||
-        !email ||
-        !password
-      ) {
-
-        toast.error(
-          "Please fill all fields"
-        );
-
-        return;
-      }
-
-
-      toast.loading(
-        "Creating account...",
-        {
-          id: "signup",
-        }
-      );
-
-
       const data =
 
         await signup(
@@ -72,15 +48,10 @@ function Signup() {
         );
 
 
-      if (
-        data?.id
-      ) {
+      if (data?.id) {
 
         toast.success(
-          "Signup successful",
-          {
-            id: "signup",
-          }
+          "Signup successful"
         );
 
         navigate("/login");
@@ -88,17 +59,9 @@ function Signup() {
       } else {
 
         toast.error(
+          data?.message ||
 
-          typeof data?.message ===
-          "string"
-
-            ? data.message
-
-            : "Signup failed",
-
-          {
-            id: "signup",
-          }
+          "Signup failed"
         );
       }
 
@@ -107,10 +70,7 @@ function Signup() {
       console.error(error);
 
       toast.error(
-        "Signup failed",
-        {
-          id: "signup",
-        }
+        "Signup failed"
       );
     }
   }
@@ -122,7 +82,6 @@ function Signup() {
       className="
         min-h-screen
         bg-black
-        text-white
         flex
         items-center
         justify-center
@@ -144,20 +103,17 @@ function Signup() {
 
         <h1
           className="
+            text-white
             text-5xl
             font-black
             mb-10
           "
         >
-          Create Account
+          Signup
         </h1>
 
 
-        <div
-          className="
-            space-y-6
-          "
-        >
+        <div className="space-y-6">
 
           <input
             type="text"
@@ -172,9 +128,10 @@ function Signup() {
               w-full
               p-5
               rounded-2xl
-              bg-black/30
+              bg-black
               border
               border-white/10
+              text-white
             "
           />
 
@@ -192,9 +149,10 @@ function Signup() {
               w-full
               p-5
               rounded-2xl
-              bg-black/30
+              bg-black
               border
               border-white/10
+              text-white
             "
           />
 
@@ -212,9 +170,10 @@ function Signup() {
               w-full
               p-5
               rounded-2xl
-              bg-black/30
+              bg-black
               border
               border-white/10
+              text-white
             "
           />
 
@@ -234,7 +193,7 @@ function Signup() {
             "
           >
 
-            Sign Up
+            Create Account
 
           </button>
 

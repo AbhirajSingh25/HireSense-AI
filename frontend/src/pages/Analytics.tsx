@@ -6,11 +6,7 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  useAuth,
-} from "../context/AuthContext";
-
-import {
-  getAnalytics,
+  getHistory,
 } from "../services/api";
 
 import {
@@ -28,14 +24,9 @@ import {
 
 function Analytics() {
 
-  const {
-    user,
-  } = useAuth();
-
-
   const [
-    analytics,
-    setAnalytics,
+    data,
+    setData,
   ] = useState<any[]>([]);
 
 
@@ -43,17 +34,43 @@ function Analytics() {
 
     async function loadAnalytics() {
 
-      if (!user?.id) return;
-
       try {
 
-        const data =
+        const user =
+          JSON.parse(
 
-          await getAnalytics(
-            user.id
+            localStorage.getItem(
+              "user"
+            ) || "{}"
           );
 
-        setAnalytics(data);
+
+        const history =
+          await getHistory(
+            user.id || 1
+          );
+
+
+        const formatted =
+          history.map(
+            (
+              item: any,
+              index: number
+            ) => ({
+
+              name:
+                `#${index + 1}`,
+
+              confidence:
+                item.confidence_score,
+
+              communication:
+                item.communication_score,
+            })
+          );
+
+
+        setData(formatted);
 
       } catch (error) {
 
@@ -63,7 +80,49 @@ function Analytics() {
 
     loadAnalytics();
 
-  }, [user]);
+  }, []);
+
+
+  const avgConfidence =
+    data.length
+
+      ? (
+          data.reduce(
+
+            (
+              acc,
+              item
+            ) =>
+
+              acc +
+              item.confidence,
+
+            0
+          ) / data.length
+        ).toFixed(1)
+
+      : 0;
+
+
+  const avgCommunication =
+    data.length
+
+      ? (
+          data.reduce(
+
+            (
+              acc,
+              item
+            ) =>
+
+              acc +
+              item.communication,
+
+            0
+          ) / data.length
+        ).toFixed(1)
+
+      : 0;
 
 
   return (
@@ -72,19 +131,23 @@ function Analytics() {
 
       <div
         className="
-          min-h-screen
-          text-white
-          p-10
+          max-w-7xl
+          mx-auto
         "
       >
 
-        <div className="mb-12">
+        <div
+          className="
+            mb-10
+          "
+        >
 
           <h1
             className="
-              text-6xl
-              font-black
-              mb-4
+              text-4xl
+              font-bold
+              text-white
+              mb-3
             "
           >
             Analytics
@@ -92,12 +155,119 @@ function Analytics() {
 
           <p
             className="
-              text-zinc-400
-              text-xl
+              text-gray-400
             "
           >
-            Real interview performance trends
+            Real interview performance insights
           </p>
+
+        </div>
+
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            md:grid-cols-3
+            gap-6
+            mb-10
+          "
+        >
+
+          <div
+            className="
+              bg-white/5
+              border
+              border-white/10
+              rounded-2xl
+              p-6
+            "
+          >
+
+            <p
+              className="
+                text-gray-400
+                mb-2
+              "
+            >
+              Total Interviews
+            </p>
+
+            <h2
+              className="
+                text-4xl
+                font-bold
+                text-cyan-400
+              "
+            >
+              {data.length}
+            </h2>
+
+          </div>
+
+
+          <div
+            className="
+              bg-white/5
+              border
+              border-white/10
+              rounded-2xl
+              p-6
+            "
+          >
+
+            <p
+              className="
+                text-gray-400
+                mb-2
+              "
+            >
+              Avg Confidence
+            </p>
+
+            <h2
+              className="
+                text-4xl
+                font-bold
+                text-green-400
+              "
+            >
+              {avgConfidence}%
+            </h2>
+
+          </div>
+
+
+          <div
+            className="
+              bg-white/5
+              border
+              border-white/10
+              rounded-2xl
+              p-6
+            "
+          >
+
+            <p
+              className="
+                text-gray-400
+                mb-2
+              "
+            >
+              Avg Communication
+            </p>
+
+            <h2
+              className="
+                text-4xl
+                font-bold
+                text-pink-400
+              "
+            >
+              {avgCommunication}%
+            </h2>
+
+          </div>
 
         </div>
 
@@ -107,14 +277,27 @@ function Analytics() {
             bg-white/5
             border
             border-white/10
-            rounded-3xl
-            p-10
+            rounded-2xl
+            p-6
           "
         >
 
+          <h2
+            className="
+              text-2xl
+              font-bold
+              text-white
+              mb-8
+            "
+          >
+            Performance Trend
+          </h2>
+
+
           <div
             className="
-              h-[500px]
+              w-full
+              h-100
             "
           >
 
@@ -124,20 +307,25 @@ function Analytics() {
             >
 
               <LineChart
-                data={analytics}
+                data={data}
               >
 
                 <CartesianGrid
                   strokeDasharray="3 3"
+                  stroke="#333"
                 />
 
                 <XAxis
-                  dataKey="session"
+                  dataKey="name"
+                  stroke="#aaa"
                 />
 
-                <YAxis />
+                <YAxis
+                  stroke="#aaa"
+                />
 
                 <Tooltip />
+
 
                 <Line
                   type="monotone"
@@ -146,17 +334,11 @@ function Analytics() {
                   strokeWidth={3}
                 />
 
+
                 <Line
                   type="monotone"
                   dataKey="communication"
                   stroke="#4ade80"
-                  strokeWidth={3}
-                />
-
-                <Line
-                  type="monotone"
-                  dataKey="eye_contact"
-                  stroke="#f472b6"
                   strokeWidth={3}
                 />
 

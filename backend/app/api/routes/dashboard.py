@@ -1,13 +1,8 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-)
+from fastapi import APIRouter
 
 from sqlalchemy.orm import Session
 
-from sqlalchemy import func
-
-from app.db.dependencies import get_db
+from app.db.database import SessionLocal
 
 from app.models.interview_model import Interview
 
@@ -20,11 +15,10 @@ router = APIRouter(
 
 @router.get("/{user_id}")
 def get_dashboard_stats(
-
-    user_id: int,
-
-    db: Session = Depends(get_db)
+    user_id: int
 ):
+
+    db: Session = SessionLocal()
 
     interviews = (
 
@@ -38,55 +32,43 @@ def get_dashboard_stats(
     )
 
 
-    total_interviews = len(
-        interviews
+    total_interviews = len(interviews)
+
+
+    if total_interviews == 0:
+
+        return {
+
+            "total_interviews": 0,
+
+            "average_confidence": 0,
+
+            "average_communication": 0,
+
+            "latest_score": 0,
+        }
+
+
+    average_confidence = sum(
+
+        i.confidence_score
+        for i in interviews
+
+    ) / total_interviews
+
+
+    average_communication = sum(
+
+        i.communication_score
+        for i in interviews
+
+    ) / total_interviews
+
+
+    latest_score = (
+        interviews[-1]
+        .communication_score
     )
-
-
-    avg_confidence = 0
-    avg_communication = 0
-    avg_eye_contact = 0
-
-
-    if total_interviews > 0:
-
-        avg_confidence = round(
-
-            sum(
-                i.confidence_score
-                for i in interviews
-            )
-
-            / total_interviews,
-
-            1
-        )
-
-
-        avg_communication = round(
-
-            sum(
-                i.communication_score
-                for i in interviews
-            )
-
-            / total_interviews,
-
-            1
-        )
-
-
-        avg_eye_contact = round(
-
-            sum(
-                i.eye_contact_score
-                for i in interviews
-            )
-
-            / total_interviews,
-
-            1
-        )
 
 
     return {
@@ -94,12 +76,18 @@ def get_dashboard_stats(
         "total_interviews":
             total_interviews,
 
-        "avg_confidence":
-            avg_confidence,
+        "average_confidence":
+            round(
+                average_confidence,
+                2
+            ),
 
-        "avg_communication":
-            avg_communication,
+        "average_communication":
+            round(
+                average_communication,
+                2
+            ),
 
-        "avg_eye_contact":
-            avg_eye_contact,
+        "latest_score":
+            latest_score,
     }
