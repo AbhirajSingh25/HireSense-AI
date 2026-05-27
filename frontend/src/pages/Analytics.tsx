@@ -6,123 +6,109 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getHistory,
+  getDashboardStats,
 } from "../services/api";
 
 import {
 
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
+  Brain,
+  Eye,
+  MessageSquare,
+  Clock3,
 
-} from "recharts";
+} from "lucide-react";
 
 
 function Analytics() {
 
   const [
-    data,
-    setData,
-  ] = useState<any[]>([]);
+    stats,
+    setStats,
+  ] = useState<any>(null);
 
 
   useEffect(() => {
-
-    async function loadAnalytics() {
-
-      try {
-
-        const user =
-          JSON.parse(
-
-            localStorage.getItem(
-              "user"
-            ) || "{}"
-          );
-
-
-        const history =
-          await getHistory(
-            user.id || 1
-          );
-
-
-        const formatted =
-          history.map(
-            (
-              item: any,
-              index: number
-            ) => ({
-
-              name:
-                `#${index + 1}`,
-
-              confidence:
-                item.confidence_score,
-
-              communication:
-                item.communication_score,
-            })
-          );
-
-
-        setData(formatted);
-
-      } catch (error) {
-
-        console.error(error);
-      }
-    }
 
     loadAnalytics();
 
   }, []);
 
 
-  const avgConfidence =
-    data.length
+  async function loadAnalytics() {
 
-      ? (
-          data.reduce(
+    try {
 
-            (
-              acc,
-              item
-            ) =>
-
-              acc +
-              item.confidence,
-
-            0
-          ) / data.length
-        ).toFixed(1)
-
-      : 0;
+      const user =
+        JSON.parse(
+          localStorage.getItem("user") || "{}"
+        );
 
 
-  const avgCommunication =
-    data.length
+      const data =
+        await getDashboardStats(
+          user.id || 1
+        );
 
-      ? (
-          data.reduce(
 
-            (
-              acc,
-              item
-            ) =>
+      setStats(data);
 
-              acc +
-              item.communication,
+    } catch (error) {
 
-            0
-          ) / data.length
-        ).toFixed(1)
+      console.error(error);
+    }
+  }
 
-      : 0;
+
+  const analyticsCards = [
+
+    {
+      title: "Confidence Score",
+      value:
+        `${stats?.confidence_score || 0}%`,
+      icon:
+        <Brain size={24} />,
+      color:
+        "text-cyan-400",
+      bg:
+        "bg-cyan-400/10",
+    },
+
+    {
+      title: "Communication",
+      value:
+        `${stats?.communication_score || 0}%`,
+      icon:
+        <MessageSquare size={24} />,
+      color:
+        "text-green-400",
+      bg:
+        "bg-green-400/10",
+    },
+
+    {
+      title: "Eye Contact",
+      value:
+        `${stats?.eye_contact_score || 0}%`,
+      icon:
+        <Eye size={24} />,
+      color:
+        "text-pink-400",
+      bg:
+        "bg-pink-400/10",
+    },
+
+    {
+      title: "Words Per Minute",
+      value:
+        stats?.words_per_minute || 0,
+      icon:
+        <Clock3 size={24} />,
+      color:
+        "text-orange-400",
+      bg:
+        "bg-orange-400/10",
+    },
+  ];
 
 
   return (
@@ -145,12 +131,12 @@ function Analytics() {
           <h1
             className="
               text-4xl
-              font-bold
+              font-black
               text-white
               mb-3
             "
           >
-            Analytics
+            AI Analytics
           </h1>
 
           <p
@@ -158,7 +144,7 @@ function Analytics() {
               text-gray-400
             "
           >
-            Real interview performance insights
+            Advanced AI interview performance insights
           </p>
 
         </div>
@@ -168,183 +154,393 @@ function Analytics() {
           className="
             grid
             grid-cols-1
-            md:grid-cols-3
+            sm:grid-cols-2
+            xl:grid-cols-4
             gap-6
             mb-10
           "
         >
 
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-2xl
-              p-6
-            "
-          >
+          {analyticsCards.map((card) => (
 
-            <p
+            <div
+              key={card.title}
               className="
-                text-gray-400
-                mb-2
+                bg-white/5
+                border
+                border-white/10
+                rounded-3xl
+                p-6
               "
             >
-              Total Interviews
-            </p>
 
-            <h2
-              className="
-                text-4xl
-                font-bold
-                text-cyan-400
-              "
-            >
-              {data.length}
-            </h2>
+              <div
+                className={`
+                  w-14
+                  h-14
+                  rounded-2xl
+                  flex
+                  items-center
+                  justify-center
+                  mb-6
+                  ${card.bg}
+                  ${card.color}
+                `}
+              >
 
-          </div>
+                {card.icon}
 
-
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-2xl
-              p-6
-            "
-          >
-
-            <p
-              className="
-                text-gray-400
-                mb-2
-              "
-            >
-              Avg Confidence
-            </p>
-
-            <h2
-              className="
-                text-4xl
-                font-bold
-                text-green-400
-              "
-            >
-              {avgConfidence}%
-            </h2>
-
-          </div>
+              </div>
 
 
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-2xl
-              p-6
-            "
-          >
+              <p
+                className="
+                  text-gray-400
+                  mb-2
+                "
+              >
+                {card.title}
+              </p>
 
-            <p
-              className="
-                text-gray-400
-                mb-2
-              "
-            >
-              Avg Communication
-            </p>
 
-            <h2
-              className="
-                text-4xl
-                font-bold
-                text-pink-400
-              "
-            >
-              {avgCommunication}%
-            </h2>
+              <h2
+                className="
+                  text-4xl
+                  font-black
+                  text-white
+                "
+              >
+                {card.value}
+              </h2>
 
-          </div>
+            </div>
+          ))}
 
         </div>
 
 
         <div
           className="
-            bg-white/5
-            border
-            border-white/10
-            rounded-2xl
-            p-6
+            grid
+            lg:grid-cols-2
+            gap-6
           "
         >
 
-          <h2
+          <div
             className="
-              text-2xl
-              font-bold
-              text-white
-              mb-8
+              bg-white/5
+              border
+              border-white/10
+              rounded-3xl
+              p-6
             "
           >
-            Performance Trend
-          </h2>
+
+            <h2
+              className="
+                text-2xl
+                font-bold
+                text-white
+                mb-6
+              "
+            >
+              Performance Summary
+            </h2>
+
+
+            <div
+              className="
+                space-y-5
+              "
+            >
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span
+                    className="
+                      text-gray-400
+                    "
+                  >
+                    Confidence
+                  </span>
+
+                  <span
+                    className="
+                      text-white
+                    "
+                  >
+                    {
+                      stats?.confidence_score || 0
+                    }%
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    bg-black/20
+                    rounded-full
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    style={{
+                      width: `${
+                        stats?.confidence_score || 0
+                      }%`
+                    }}
+                    className="
+                      h-full
+                      bg-cyan-400
+                    "
+                  />
+
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span
+                    className="
+                      text-gray-400
+                    "
+                  >
+                    Communication
+                  </span>
+
+                  <span
+                    className="
+                      text-white
+                    "
+                  >
+                    {
+                      stats?.communication_score || 0
+                    }%
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    bg-black/20
+                    rounded-full
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    style={{
+                      width: `${
+                        stats?.communication_score || 0
+                      }%`
+                    }}
+                    className="
+                      h-full
+                      bg-green-400
+                    "
+                  />
+
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <div
+                  className="
+                    flex
+                    justify-between
+                    mb-2
+                  "
+                >
+
+                  <span
+                    className="
+                      text-gray-400
+                    "
+                  >
+                    Eye Contact
+                  </span>
+
+                  <span
+                    className="
+                      text-white
+                    "
+                  >
+                    {
+                      stats?.eye_contact_score || 0
+                    }%
+                  </span>
+
+                </div>
+
+                <div
+                  className="
+                    h-3
+                    bg-black/20
+                    rounded-full
+                    overflow-hidden
+                  "
+                >
+
+                  <div
+                    style={{
+                      width: `${
+                        stats?.eye_contact_score || 0
+                      }%`
+                    }}
+                    className="
+                      h-full
+                      bg-pink-400
+                    "
+                  />
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
 
 
           <div
             className="
-              w-full
-              h-100
+              bg-white/5
+              border
+              border-white/10
+              rounded-3xl
+              p-6
             "
           >
 
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
+            <h2
+              className="
+                text-2xl
+                font-bold
+                text-white
+                mb-6
+              "
+            >
+              AI Feedback
+            </h2>
+
+
+            <div
+              className="
+                bg-black/20
+                rounded-2xl
+                p-5
+              "
             >
 
-              <LineChart
-                data={data}
+              <p
+                className="
+                  text-gray-300
+                  leading-8
+                "
               >
 
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#333"
-                />
+                Your communication clarity is strong and your confidence levels are above average. Continue improving structured answers and maintain consistent eye contact during technical discussions.
 
-                <XAxis
-                  dataKey="name"
-                  stroke="#aaa"
-                />
+              </p>
 
-                <YAxis
-                  stroke="#aaa"
-                />
-
-                <Tooltip />
+            </div>
 
 
-                <Line
-                  type="monotone"
-                  dataKey="confidence"
-                  stroke="#22d3ee"
-                  strokeWidth={3}
-                />
+            <div
+              className="
+                mt-6
+                grid
+                gap-4
+              "
+            >
+
+              <div
+                className="
+                  bg-cyan-400/10
+                  border
+                  border-cyan-400/20
+                  rounded-2xl
+                  p-4
+                "
+              >
+
+                <h3
+                  className="
+                    text-cyan-400
+                    font-semibold
+                    mb-2
+                  "
+                >
+                  Strong Area
+                </h3>
+
+                <p
+                  className="
+                    text-gray-300
+                  "
+                >
+                  Communication clarity and speaking confidence
+                </p>
+
+              </div>
 
 
-                <Line
-                  type="monotone"
-                  dataKey="communication"
-                  stroke="#4ade80"
-                  strokeWidth={3}
-                />
+              <div
+                className="
+                  bg-orange-400/10
+                  border
+                  border-orange-400/20
+                  rounded-2xl
+                  p-4
+                "
+              >
 
-              </LineChart>
+                <h3
+                  className="
+                    text-orange-400
+                    font-semibold
+                    mb-2
+                  "
+                >
+                  Improvement Area
+                </h3>
 
-            </ResponsiveContainer>
+                <p
+                  className="
+                    text-gray-300
+                  "
+                >
+                  Maintain concise answers in technical rounds
+                </p>
+
+              </div>
+
+            </div>
 
           </div>
 
