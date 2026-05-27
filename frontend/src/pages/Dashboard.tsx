@@ -3,23 +3,32 @@ import {
   useState,
 } from "react";
 
-import MainLayout from "../components/MainLayout";
-
 import {
+  useNavigate,
+} from "react-router-dom";
 
-  Brain,
-  Trophy,
-  Activity,
-  Sparkles,
-
-} from "lucide-react";
+import MainLayout from "../components/MainLayout";
 
 import {
   getDashboardStats,
 } from "../services/api";
 
+import {
+
+  Brain,
+  Trophy,
+  BarChart3,
+  Clock,
+  ArrowRight,
+
+} from "lucide-react";
+
 
 function Dashboard() {
+
+  const navigate =
+    useNavigate();
+
 
   const [
     stats,
@@ -29,93 +38,76 @@ function Dashboard() {
 
   useEffect(() => {
 
-    async function loadStats() {
-
-      try {
-
-        const user =
-          JSON.parse(
-
-            localStorage.getItem(
-              "user"
-            ) || "{}"
-          );
-
-
-        const data =
-          await getDashboardStats(
-            user.id || 1
-          );
-
-        setStats(data);
-
-      } catch (error) {
-
-        console.error(error);
-      }
-    }
-
     loadStats();
 
   }, []);
 
 
+  async function loadStats() {
+
+    try {
+
+      const user =
+        JSON.parse(
+          localStorage.getItem("user") || "{}"
+        );
+
+
+      const data =
+        await getDashboardStats(
+          user.id || 1
+        );
+
+
+      setStats(data);
+
+    } catch (error) {
+
+      console.error(error);
+    }
+  }
+
+
   const cards = [
 
     {
-      title:
-        "Total Interviews",
-
+      title: "Confidence",
       value:
-        stats?.total_interviews || 0,
-
+        `${stats?.confidence_score || 0}%`,
       icon:
-        <Brain size={34} />,
-
+        <Brain size={24} />,
       color:
         "from-cyan-500 to-blue-500",
     },
 
     {
-      title:
-        "Confidence",
-
+      title: "Communication",
       value:
-        stats?.average_confidence || 0,
-
+        `${stats?.communication_score || 0}%`,
       icon:
-        <Sparkles size={34} />,
-
-      color:
-        "from-pink-500 to-purple-500",
-    },
-
-    {
-      title:
-        "Communication",
-
-      value:
-        stats?.average_communication || 0,
-
-      icon:
-        <Activity size={34} />,
-
+        <BarChart3 size={24} />,
       color:
         "from-green-500 to-emerald-500",
     },
 
     {
-      title:
-        "Latest Score",
-
+      title: "Eye Contact",
       value:
-        stats?.latest_score || 0,
-
+        `${stats?.eye_contact_score || 0}%`,
       icon:
-        <Trophy size={34} />,
-
+        <Trophy size={24} />,
       color:
-        "from-orange-500 to-yellow-500",
+        "from-pink-500 to-purple-500",
+    },
+
+    {
+      title: "Words / Min",
+      value:
+        stats?.words_per_minute || 0,
+      icon:
+        <Clock size={24} />,
+      color:
+        "from-orange-500 to-red-500",
     },
   ];
 
@@ -124,33 +116,75 @@ function Dashboard() {
 
     <MainLayout>
 
-      <div>
+      <div
+        className="
+          max-w-7xl
+          mx-auto
+        "
+      >
 
         <div
           className="
+            flex
+            flex-col
+            md:flex-row
+            md:items-center
+            md:justify-between
+            gap-5
             mb-10
           "
         >
 
-          <h1
-            className="
-              text-6xl
-              font-black
-              text-white
-              mb-4
-            "
-          >
-            Dashboard
-          </h1>
+          <div>
 
-          <p
+            <h1
+              className="
+                text-4xl
+                font-black
+                text-white
+                mb-2
+              "
+            >
+              Dashboard
+            </h1>
+
+            <p
+              className="
+                text-gray-400
+              "
+            >
+              AI Interview Analytics Overview
+            </p>
+
+          </div>
+
+
+          <button
+            onClick={() =>
+              navigate(
+                "/mock-interview"
+              )
+            }
             className="
-              text-gray-400
-              text-lg
+              bg-cyan-400
+              hover:bg-cyan-300
+              text-black
+              font-bold
+              px-6
+              py-4
+              rounded-2xl
+              flex
+              items-center
+              gap-3
+              transition-all
             "
           >
-            Welcome back to your AI interview workspace
-          </p>
+
+            Start Interview
+
+            <ArrowRight size={20} />
+
+          </button>
 
         </div>
 
@@ -159,9 +193,10 @@ function Dashboard() {
           className="
             grid
             grid-cols-1
-            md:grid-cols-2
+            sm:grid-cols-2
             xl:grid-cols-4
-            gap-8
+            gap-6
+            mb-10
           "
         >
 
@@ -169,68 +204,62 @@ function Dashboard() {
 
             <div
               key={card.title}
-              className="
-                relative
-                overflow-hidden
-                rounded-3xl
-                p-px
+              className={`
                 bg-linear-to-br
-                from-white/20
-                to-white/5
-              "
+                ${card.color}
+                rounded-3xl
+                p-6
+                text-white
+                shadow-xl
+              `}
             >
 
               <div
                 className="
-                  bg-[#0b1120]
-                  rounded-3xl
-                  p-8
-                  h-full
+                  flex
+                  justify-between
+                  items-start
+                  mb-6
                 "
               >
 
                 <div
-                  className={`
-                    w-16
-                    h-16
+                  className="
+                    w-12
+                    h-12
                     rounded-2xl
-                    bg-linear-to-br
-                    ${card.color}
-
+                    bg-white/20
                     flex
                     items-center
                     justify-center
-                    mb-6
-                  `}
+                  "
                 >
 
                   {card.icon}
 
                 </div>
 
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-3
-                    text-lg
-                  "
-                >
-                  {card.title}
-                </p>
-
-
-                <h2
-                  className="
-                    text-5xl
-                    font-black
-                    text-white
-                  "
-                >
-                  {card.value}
-                </h2>
-
               </div>
+
+
+              <h3
+                className="
+                  text-gray-100
+                  mb-2
+                "
+              >
+                {card.title}
+              </h3>
+
+
+              <p
+                className="
+                  text-4xl
+                  font-black
+                "
+              >
+                {card.value}
+              </p>
 
             </div>
           ))}
@@ -240,11 +269,9 @@ function Dashboard() {
 
         <div
           className="
-            mt-12
             grid
-            grid-cols-1
-            xl:grid-cols-2
-            gap-8
+            lg:grid-cols-2
+            gap-6
           "
         >
 
@@ -254,19 +281,21 @@ function Dashboard() {
               border
               border-white/10
               rounded-3xl
-              p-8
+              p-6
             "
           >
 
             <h2
               className="
-                text-3xl
+                text-2xl
                 font-bold
+                text-white
                 mb-6
               "
             >
-              Performance Overview
+              Interview Summary
             </h2>
+
 
             <div
               className="
@@ -276,44 +305,31 @@ function Dashboard() {
 
               <div>
 
-                <div
+                <p
                   className="
-                    flex
-                    justify-between
+                    text-gray-400
                     mb-2
                   "
                 >
-
-                  <span>
-                    Confidence
-                  </span>
-
-                  <span>
-                    {
-                      stats?.average_confidence || 0
-                    }%
-                  </span>
-
-                </div>
+                  Attention Status
+                </p>
 
                 <div
                   className="
-                    h-3
-                    rounded-full
-                    bg-white/10
-                    overflow-hidden
+                    inline-flex
+                    px-4
+                    py-2
+                    rounded-xl
+                    bg-cyan-400
+                    text-black
+                    font-semibold
                   "
                 >
 
-                  <div
-                    style={{
-                      width: `${stats?.average_confidence || 0}%`
-                    }}
-                    className="
-                      h-full
-                      bg-cyan-400
-                    "
-                  />
+                  {
+                    stats?.attention_status ||
+                    "Focused"
+                  }
 
                 </div>
 
@@ -322,46 +338,28 @@ function Dashboard() {
 
               <div>
 
-                <div
+                <p
                   className="
-                    flex
-                    justify-between
+                    text-gray-400
                     mb-2
                   "
                 >
+                  Last Transcript
+                </p>
 
-                  <span>
-                    Communication
-                  </span>
-
-                  <span>
-                    {
-                      stats?.average_communication || 0
-                    }%
-                  </span>
-
-                </div>
-
-                <div
+                <p
                   className="
-                    h-3
-                    rounded-full
-                    bg-white/10
-                    overflow-hidden
+                    text-gray-300
+                    leading-7
                   "
                 >
 
-                  <div
-                    style={{
-                      width: `${stats?.average_communication || 0}%`
-                    }}
-                    className="
-                      h-full
-                      bg-green-400
-                    "
-                  />
+                  {
+                    stats?.transcript ||
+                    "No interview completed yet."
+                  }
 
-                </div>
+                </p>
 
               </div>
 
@@ -372,47 +370,107 @@ function Dashboard() {
 
           <div
             className="
-              bg-linear-to-br
-              from-cyan-500
-              to-blue-600
+              bg-white/5
+              border
+              border-white/10
               rounded-3xl
-              p-8
-              text-black
+              p-6
             "
           >
 
             <h2
               className="
-                text-4xl
-                font-black
-                mb-4
+                text-2xl
+                font-bold
+                text-white
+                mb-6
               "
             >
-              AI Interview Ready
+              Quick Actions
             </h2>
 
-            <p
+
+            <div
               className="
-                text-lg
-                mb-8
+                grid
+                gap-4
               "
             >
-              Continue improving your interview performance with real-time AI feedback and analytics.
-            </p>
+
+              <button
+                onClick={() =>
+                  navigate("/history")
+                }
+                className="
+                  bg-black/30
+                  hover:bg-black/50
+                  border
+                  border-white/10
+                  rounded-2xl
+                  p-5
+                  text-left
+                  transition-all
+                "
+              >
+
+                <h3
+                  className="
+                    text-white
+                    font-semibold
+                    mb-2
+                  "
+                >
+                  Interview History
+                </h3>
+
+                <p
+                  className="
+                    text-gray-400
+                  "
+                >
+                  Review previous interview sessions
+                </p>
+
+              </button>
 
 
-            <button
-              className="
-                bg-black
-                text-white
-                px-8
-                py-4
-                rounded-2xl
-                font-bold
-              "
-            >
-              Start New Interview
-            </button>
+              <button
+                onClick={() =>
+                  navigate("/reports")
+                }
+                className="
+                  bg-black/30
+                  hover:bg-black/50
+                  border
+                  border-white/10
+                  rounded-2xl
+                  p-5
+                  text-left
+                  transition-all
+                "
+              >
+
+                <h3
+                  className="
+                    text-white
+                    font-semibold
+                    mb-2
+                  "
+                >
+                  AI Reports
+                </h3>
+
+                <p
+                  className="
+                    text-gray-400
+                  "
+                >
+                  Detailed AI performance reports
+                </p>
+
+              </button>
+
+            </div>
 
           </div>
 
