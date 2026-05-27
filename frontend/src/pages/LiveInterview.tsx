@@ -280,7 +280,7 @@ function LiveInterview() {
 
           <div className="lg:col-span-2 space-y-8">
 
-            <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden h-[500px] relative flex items-center justify-center">
+            <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden h-125 relative flex items-center justify-center">
 
               {!cameraOn && (
 
@@ -327,7 +327,7 @@ function LiveInterview() {
 
               </div>
 
-              <p className="mt-8 text-lg leading-8 text-gray-300 min-h-[160px]">
+              <p className="mt-8 text-lg leading-8 text-gray-300 min-h-40">
 
                 {transcript ||
                   "Waiting for interview..."}

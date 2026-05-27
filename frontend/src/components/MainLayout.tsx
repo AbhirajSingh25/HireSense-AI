@@ -21,6 +21,7 @@ import {
   X,
   LogOut,
   Mic,
+  Camera,
 
 } from "lucide-react";
 
@@ -89,6 +90,11 @@ function MainLayout({
   name: "Speech Analysis",
   path: "/speech-analysis",
   icon: <Mic size={20} />,
+},
+{
+  name: "Vision Analysis",
+  path: "/vision-analysis",
+  icon: <Camera size={20} />,
 },
     {
       name: "Analytics",

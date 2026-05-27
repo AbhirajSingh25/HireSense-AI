@@ -6,6 +6,8 @@ import {
 
 import SpeechAnalysis from "./pages/SpeechAnalysis";
 
+import VisionAnalysis from "./pages/VisionAnalysis";
+
 import LandingPage from "./pages/LandingPage";
 
 import Login from "./pages/Login";
@@ -86,7 +88,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+<Route
+  path="/vision-analysis"
+  element={
+    <ProtectedRoute>
+      <VisionAnalysis />
+    </ProtectedRoute>
+  }
+/>
           <Route
             path="/history"
             element={
