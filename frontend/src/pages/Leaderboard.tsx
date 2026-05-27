@@ -6,42 +6,108 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  Trophy,
-} from "lucide-react";
-
-import {
   getLeaderboard,
 } from "../services/api";
+
+import {
+
+  Trophy,
+  Medal,
+  Crown,
+
+} from "lucide-react";
 
 
 function Leaderboard() {
 
   const [
-    users,
-    setUsers,
+    leaders,
+    setLeaders,
   ] = useState<any[]>([]);
 
 
   useEffect(() => {
 
-    async function loadLeaderboard() {
-
-      try {
-
-        const data =
-          await getLeaderboard();
-
-        setUsers(data);
-
-      } catch (error) {
-
-        console.error(error);
-      }
-    }
-
     loadLeaderboard();
 
   }, []);
+
+
+  async function loadLeaderboard() {
+
+    try {
+
+      const data =
+        await getLeaderboard();
+
+      setLeaders(data);
+
+    } catch (error) {
+
+      console.error(error);
+    }
+  }
+
+
+  function getRankIcon(
+    rank: number
+  ) {
+
+    if (rank === 1) {
+
+      return (
+        <Crown
+          className="
+            text-yellow-400
+          "
+          size={24}
+        />
+      );
+    }
+
+    if (rank === 2) {
+
+      return (
+        <Medal
+          className="
+            text-gray-300
+          "
+          size={24}
+        />
+      );
+    }
+
+    if (rank === 3) {
+
+      return (
+        <Medal
+          className="
+            text-orange-400
+          "
+          size={24}
+        />
+      );
+    }
+
+    return (
+
+      <div
+        className="
+          w-8
+          h-8
+          rounded-full
+          bg-white/10
+          flex
+          items-center
+          justify-center
+          text-sm
+          font-bold
+        "
+      >
+        {rank}
+      </div>
+    );
+  }
 
 
   return (
@@ -61,217 +127,294 @@ function Leaderboard() {
           "
         >
 
-          <h1
+          <div
             className="
-              text-4xl
-              font-bold
-              text-white
+              flex
+              items-center
+              gap-4
               mb-3
             "
           >
-            Leaderboard
-          </h1>
 
-          <p
-            className="
-              text-gray-400
-            "
-          >
-            Top interview performers
-          </p>
+            <div
+              className="
+                w-14
+                h-14
+                rounded-2xl
+                bg-yellow-400
+                text-black
+                flex
+                items-center
+                justify-center
+              "
+            >
+
+              <Trophy size={28} />
+
+            </div>
+
+
+            <div>
+
+              <h1
+                className="
+                  text-4xl
+                  font-black
+                  text-white
+                "
+              >
+                Leaderboard
+              </h1>
+
+              <p
+                className="
+                  text-gray-400
+                "
+              >
+                Top AI interview performers
+              </p>
+
+            </div>
+
+          </div>
 
         </div>
 
 
         <div
           className="
-            space-y-5
+            grid
+            gap-5
           "
         >
 
-          {users.map(
-
-            (
-              user,
-              index
-            ) => (
+          {leaders.map((
+            user,
+            index
+          ) => (
 
             <div
-              key={user.username}
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-2xl
+              key={index}
+              className={`
+                rounded-3xl
                 p-6
-                flex
-                flex-col
-                md:flex-row
-                md:items-center
-                md:justify-between
-                gap-6
-              "
+                border
+                transition-all
+
+                ${
+                  index === 0
+
+                    ? `
+                      bg-linear-to-r
+                      from-yellow-500/20
+                      to-orange-500/20
+                      border-yellow-400/30
+                    `
+
+                    : `
+                      bg-white/5
+                      border-white/10
+                    `
+                }
+              `}
             >
 
               <div
                 className="
                   flex
-                  items-center
+                  flex-col
+                  md:flex-row
+                  md:items-center
+                  md:justify-between
                   gap-5
                 "
               >
 
                 <div
                   className="
-                    w-14
-                    h-14
-                    rounded-2xl
-                    bg-yellow-400
-                    text-black
-                    font-black
                     flex
                     items-center
-                    justify-center
-                    text-xl
+                    gap-5
                   "
                 >
 
-                  {index + 1}
-
-                </div>
-
-
-                <div>
-
-                  <h2
-                    className="
-                      text-2xl
-                      font-bold
-                      text-white
-                    "
-                  >
-                    {user.username}
-                  </h2>
-
-                  <p
-                    className="
-                      text-gray-400
-                    "
-                  >
-                    {
-                      user.total_interviews
-                    }
-                    {" "}
-                    interviews completed
-                  </p>
-
-                </div>
-
-              </div>
+                  {getRankIcon(
+                    index + 1
+                  )}
 
 
-              <div
-                className="
-                  flex
-                  flex-wrap
-                  gap-4
-                "
-              >
+                  <div>
 
-                <div
-                  className="
-                    bg-black/30
-                    rounded-xl
-                    px-5
-                    py-3
-                  "
-                >
+                    <h2
+                      className="
+                        text-2xl
+                        font-bold
+                        text-white
+                        mb-1
+                      "
+                    >
+                      {
+                        user.username ||
+                        `User ${index + 1}`
+                      }
+                    </h2>
 
-                  <p
-                    className="
-                      text-sm
-                      text-gray-400
-                    "
-                  >
-                    Confidence
-                  </p>
+                    <p
+                      className="
+                        text-gray-400
+                      "
+                    >
+                      AI Interview Candidate
+                    </p>
 
-                  <h3
-                    className="
-                      text-xl
-                      font-bold
-                      text-cyan-400
-                    "
-                  >
-                    {
-                      user.avg_confidence
-                    }%
-                  </h3>
+                  </div>
 
                 </div>
 
 
                 <div
                   className="
-                    bg-black/30
-                    rounded-xl
-                    px-5
-                    py-3
+                    grid
+                    grid-cols-2
+                    md:grid-cols-4
+                    gap-4
                   "
                 >
 
-                  <p
+                  <div
                     className="
-                      text-sm
-                      text-gray-400
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
                     "
                   >
-                    Communication
-                  </p>
 
-                  <h3
+                    <p
+                      className="
+                        text-gray-400
+                        text-sm
+                        mb-2
+                      "
+                    >
+                      Confidence
+                    </p>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-cyan-400
+                      "
+                    >
+                      {
+                        user.confidence_score || 0
+                      }%
+                    </h3>
+
+                  </div>
+
+
+                  <div
                     className="
-                      text-xl
-                      font-bold
-                      text-green-400
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
                     "
                   >
-                    {
-                      user.avg_communication
-                    }%
-                  </h3>
 
-                </div>
+                    <p
+                      className="
+                        text-gray-400
+                        text-sm
+                        mb-2
+                      "
+                    >
+                      Communication
+                    </p>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-green-400
+                      "
+                    >
+                      {
+                        user.communication_score || 0
+                      }%
+                    </h3>
+
+                  </div>
 
 
-                <div
-                  className="
-                    bg-black/30
-                    rounded-xl
-                    px-5
-                    py-3
-                    flex
-                    items-center
-                    gap-2
-                  "
-                >
-
-                  <Trophy
-                    size={20}
+                  <div
                     className="
-                      text-yellow-400
-                    "
-                  />
-
-                  <span
-                    className="
-                      text-white
-                      font-semibold
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
                     "
                   >
-                    Rank #
-                    {index + 1}
-                  </span>
+
+                    <p
+                      className="
+                        text-gray-400
+                        text-sm
+                        mb-2
+                      "
+                    >
+                      Eye Contact
+                    </p>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-pink-400
+                      "
+                    >
+                      {
+                        user.eye_contact_score || 0
+                      }%
+                    </h3>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      bg-black/20
+                      rounded-2xl
+                      px-5
+                      py-4
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-gray-400
+                        text-sm
+                        mb-2
+                      "
+                    >
+                      WPM
+                    </p>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-bold
+                        text-orange-400
+                      "
+                    >
+                      {
+                        user.words_per_minute || 0
+                      }
+                    </h3>
+
+                  </div>
 
                 </div>
 
@@ -281,17 +424,17 @@ function Leaderboard() {
           ))}
 
 
-          {!users.length && (
+          {!leaders.length && (
 
             <div
               className="
                 text-center
-                text-gray-400
                 py-20
+                text-gray-400
               "
             >
 
-              No leaderboard data yet
+              No leaderboard data available
 
             </div>
           )}
