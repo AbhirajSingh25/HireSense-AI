@@ -4,9 +4,8 @@ import {
 
 import {
   useNavigate,
+  Link,
 } from "react-router-dom";
-
-import toast from "react-hot-toast";
 
 import {
   login,
@@ -18,10 +17,12 @@ function Login() {
   const navigate =
     useNavigate();
 
+
   const [
     email,
     setEmail,
   ] = useState("");
+
 
   const [
     password,
@@ -29,7 +30,28 @@ function Login() {
   ] = useState("");
 
 
-  async function handleLogin() {
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
+
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+
+  async function handleLogin(
+    e: React.FormEvent
+  ) {
+
+    e.preventDefault();
+
+    setLoading(true);
+
+    setError("");
+
 
     try {
 
@@ -40,46 +62,40 @@ function Login() {
         );
 
 
-      console.log(data);
-
-
       if (
-        data?.access_token ||
-
-        data?.token ||
-
         data?.id
       ) {
 
         localStorage.setItem(
+
           "user",
+
           JSON.stringify(data)
         );
 
-        toast.success(
-          "Login successful"
-        );
 
-        navigate("/dashboard");
+        navigate(
+          "/dashboard"
+        );
 
       } else {
 
-        toast.error(
-          data?.detail ||
-
-          data?.message ||
-
-          "Login failed"
+        setError(
+          "Invalid credentials"
         );
       }
 
-    } catch (error) {
+    } catch (err) {
 
-      console.error(error);
-
-      toast.error(
+      setError(
         "Login failed"
       );
+
+      console.error(err);
+
+    } finally {
+
+      setLoading(false);
     }
   }
 
@@ -89,10 +105,10 @@ function Login() {
     <div
       className="
         min-h-screen
-        bg-black
         flex
         items-center
         justify-center
+        bg-[#050816]
         px-6
       "
     >
@@ -100,28 +116,46 @@ function Login() {
       <div
         className="
           w-full
-          max-w-xl
+          max-w-md
           bg-white/5
           border
           border-white/10
           rounded-3xl
-          p-10
+          p-8
+          backdrop-blur-xl
         "
       >
 
         <h1
           className="
-            text-white
-            text-5xl
+            text-4xl
             font-black
-            mb-10
+            text-white
+            mb-3
+            text-center
           "
         >
-          Login
+          Welcome Back
         </h1>
 
 
-        <div className="space-y-6">
+        <p
+          className="
+            text-gray-400
+            text-center
+            mb-8
+          "
+        >
+          Login to HireSense AI
+        </p>
+
+
+        <form
+          onSubmit={handleLogin}
+          className="
+            space-y-5
+          "
+        >
 
           <input
             type="email"
@@ -132,14 +166,16 @@ function Login() {
                 e.target.value
               )
             }
+            required
             className="
               w-full
-              p-5
+              p-4
               rounded-2xl
-              bg-black
+              bg-black/30
               border
               border-white/10
               text-white
+              outline-none
             "
           />
 
@@ -153,38 +189,80 @@ function Login() {
                 e.target.value
               )
             }
+            required
             className="
               w-full
-              p-5
+              p-4
               rounded-2xl
-              bg-black
+              bg-black/30
               border
               border-white/10
               text-white
+              outline-none
             "
           />
 
 
+          {error && (
+
+            <div
+              className="
+                text-red-400
+                text-sm
+              "
+            >
+              {error}
+            </div>
+          )}
+
+
           <button
-            onClick={
-              handleLogin
-            }
+            type="submit"
+            disabled={loading}
             className="
               w-full
               bg-cyan-400
               hover:bg-cyan-300
               text-black
               font-bold
-              py-5
+              py-4
               rounded-2xl
+              transition-all
             "
           >
 
-            Login
+            {loading
 
+              ? "Logging in..."
+
+              : "Login"}
           </button>
 
-        </div>
+        </form>
+
+
+        <p
+          className="
+            text-gray-400
+            text-center
+            mt-6
+          "
+        >
+
+          Don't have an account?
+
+          {" "}
+
+          <Link
+            to="/signup"
+            className="
+              text-cyan-400
+            "
+          >
+            Signup
+          </Link>
+
+        </p>
 
       </div>
 
