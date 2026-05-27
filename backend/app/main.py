@@ -1,84 +1,361 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes.dashboard import router as dashboard_router
-from app.api.routes.analytics import router as analytics_router
-from sqlalchemy.orm import Session
-from fastapi import Depends
-from app.api.routes.leaderboard import router as leaderboard_router
-from app.api.routes.dashboard import router as dashboard_router
-from app.db.database import (
-    Base,
-    engine,
-)
-
-from app.db.dependencies import (
-    get_db,
-)
-
-from app.models.interview_model import (
-    Interview,
-)
-
-from app.api.routes.auth import (
-    router as auth_router,
-)
-
-from app.api.routes.interview import (
-    router as interview_router,
-)
-
-
-Base.metadata.create_all(
-    bind=engine
-)
+from pydantic import BaseModel
+from typing import List
+import random
 
 
 app = FastAPI()
-app.include_router(
-    dashboard_router
-)
 
-app.include_router(
-    dashboard_router
-)
 
-app.include_router(
-    leaderboard_router
-)
+# =========================
+# CORS
+# =========================
 
-app.include_router(
-    analytics_router
-)
 app.add_middleware(
-
     CORSMiddleware,
-
-    allow_origins=[
-        "*"
-    ],
-
+    allow_origins=["*"],
     allow_credentials=True,
-
     allow_methods=["*"],
-
     allow_headers=["*"],
 )
 
 
-app.include_router(
-    auth_router
-)
+# =========================
+# DATABASE MOCK
+# =========================
 
-app.include_router(
-    interview_router
-)
-from pydantic import BaseModel
+users_db = []
+
+interviews_db = []
+
+
+# =========================
+# MODELS
+# =========================
+
+class SignupRequest(BaseModel):
+
+    username: str
+    email: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+
+    email: str
+    password: str
+
+
+class InterviewSaveRequest(BaseModel):
+
+    user_id: int
+    transcript: str
+    confidence_score: int
+    communication_score: int
+    words_per_minute: int
+    eye_contact_score: int
+    attention_status: str
 
 
 class SpeechRequest(BaseModel):
 
     transcript: str
 
+
+class LiveInterviewRequest(BaseModel):
+
+    transcript: str
+    role: str
+
+
+class QuestionRequest(BaseModel):
+
+    role: str
+
+
+class AnswerRequest(BaseModel):
+
+    question: str
+    answer: str
+
+
+# =========================
+# ROOT
+# =========================
+
+@app.get("/")
+async def root():
+
+    return {
+        "message": "HireSense AI Backend Running"
+    }
+
+
+# =========================
+# AUTH
+# =========================
+
+@app.post("/auth/signup")
+async def signup(
+    data: SignupRequest
+):
+
+    new_user = {
+        "id": len(users_db) + 1,
+        "username": data.username,
+        "email": data.email,
+        "password": data.password,
+    }
+
+    users_db.append(new_user)
+
+    return {
+        "id": new_user["id"],
+        "username": new_user["username"],
+        "email": new_user["email"],
+    }
+
+
+@app.post("/auth/login")
+async def login(
+    data: LoginRequest
+):
+
+    for user in users_db:
+
+        if (
+            user["email"] == data.email
+            and
+            user["password"] == data.password
+        ):
+
+            return {
+                "message": "Login successful",
+                "user": {
+                    "id": user["id"],
+                    "username": user["username"],
+                    "email": user["email"],
+                },
+                "token": "fake-jwt-token",
+            }
+
+    return {
+        "message": "Invalid credentials"
+    }
+
+
+# =========================
+# DASHBOARD
+# =========================
+
+@app.get("/dashboard/{user_id}")
+async def get_dashboard_stats(
+    user_id: int
+):
+
+    if interviews_db:
+
+        latest = interviews_db[-1]
+
+        return latest
+
+    return {
+        "confidence_score": 0,
+        "communication_score": 0,
+        "words_per_minute": 0,
+        "eye_contact_score": 0,
+        "attention_status": "No Data",
+        "transcript": "",
+    }
+
+
+# =========================
+# SAVE INTERVIEW
+# =========================
+
+@app.post("/save-interview")
+async def save_interview(
+    data: InterviewSaveRequest
+):
+
+    new_interview = {
+        "id": len(interviews_db) + 1,
+        **data.dict(),
+    }
+
+    interviews_db.append(new_interview)
+
+    return {
+        "message": "Interview saved",
+        "data": new_interview,
+    }
+
+
+# =========================
+# HISTORY
+# =========================
+
+@app.get("/history/{user_id}")
+async def get_history(
+    user_id: int
+):
+
+    return interviews_db
+
+
+# =========================
+# REPORTS
+# =========================
+
+@app.get("/reports/{user_id}")
+async def get_reports(
+    user_id: int
+):
+
+    return interviews_db
+
+
+# =========================
+# LEADERBOARD
+# =========================
+
+@app.get("/leaderboard")
+async def get_leaderboard():
+
+    leaderboard = sorted(
+
+        interviews_db,
+
+        key=lambda x:
+        x["confidence_score"],
+
+        reverse=True,
+    )
+
+    return leaderboard
+
+
+# =========================
+# QUESTION GENERATION
+# =========================
+
+@app.post("/generate-questions")
+async def generate_questions(
+    data: QuestionRequest
+):
+
+    role = data.role
+
+
+    question_bank = {
+
+        "Frontend Developer": [
+
+            "Explain React hooks.",
+
+            "What is Virtual DOM?",
+
+            "Difference between props and state?",
+
+            "Explain useEffect lifecycle.",
+        ],
+
+        "Backend Developer": [
+
+            "Explain REST APIs.",
+
+            "What is JWT authentication?",
+
+            "Difference between SQL and NoSQL?",
+
+            "Explain database indexing.",
+        ],
+
+        "AI Engineer": [
+
+            "Explain machine learning.",
+
+            "Difference between AI and ML?",
+
+            "What is overfitting?",
+
+            "Explain neural networks.",
+        ],
+
+        "Data Analyst": [
+
+            "Explain data cleaning.",
+
+            "What is data visualization?",
+
+            "Difference between mean and median?",
+
+            "Explain SQL joins.",
+        ],
+    }
+
+
+    questions = question_bank.get(
+
+        role,
+
+        [
+            "Tell me about yourself.",
+            "Why should we hire you?",
+        ]
+    )
+
+
+    return {
+        "questions": questions
+    }
+
+
+# =========================
+# ANSWER EVALUATION
+# =========================
+
+@app.post("/evaluate-answer")
+async def evaluate_answer(
+    data: AnswerRequest
+):
+
+    score = random.randint(70, 95)
+
+    return {
+
+        "score": score,
+
+        "feedback":
+            "Good answer with decent technical clarity.",
+    }
+
+
+# =========================
+# FINAL REPORT
+# =========================
+
+@app.post("/final-report")
+async def final_report():
+
+    return {
+
+        "confidence_score": 85,
+
+        "communication_score": 88,
+
+        "words_per_minute": 120,
+
+        "eye_contact_score": 90,
+
+        "attention_status": "Focused",
+    }
+
+
+# =========================
+# SPEECH ANALYSIS
+# =========================
 
 @app.post("/speech-analysis")
 async def speech_analysis(
@@ -167,71 +444,106 @@ async def speech_analysis(
             feedback,
     }
 
-@app.get("/")
-def root():
 
-    return {
-        "message":
-            "HireSense Backend Running"
-    }
+# =========================
+# LIVE INTERVIEW ANALYSIS
+# =========================
 
-
-@app.post("/save-interview")
-def save_interview(
-
-    data: dict,
-
-    db: Session = Depends(get_db)
+@app.post("/live-interview-analysis")
+async def live_interview_analysis(
+    data: LiveInterviewRequest
 ):
 
-    interview = Interview(
+    transcript = data.transcript
 
-        user_id=data.get(
-            "user_id"
-        ),
+    role = data.role
 
-        transcript=data.get(
-            "transcript",
-            ""
-        ),
 
-        confidence_score=data.get(
-            "confidence_score",
-            0
-        ),
+    words = transcript.split()
 
-        communication_score=data.get(
-            "communication_score",
-            0
-        ),
+    total_words = len(words)
 
-        words_per_minute=data.get(
-            "words_per_minute",
-            0
-        ),
 
-        eye_contact_score=data.get(
-            "eye_contact_score",
-            0
-        ),
+    filler_words = [
 
-        attention_status=data.get(
-            "attention_status",
-            "Focused"
-        ),
+        "um",
+        "uh",
+        "like",
+        "basically",
+    ]
+
+
+    filler_count = 0
+
+
+    for filler in filler_words:
+
+        filler_count += (
+            transcript.lower().count(
+                filler
+            )
+        )
+
+
+    confidence_score = max(
+        55,
+        100 - (filler_count * 4)
     )
 
-    db.add(interview)
 
-    db.commit()
+    communication_score = min(
+        95,
+        70 + (
+            total_words // 10
+        )
+    )
 
-    db.refresh(interview)
+
+    attention_status = (
+
+        "Focused"
+
+        if filler_count < 6
+
+        else "Distracted"
+    )
+
+
+    feedback = f"""
+
+Role Evaluated:
+{role}
+
+Communication quality is good.
+Try keeping answers concise and structured.
+Reduce filler words for stronger technical delivery.
+
+"""
+
 
     return {
 
-        "message":
-            "Interview saved",
+        "role":
+            role,
 
-        "id":
-            interview.id,
+        "confidence_score":
+            confidence_score,
+
+        "communication_score":
+            communication_score,
+
+        "attention_status":
+            attention_status,
+
+        "words_per_minute":
+            max(
+                90,
+                min(
+                    160,
+                    total_words // 2
+                )
+            ),
+
+        "feedback":
+            feedback.strip(),
     }
