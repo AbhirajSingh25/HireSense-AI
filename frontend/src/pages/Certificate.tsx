@@ -40,7 +40,14 @@ function Certificate() {
     try {
 
       const data =
-        await getInterviewSessions();
+        const user =
+  JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+await getInterviewSessions(
+  user.id || 1
+);
 
       if (
         data &&
