@@ -6,42 +6,33 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getInterviewSessions,
+  getFinalReport,
 } from "../services/api";
 
 
 function RecruiterDashboard() {
 
   const [
-    candidates,
-    setCandidates,
-  ] = useState<any[]>([]);
+    report,
+    setReport,
+  ] = useState<any>(null);
 
 
   useEffect(() => {
 
-    loadCandidates();
+    loadDashboard();
 
   }, []);
 
 
-  async function loadCandidates() {
+  async function loadDashboard() {
 
     try {
 
-      const user =
-        JSON.parse(
-          localStorage.getItem("user") || "{}"
-        );
-
-
       const data =
-        await getInterviewSessions(
-          user.id || 1
-        );
+        await getFinalReport({});
 
-
-      setCandidates(data);
+      setReport(data);
 
     } catch (error) {
 
@@ -71,65 +62,41 @@ function RecruiterDashboard() {
         <div
           className="
             grid
-            md:grid-cols-2
+            md:grid-cols-3
             gap-6
           "
         >
 
-          {candidates.map((candidate) => (
+          <div
+            className="
+              bg-white/5
+              p-6
+              rounded-2xl
+            "
+          >
 
-            <div
-              key={candidate.id}
+            <h2
               className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-2xl
-                p-6
+                text-gray-400
+                mb-2
               "
             >
+              Confidence
+            </h2>
 
-              <h2
-                className="
-                  text-2xl
-                  font-semibold
-                  text-white
-                  mb-4
-                "
-              >
-                Candidate #{candidate.id}
-              </h2>
+            <p
+              className="
+                text-4xl
+                font-bold
+                text-cyan-400
+              "
+            >
+              {
+                report?.confidence_score || 0
+              }%
+            </p>
 
-
-              <div
-                className="
-                  space-y-2
-                  text-gray-300
-                "
-              >
-
-                <p>
-                  Confidence:
-                  {" "}
-                  {candidate.confidence_score}%
-                </p>
-
-                <p>
-                  Communication:
-                  {" "}
-                  {candidate.communication_score}%
-                </p>
-
-                <p>
-                  WPM:
-                  {" "}
-                  {candidate.words_per_minute}
-                </p>
-
-              </div>
-
-            </div>
-          ))}
+          </div>
 
         </div>
 

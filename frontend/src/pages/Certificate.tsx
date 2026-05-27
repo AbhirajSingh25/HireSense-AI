@@ -6,42 +6,33 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getInterviewSessions,
+  getFinalReport,
 } from "../services/api";
 
 
 function Certificate() {
 
   const [
-    sessions,
-    setSessions,
-  ] = useState<any[]>([]);
+    report,
+    setReport,
+  ] = useState<any>(null);
 
 
   useEffect(() => {
 
-    loadData();
+    loadCertificate();
 
   }, []);
 
 
-  async function loadData() {
+  async function loadCertificate() {
 
     try {
 
-      const user =
-        JSON.parse(
-          localStorage.getItem("user") || "{}"
-        );
-
-
       const data =
-        await getInterviewSessions(
-          user.id || 1
-        );
+        await getFinalReport({});
 
-
-      setSessions(data);
+      setReport(data);
 
     } catch (error) {
 
@@ -64,65 +55,42 @@ function Certificate() {
             mb-8
           "
         >
-          Certificates
+          Certificate
         </h1>
 
 
         <div
           className="
-            grid
-            md:grid-cols-2
-            gap-6
+            bg-linear-to-r
+            from-cyan-500
+            to-blue-500
+            rounded-3xl
+            p-10
+            text-black
           "
         >
 
-          {sessions.map((session) => (
+          <h2
+            className="
+              text-3xl
+              font-black
+              mb-4
+            "
+          >
+            AI Interview Completion
+          </h2>
 
-            <div
-              key={session.id}
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-8
-              "
-            >
-
-              <h2
-                className="
-                  text-2xl
-                  font-bold
-                  text-white
-                  mb-4
-                "
-              >
-                AI Interview Certificate
-              </h2>
-
-              <p
-                className="
-                  text-gray-300
-                  mb-2
-                "
-              >
-                Confidence:
-                {" "}
-                {session.confidence_score}%
-              </p>
-
-              <p
-                className="
-                  text-gray-300
-                "
-              >
-                Communication:
-                {" "}
-                {session.communication_score}%
-              </p>
-
-            </div>
-          ))}
+          <p
+            className="
+              text-xl
+            "
+          >
+            Confidence:
+            {" "}
+            {
+              report?.confidence_score || 0
+            }%
+          </p>
 
         </div>
 

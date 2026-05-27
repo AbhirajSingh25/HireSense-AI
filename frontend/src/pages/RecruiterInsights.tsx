@@ -6,16 +6,16 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getInterviewSessions,
+  getFinalReport,
 } from "../services/api";
 
 
 function RecruiterInsights() {
 
   const [
-    candidates,
-    setCandidates,
-  ] = useState<any[]>([]);
+    report,
+    setReport,
+  ] = useState<any>(null);
 
 
   useEffect(() => {
@@ -29,19 +29,10 @@ function RecruiterInsights() {
 
     try {
 
-      const user =
-        JSON.parse(
-          localStorage.getItem("user") || "{}"
-        );
-
-
       const data =
-        await getInterviewSessions(
-          user.id || 1
-        );
+        await getFinalReport({});
 
-
-      setCandidates(data);
+      setReport(data);
 
     } catch (error) {
 
@@ -70,136 +61,47 @@ function RecruiterInsights() {
 
         <div
           className="
-            space-y-6
+            bg-white/5
+            border
+            border-white/10
+            rounded-2xl
+            p-6
           "
         >
 
-          {candidates.map((candidate) => (
+          <div
+            className="
+              grid
+              md:grid-cols-3
+              gap-5
+            "
+          >
 
-            <div
-              key={candidate.id}
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-2xl
-                p-6
-              "
-            >
+            <div>
+
+              <p
+                className="
+                  text-gray-400
+                "
+              >
+                Communication
+              </p>
 
               <h2
                 className="
-                  text-2xl
-                  font-semibold
-                  text-white
-                  mb-4
+                  text-4xl
+                  font-bold
+                  text-green-400
                 "
               >
-                Candidate #{candidate.id}
+                {
+                  report?.communication_score || 0
+                }%
               </h2>
 
-
-              <div
-                className="
-                  grid
-                  md:grid-cols-3
-                  gap-4
-                "
-              >
-
-                <div
-                  className="
-                    bg-black/20
-                    rounded-xl
-                    p-4
-                  "
-                >
-
-                  <p
-                    className="
-                      text-gray-400
-                      mb-2
-                    "
-                  >
-                    Confidence
-                  </p>
-
-                  <h3
-                    className="
-                      text-3xl
-                      font-bold
-                      text-cyan-400
-                    "
-                  >
-                    {candidate.confidence_score}%
-                  </h3>
-
-                </div>
-
-
-                <div
-                  className="
-                    bg-black/20
-                    rounded-xl
-                    p-4
-                  "
-                >
-
-                  <p
-                    className="
-                      text-gray-400
-                      mb-2
-                    "
-                  >
-                    Communication
-                  </p>
-
-                  <h3
-                    className="
-                      text-3xl
-                      font-bold
-                      text-green-400
-                    "
-                  >
-                    {candidate.communication_score}%
-                  </h3>
-
-                </div>
-
-
-                <div
-                  className="
-                    bg-black/20
-                    rounded-xl
-                    p-4
-                  "
-                >
-
-                  <p
-                    className="
-                      text-gray-400
-                      mb-2
-                    "
-                  >
-                    WPM
-                  </p>
-
-                  <h3
-                    className="
-                      text-3xl
-                      font-bold
-                      text-orange-400
-                    "
-                  >
-                    {candidate.words_per_minute}
-                  </h3>
-
-                </div>
-
-              </div>
-
             </div>
-          ))}
+
+          </div>
 
         </div>
 

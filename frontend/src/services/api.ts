@@ -167,6 +167,20 @@ export async function getHistory(
 }
 
 
+export async function getInterviewSessions(
+  userId: number
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/interviews/${userId}`
+    );
+
+  return response.json();
+}
+
+
 export async function getDashboardStats(
   userId: number
 ) {
@@ -187,18 +201,6 @@ export async function getLeaderboard() {
     await fetch(
 
       `${API_BASE_URL}/leaderboard/`
-    );
-
-  return response.json();
-}
-export async function getInterviewSessions(
-  userId: number
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/interviews/${userId}`
     );
 
   return response.json();

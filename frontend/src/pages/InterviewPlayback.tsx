@@ -6,42 +6,33 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getInterviewSessions,
+  getFinalReport,
 } from "../services/api";
 
 
 function InterviewPlayback() {
 
   const [
-    sessions,
-    setSessions,
-  ] = useState<any[]>([]);
+    report,
+    setReport,
+  ] = useState<any>(null);
 
 
   useEffect(() => {
 
-    loadSessions();
+    loadPlayback();
 
   }, []);
 
 
-  async function loadSessions() {
+  async function loadPlayback() {
 
     try {
 
-      const user =
-        JSON.parse(
-          localStorage.getItem("user") || "{}"
-        );
-
-
       const data =
-        await getInterviewSessions(
-          user.id || 1
-        );
+        await getFinalReport({});
 
-
-      setSessions(data);
+      setReport(data);
 
     } catch (error) {
 
@@ -70,45 +61,25 @@ function InterviewPlayback() {
 
         <div
           className="
-            space-y-6
+            bg-white/5
+            border
+            border-white/10
+            rounded-2xl
+            p-6
           "
         >
 
-          {sessions.map((session) => (
-
-            <div
-              key={session.id}
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-2xl
-                p-6
-              "
-            >
-
-              <h2
-                className="
-                  text-2xl
-                  font-semibold
-                  text-white
-                  mb-3
-                "
-              >
-                Session #{session.id}
-              </h2>
-
-              <p
-                className="
-                  text-gray-300
-                  leading-7
-                "
-              >
-                {session.transcript}
-              </p>
-
-            </div>
-          ))}
+          <p
+            className="
+              text-gray-300
+              leading-8
+            "
+          >
+            {
+              report?.transcript ||
+              "No transcript"
+            }
+          </p>
 
         </div>
 

@@ -6,42 +6,33 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getInterviewSessions,
+  getFinalReport,
 } from "../services/api";
 
 
 function AdminPanel() {
 
   const [
-    sessions,
-    setSessions,
-  ] = useState<any[]>([]);
+    report,
+    setReport,
+  ] = useState<any>(null);
 
 
   useEffect(() => {
 
-    loadData();
+    loadReport();
 
   }, []);
 
 
-  async function loadData() {
+  async function loadReport() {
 
     try {
 
-      const user =
-        JSON.parse(
-          localStorage.getItem("user") || "{}"
-        );
-
-
       const data =
-        await getInterviewSessions(
-          user.id || 1
-        );
+        await getFinalReport({});
 
-
-      setSessions(data);
+      setReport(data);
 
     } catch (error) {
 
@@ -70,47 +61,28 @@ function AdminPanel() {
 
         <div
           className="
-            grid
-            gap-5
+            bg-white/5
+            border
+            border-white/10
+            rounded-2xl
+            p-6
           "
         >
 
-          {sessions.map((session) => (
+          <pre
+            className="
+              text-white
+              whitespace-pre-wrap
+            "
+          >
 
-            <div
-              key={session.id}
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-2xl
-                p-5
-              "
-            >
+            {JSON.stringify(
+              report,
+              null,
+              2
+            )}
 
-              <h2
-                className="
-                  text-2xl
-                  text-white
-                  font-semibold
-                  mb-2
-                "
-              >
-                Interview #{session.id}
-              </h2>
-
-              <p
-                className="
-                  text-gray-400
-                "
-              >
-                Confidence:
-                {" "}
-                {session.confidence_score}%
-              </p>
-
-            </div>
-          ))}
+          </pre>
 
         </div>
 
