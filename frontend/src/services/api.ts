@@ -284,7 +284,8 @@ export async function analyzeLiveInterview(
 export async function generateFollowupQuestion(
 
   question: string,
-  answer: string
+  answer: string,
+  history: any[]
 
 ) {
 
@@ -305,6 +306,7 @@ export async function generateFollowupQuestion(
 
           question,
           answer,
+          history,
         }),
       }
     );

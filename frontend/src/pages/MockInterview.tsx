@@ -208,10 +208,12 @@ function MockInterview() {
       const followup =
         await generateFollowupQuestion(
 
-          currentQuestion,
+  currentQuestion,
 
-          answer
-        );
+  answer,
+
+  chatMessages
+);
 
 
       if (

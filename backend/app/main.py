@@ -89,6 +89,12 @@ class QuestionRequest(BaseModel):
 class AnswerRequest(BaseModel):
 
     question: str
+
+    answer: str
+
+    history: list = []
+
+    question: str
     answer: str
 
 
@@ -318,24 +324,38 @@ async def generate_followup(
     data: AnswerRequest
 ):
 
+    history_text = "\n".join(
+
+        [
+            f"{msg['role']}: {msg['content']}"
+
+            for msg in data.history
+        ]
+    )
+
+
     prompt = f"""
 
-You are an AI interviewer.
+You are an advanced AI interviewer.
 
-Previous Question:
+Interview Conversation So Far:
+{history_text}
+
+Current Question:
 {data.question}
 
 Candidate Answer:
 {data.answer}
 
-Generate ONE intelligent follow-up interview question.
+Generate ONE smart follow-up question.
 
 Rules:
-- professional
-- concise
-- relevant to answer
+- avoid repeating topics
+- adapt to candidate level
 - conversational
-- technical if needed
+- technical where relevant
+- concise
+- realistic interviewer tone
 
 Return only the question.
 
