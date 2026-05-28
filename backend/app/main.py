@@ -134,51 +134,50 @@ async def login(
     data: LoginRequest
 ):
 
+    print(users_db)
+
     for user in users_db:
 
         if (
-            user["email"] == data.email
+            user["email"].strip().lower()
+
+            ==
+
+            data.email.strip().lower()
+
             and
-            user["password"] == data.password
+
+            user["password"].strip()
+
+            ==
+
+            data.password.strip()
         ):
 
             return {
-                "message": "Login successful",
+
+                "message":
+                    "Login successful",
+
                 "user": {
-                    "id": user["id"],
-                    "username": user["username"],
-                    "email": user["email"],
+
+                    "id":
+                        user["id"],
+
+                    "username":
+                        user["username"],
+
+                    "email":
+                        user["email"],
                 },
-                "token": "fake-jwt-token",
+
+                "token":
+                    "fake-jwt-token",
             }
 
     return {
-        "message": "Invalid credentials"
-    }
-
-
-# =========================
-# DASHBOARD
-# =========================
-
-@app.get("/dashboard/{user_id}")
-async def get_dashboard_stats(
-    user_id: int
-):
-
-    if interviews_db:
-
-        latest = interviews_db[-1]
-
-        return latest
-
-    return {
-        "confidence_score": 0,
-        "communication_score": 0,
-        "words_per_minute": 0,
-        "eye_contact_score": 0,
-        "attention_status": "No Data",
-        "transcript": "",
+        "message":
+            "Invalid credentials"
     }
 
 

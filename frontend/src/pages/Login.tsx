@@ -17,24 +17,15 @@ function Login() {
   const navigate =
     useNavigate();
 
-
   const [
     email,
     setEmail,
   ] = useState("");
 
-
   const [
     password,
     setPassword,
   ] = useState("");
-
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
-
 
   const [
     error,
@@ -43,15 +34,12 @@ function Login() {
 
 
   async function handleLogin(
-    e: React.FormEvent
+    e: any
   ) {
 
     e.preventDefault();
 
-    setLoading(true);
-
     setError("");
-
 
     try {
 
@@ -61,22 +49,28 @@ function Login() {
           password
         );
 
+      console.log(data);
 
       if (
-        data?.id
+        data.message ===
+        "Login successful"
       ) {
 
         localStorage.setItem(
 
           "user",
 
-          JSON.stringify(data)
+          JSON.stringify(
+            data.user
+          )
         );
 
-
-        navigate(
-          "/dashboard"
+        localStorage.setItem(
+          "token",
+          data.token
         );
+
+        navigate("/dashboard");
 
       } else {
 
@@ -85,17 +79,13 @@ function Login() {
         );
       }
 
-    } catch (err) {
+    } catch (error) {
+
+      console.error(error);
 
       setError(
         "Login failed"
       );
-
-      console.error(err);
-
-    } finally {
-
-      setLoading(false);
     }
   }
 
@@ -105,158 +95,144 @@ function Login() {
     <div
       className="
         min-h-screen
+        bg-[#020817]
         flex
         items-center
         justify-center
-        bg-[#050816]
-        px-6
+        px-4
       "
     >
 
-      <div
+      <form
+        onSubmit={
+          handleLogin
+        }
         className="
-          w-full
-          max-w-md
-          bg-white/5
+          bg-[#0f172a]
           border
           border-white/10
           rounded-3xl
-          p-8
-          backdrop-blur-xl
+          p-10
+          w-full
+          max-w-md
         "
       >
 
         <h1
           className="
-            text-4xl
+            text-5xl
             font-black
             text-white
-            mb-3
             text-center
+            mb-3
           "
         >
           Welcome Back
         </h1>
 
-
         <p
           className="
             text-gray-400
             text-center
-            mb-8
+            mb-10
           "
         >
           Login to HireSense AI
         </p>
 
 
-        <form
-          onSubmit={handleLogin}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) =>
+            setEmail(
+              e.target.value
+            )
+          }
           className="
-            space-y-5
+            w-full
+            p-5
+            rounded-2xl
+            bg-gray-200
+            mb-5
+            outline-none
+          "
+          required
+        />
+
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) =>
+            setPassword(
+              e.target.value
+            )
+          }
+          className="
+            w-full
+            p-5
+            rounded-2xl
+            bg-[#020817]
+            border
+            border-white/10
+            text-white
+            mb-5
+            outline-none
+          "
+          required
+        />
+
+
+        {error && (
+
+          <p
+            className="
+              text-red-400
+              mb-5
+            "
+          >
+            {error}
+          </p>
+        )}
+
+
+        <button
+          type="submit"
+          className="
+            w-full
+            bg-cyan-400
+            hover:bg-cyan-300
+            text-black
+            font-bold
+            py-5
+            rounded-2xl
+            transition
           "
         >
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) =>
-              setEmail(
-                e.target.value
-              )
-            }
-            required
-            className="
-              w-full
-              p-4
-              rounded-2xl
-              bg-black/30
-              border
-              border-white/10
-              text-white
-              outline-none
-            "
-          />
+          Login
 
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) =>
-              setPassword(
-                e.target.value
-              )
-            }
-            required
-            className="
-              w-full
-              p-4
-              rounded-2xl
-              bg-black/30
-              border
-              border-white/10
-              text-white
-              outline-none
-            "
-          />
-
-
-          {error && (
-
-            <div
-              className="
-                text-red-400
-                text-sm
-              "
-            >
-              {error}
-            </div>
-          )}
-
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="
-              w-full
-              bg-cyan-400
-              hover:bg-cyan-300
-              text-black
-              font-bold
-              py-4
-              rounded-2xl
-              transition-all
-            "
-          >
-
-            {loading
-
-              ? "Logging in..."
-
-              : "Login"}
-          </button>
-
-        </form>
+        </button>
 
 
         <p
           className="
-            text-gray-400
             text-center
-            mt-6
+            text-gray-400
+            mt-8
           "
         >
 
-          Don't have an account?
-
-          {" "}
+          Don't have an account?{" "}
 
           <Link
             to="/signup"
             className="
               text-cyan-400
+              font-semibold
             "
           >
             Signup
@@ -264,7 +240,7 @@ function Login() {
 
         </p>
 
-      </div>
+      </form>
 
     </div>
   );
