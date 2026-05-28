@@ -39,6 +39,11 @@ function MockInterview() {
   ] = useState<string[]>([]);
 
   const [
+    chatMessages,
+    setChatMessages,
+  ] = useState<any[]>([]);
+
+  const [
     currentIndex,
     setCurrentIndex,
   ] = useState(0);
@@ -120,17 +125,33 @@ function MockInterview() {
         );
 
 
-      if (
+      const generatedQuestions =
+
         Array.isArray(data)
+
+          ? data
+
+          : data.questions || [];
+
+
+      setQuestions(
+        generatedQuestions
+      );
+
+
+      if (
+        generatedQuestions.length
       ) {
 
-        setQuestions(data);
+        setChatMessages([
 
-      } else {
+          {
+            role: "ai",
 
-        setQuestions(
-          data.questions || []
-        );
+            content:
+              generatedQuestions[0],
+          }
+        ]);
       }
 
     } catch (error) {
@@ -156,6 +177,17 @@ function MockInterview() {
 
       const currentQuestion =
         questions[currentIndex];
+
+
+      setChatMessages((prev) => [
+
+        ...prev,
+
+        {
+          role: "user",
+          content: answer,
+        }
+      ]);
 
 
       const evaluation =
@@ -191,6 +223,19 @@ function MockInterview() {
           ...prev,
 
           followup.question
+        ]);
+
+
+        setChatMessages((prev) => [
+
+          ...prev,
+
+          {
+            role: "ai",
+
+            content:
+              followup.question,
+          }
         ]);
       }
 
@@ -330,7 +375,7 @@ function MockInterview() {
                 text-gray-400
               "
             >
-              Practice realistic AI-generated interviews
+              Conversational AI-powered interview experience
             </p>
 
           </div>
@@ -434,7 +479,7 @@ function MockInterview() {
                     text-gray-400
                   "
                 >
-                  Select role and begin AI interview
+                  Generate a realistic AI interview session
                 </p>
 
               </div>
@@ -602,21 +647,67 @@ function MockInterview() {
               </div>
 
 
-              <h2
+              <div
                 className="
-                  text-2xl
-                  font-semibold
-                  text-white
-                  leading-10
+                  space-y-5
                   mb-8
+                  max-h-125
+                  overflow-y-auto
                 "
               >
 
-                {
-                  questions[currentIndex]
-                }
+                {chatMessages.map((
+                  msg,
+                  index
+                ) => (
 
-              </h2>
+                  <div
+                    key={index}
+                    className={`
+                      flex
+
+                      ${
+                        msg.role === "user"
+
+                          ? "justify-end"
+
+                          : "justify-start"
+                      }
+                    `}
+                  >
+
+                    <div
+                      className={`
+                        max-w-[80%]
+                        px-5
+                        py-4
+                        rounded-3xl
+                        leading-8
+
+                        ${
+                          msg.role === "user"
+
+                            ? `
+                              bg-cyan-400
+                              text-black
+                            `
+
+                            : `
+                              bg-white/10
+                              text-white
+                            `
+                        }
+                      `}
+                    >
+
+                      {msg.content}
+
+                    </div>
+
+                  </div>
+                ))}
+
+              </div>
 
 
               <textarea
@@ -626,7 +717,7 @@ function MockInterview() {
                     e.target.value
                   )
                 }
-                rows={8}
+                rows={6}
                 placeholder="Type your answer..."
                 className="
                   w-full
