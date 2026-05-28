@@ -1,16 +1,44 @@
 import os
+import re
 
 from groq import Groq
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List
-import random
 
+from fastapi import FastAPI
+
+from fastapi.middleware.cors import CORSMiddleware
+
+from pydantic import BaseModel
+
+from sqlalchemy.orm import Session
+
+from .database import (
+    SessionLocal,
+    engine,
+    Base
+)
+
+from .models import (
+    User,
+    Interview
+)
+
+
+# =========================
+# APP
+# =========================
 
 app = FastAPI()
+
+Base.metadata.create_all(
+    bind=engine
+)
+
+
+# =========================
+# ENV
+# =========================
 
 load_dotenv()
 
@@ -20,30 +48,44 @@ groq_client = Groq(
         "GROQ_API_KEY"
     )
 )
+
+
 # =========================
 # CORS
 # =========================
 
 app.add_middleware(
     CORSMiddleware,
+
     allow_origins=["*"],
+
     allow_credentials=True,
+
     allow_methods=["*"],
+
     allow_headers=["*"],
 )
 
 
 # =========================
-# DATABASE MOCK
+# DATABASE SESSION
 # =========================
 
-users_db = []
+def get_db():
 
-interviews_db = []
+    db = SessionLocal()
+
+    try:
+
+        yield db
+
+    finally:
+
+        db.close()
 
 
 # =========================
-# MODELS
+# REQUEST MODELS
 # =========================
 
 class SignupRequest(BaseModel):
@@ -62,11 +104,17 @@ class LoginRequest(BaseModel):
 class InterviewSaveRequest(BaseModel):
 
     user_id: int
+
     transcript: str
+
     confidence_score: int
+
     communication_score: int
+
     words_per_minute: int
+
     eye_contact_score: int
+
     attention_status: str
 
 
@@ -78,6 +126,7 @@ class SpeechRequest(BaseModel):
 class LiveInterviewRequest(BaseModel):
 
     transcript: str
+
     role: str
 
 
@@ -94,9 +143,6 @@ class AnswerRequest(BaseModel):
 
     history: list = []
 
-    question: str
-    answer: str
-
 
 # =========================
 # ROOT
@@ -106,7 +152,9 @@ class AnswerRequest(BaseModel):
 async def root():
 
     return {
-        "message": "HireSense AI Backend Running"
+
+        "message":
+            "HireSense AI Backend Running"
     }
 
 
@@ -119,19 +167,56 @@ async def signup(
     data: SignupRequest
 ):
 
-    new_user = {
-        "id": len(users_db) + 1,
-        "username": data.username,
-        "email": data.email,
-        "password": data.password,
-    }
+    db = SessionLocal()
 
-    users_db.append(new_user)
+
+    existing_user = (
+
+        db.query(User)
+
+        .filter(
+            User.email == data.email
+        )
+
+        .first()
+    )
+
+
+    if existing_user:
+
+        return {
+            "message":
+                "User already exists"
+        }
+
+
+    new_user = User(
+
+        username=data.username,
+
+        email=data.email,
+
+        password=data.password
+    )
+
+
+    db.add(new_user)
+
+    db.commit()
+
+    db.refresh(new_user)
+
 
     return {
-        "id": new_user["id"],
-        "username": new_user["username"],
-        "email": new_user["email"],
+
+        "id":
+            new_user.id,
+
+        "username":
+            new_user.username,
+
+        "email":
+            new_user.email,
     }
 
 
@@ -140,50 +225,124 @@ async def login(
     data: LoginRequest
 ):
 
-    print(users_db)
+    db = SessionLocal()
 
-    for user in users_db:
 
-        if (
-            user["email"].strip().lower()
+    user = (
 
-            ==
+        db.query(User)
 
-            data.email.strip().lower()
+        .filter(
+            User.email == data.email
+        )
 
-            and
+        .first()
+    )
 
-            user["password"].strip()
 
-            ==
+    if (
 
-            data.password.strip()
-        ):
+        not user
 
-            return {
+        or
 
-                "message":
-                    "Login successful",
+        user.password != data.password
+    ):
 
-                "user": {
+        return {
+            "message":
+                "Invalid credentials"
+        }
 
-                    "id":
-                        user["id"],
-
-                    "username":
-                        user["username"],
-
-                    "email":
-                        user["email"],
-                },
-
-                "token":
-                    "fake-jwt-token",
-            }
 
     return {
+
         "message":
-            "Invalid credentials"
+            "Login successful",
+
+        "user": {
+
+            "id":
+                user.id,
+
+            "username":
+                user.username,
+
+            "email":
+                user.email,
+        },
+
+        "token":
+            "fake-jwt-token",
+    }
+
+
+# =========================
+# DASHBOARD
+# =========================
+
+@app.get("/dashboard/{user_id}")
+async def get_dashboard(
+    user_id: int
+):
+
+    db = SessionLocal()
+
+
+    latest = (
+
+        db.query(Interview)
+
+        .filter(
+            Interview.user_id == user_id
+        )
+
+        .order_by(
+            Interview.id.desc()
+        )
+
+        .first()
+    )
+
+
+    if not latest:
+
+        return {
+
+            "confidence_score": 0,
+
+            "communication_score": 0,
+
+            "words_per_minute": 0,
+
+            "eye_contact_score": 0,
+
+            "attention_status":
+                "No Data",
+
+            "transcript": "",
+        }
+
+
+    return {
+
+        "confidence_score":
+            latest.confidence_score,
+
+        "communication_score":
+            latest.communication_score,
+
+        "words_per_minute":
+            latest.words_per_minute,
+
+        "eye_contact_score":
+            latest.eye_contact_score,
+
+        "attention_status":
+            latest.attention_status,
+
+        "transcript":
+            latest.transcript,
     }
 
 
@@ -196,16 +355,42 @@ async def save_interview(
     data: InterviewSaveRequest
 ):
 
-    new_interview = {
-        "id": len(interviews_db) + 1,
-        **data.dict(),
-    }
+    db = SessionLocal()
 
-    interviews_db.append(new_interview)
+
+    interview = Interview(
+
+        user_id=data.user_id,
+
+        transcript=data.transcript,
+
+        confidence_score=
+            data.confidence_score,
+
+        communication_score=
+            data.communication_score,
+
+        words_per_minute=
+            data.words_per_minute,
+
+        eye_contact_score=
+            data.eye_contact_score,
+
+        attention_status=
+            data.attention_status,
+    )
+
+
+    db.add(interview)
+
+    db.commit()
+
+    db.refresh(interview)
+
 
     return {
-        "message": "Interview saved",
-        "data": new_interview,
+        "message":
+            "Interview saved"
     }
 
 
@@ -218,19 +403,22 @@ async def get_history(
     user_id: int
 ):
 
-    return interviews_db
+    db = SessionLocal()
 
 
-# =========================
-# REPORTS
-# =========================
+    interviews = (
 
-@app.get("/reports/{user_id}")
-async def get_reports(
-    user_id: int
-):
+        db.query(Interview)
 
-    return interviews_db
+        .filter(
+            Interview.user_id == user_id
+        )
+
+        .all()
+    )
+
+
+    return interviews
 
 
 # =========================
@@ -240,17 +428,22 @@ async def get_reports(
 @app.get("/leaderboard")
 async def get_leaderboard():
 
-    leaderboard = sorted(
+    db = SessionLocal()
 
-        interviews_db,
 
-        key=lambda x:
-        x["confidence_score"],
+    interviews = (
 
-        reverse=True,
+        db.query(Interview)
+
+        .order_by(
+            Interview.confidence_score.desc()
+        )
+
+        .all()
     )
 
-    return leaderboard
+
+    return interviews
 
 
 # =========================
@@ -274,7 +467,7 @@ Rules:
 - concise
 - professional
 - technical
-- mix beginner and intermediate
+- beginner to intermediate
 - return plain list only
 
 """
@@ -319,6 +512,10 @@ Rules:
     }
 
 
+# =========================
+# FOLLOWUP QUESTIONS
+# =========================
+
 @app.post("/generate-followup")
 async def generate_followup(
     data: AnswerRequest
@@ -338,7 +535,7 @@ async def generate_followup(
 
 You are an advanced AI interviewer.
 
-Interview Conversation So Far:
+Interview Conversation:
 {history_text}
 
 Current Question:
@@ -350,12 +547,11 @@ Candidate Answer:
 Generate ONE smart follow-up question.
 
 Rules:
-- avoid repeating topics
-- adapt to candidate level
 - conversational
-- technical where relevant
 - concise
-- realistic interviewer tone
+- technical
+- adaptive
+- non repetitive
 
 Return only the question.
 
@@ -391,6 +587,7 @@ Return only the question.
         "question": followup
     }
 
+
 # =========================
 # ANSWER EVALUATION
 # =========================
@@ -410,15 +607,15 @@ Question:
 Candidate Answer:
 {data.answer}
 
-Evaluate the answer professionally.
+Evaluate professionally.
 
 Return:
 1. Score out of 100
-2. Short feedback
+2. Feedback
 3. Strengths
 4. Improvements
 
-Keep response concise.
+Keep concise.
 
 """
 
@@ -446,8 +643,6 @@ Keep response concise.
         .message.content
     )
 
-
-    import re
 
     score_match = re.search(
         r'(\d{1,3})',
@@ -490,7 +685,8 @@ async def final_report():
 
         "eye_contact_score": 90,
 
-        "attention_status": "Focused",
+        "attention_status":
+            "Focused",
     }
 
 
@@ -504,7 +700,6 @@ async def speech_analysis(
 ):
 
     transcript = data.transcript
-
 
     words = transcript.split()
 
@@ -527,9 +722,10 @@ async def speech_analysis(
     for filler in filler_words:
 
         filler_count += (
-            transcript.lower().count(
-                filler
-            )
+
+            transcript
+            .lower()
+            .count(filler)
         )
 
 
@@ -548,25 +744,6 @@ async def speech_analysis(
     )
 
 
-    if filler_count <= 3:
-
-        feedback = (
-            "Excellent speaking clarity with strong communication confidence."
-        )
-
-    elif filler_count <= 7:
-
-        feedback = (
-            "Good communication skills but reduce filler words for more polished answers."
-        )
-
-    else:
-
-        feedback = (
-            "Practice reducing filler words and improve pacing during technical explanations."
-        )
-
-
     return {
 
         "total_words":
@@ -582,7 +759,7 @@ async def speech_analysis(
             confidence_score,
 
         "feedback":
-            feedback,
+            "Speech analyzed successfully",
     }
 
 
@@ -596,9 +773,6 @@ async def live_interview_analysis(
 ):
 
     transcript = data.transcript
-
-    role = data.role
-
 
     words = transcript.split()
 
@@ -620,9 +794,10 @@ async def live_interview_analysis(
     for filler in filler_words:
 
         filler_count += (
-            transcript.lower().count(
-                filler
-            )
+
+            transcript
+            .lower()
+            .count(filler)
         )
 
 
@@ -640,32 +815,10 @@ async def live_interview_analysis(
     )
 
 
-    attention_status = (
-
-        "Focused"
-
-        if filler_count < 6
-
-        else "Distracted"
-    )
-
-
-    feedback = f"""
-
-Role Evaluated:
-{role}
-
-Communication quality is good.
-Try keeping answers concise and structured.
-Reduce filler words for stronger technical delivery.
-
-"""
-
-
     return {
 
         "role":
-            role,
+            data.role,
 
         "confidence_score":
             confidence_score,
@@ -674,7 +827,7 @@ Reduce filler words for stronger technical delivery.
             communication_score,
 
         "attention_status":
-            attention_status,
+            "Focused",
 
         "words_per_minute":
             max(
@@ -686,5 +839,5 @@ Reduce filler words for stronger technical delivery.
             ),
 
         "feedback":
-            feedback.strip(),
+            "Communication quality is good.",
     }
