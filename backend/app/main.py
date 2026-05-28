@@ -323,14 +323,76 @@ async def evaluate_answer(
     data: AnswerRequest
 ):
 
-    score = random.randint(70, 95)
+    prompt = f"""
+
+You are an AI interview evaluator.
+
+Question:
+{data.question}
+
+Candidate Answer:
+{data.answer}
+
+Evaluate the answer professionally.
+
+Return:
+1. Score out of 100
+2. Short feedback
+3. Strengths
+4. Improvements
+
+Keep response concise.
+
+"""
+
+
+    completion = groq_client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+
+        temperature=0.5,
+    )
+
+
+    feedback = (
+
+        completion
+        .choices[0]
+        .message.content
+    )
+
+
+    import re
+
+    score_match = re.search(
+        r'(\d{1,3})',
+        feedback
+    )
+
+
+    score = (
+
+        int(score_match.group(1))
+
+        if score_match
+
+        else 80
+    )
+
 
     return {
 
         "score": score,
 
-        "feedback":
-            "Good answer with decent technical clarity.",
+        "feedback": feedback,
     }
 
 
