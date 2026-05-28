@@ -1,500 +1,598 @@
 import {
-  useEffect,
-  useRef,
   useState,
+  useRef,
 } from "react";
 
 import MainLayout from "../components/MainLayout";
 
-const transcriptSamples = [
-  "Hello, thank you for giving me this opportunity.",
-  "I recently completed my B.Tech in Computer Science.",
-  "I enjoy building AI-powered applications.",
-  "My strengths include problem solving and adaptability.",
-  "I have experience with FastAPI, React and AI systems.",
-];
+import {
+  analyzeLiveInterview,
+} from "../services/api";
+
+import {
+
+  Mic,
+  Brain,
+  Square,
+
+} from "lucide-react";
+
+
+declare global {
+
+  interface Window {
+
+    webkitSpeechRecognition: any;
+  }
+}
+
 
 function LiveInterview() {
 
-  const videoRef =
-    useRef<HTMLVideoElement | null>(null);
+  const [
+    transcript,
+    setTranscript,
+  ] = useState("");
 
-  const intervalRef =
-    useRef<number | null>(null);
+  const [
+    role,
+    setRole,
+  ] = useState("");
 
-  const timerRef =
-    useRef<number | null>(null);
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  const [cameraOn, setCameraOn] =
-    useState(false);
+  const [
+    listening,
+    setListening,
+  ] = useState(false);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [
+    result,
+    setResult,
+  ] = useState<any>(null);
 
-  const [transcript, setTranscript] =
-    useState("");
 
-  const [seconds, setSeconds] =
-    useState(0);
+  const recognitionRef =
+    useRef<any>(null);
 
-  const [confidenceScore, setConfidenceScore] =
-    useState(82);
 
-  const [eyeContactScore, setEyeContactScore] =
-    useState(88);
+  function startListening() {
 
-  const [communicationScore, setCommunicationScore] =
-    useState(79);
+    const SpeechRecognition =
+  (window as any)
+    .SpeechRecognition ||
 
-  const [sessionStatus, setSessionStatus] =
-    useState("Waiting");
+  window.webkitSpeechRecognition;
 
-  const formatTime = (
-    totalSeconds: number
-  ) => {
 
-    const mins =
-      Math.floor(totalSeconds / 60);
+    if (!SpeechRecognition) {
 
-    const secs =
-      totalSeconds % 60;
+      alert(
+        "Speech recognition not supported in this browser"
+      );
 
-    return `${String(mins).padStart(
-      2,
-      "0"
-    )}:${String(secs).padStart(
-      2,
-      "0"
-    )}`;
-  };
+      return;
+    }
 
-  const startTranscriptSimulation = () => {
 
-    let index = 0;
+    const recognition =
+      new SpeechRecognition();
 
-    intervalRef.current =
-      window.setInterval(() => {
+    recognition.lang = "en-US";
 
-        if (
-          index <
-          transcriptSamples.length
-        ) {
+    recognition.continuous = true;
 
-          setTranscript((prev) =>
-            prev +
-            " " +
-            transcriptSamples[index]
-          );
+    recognition.interimResults = true;
 
-          setConfidenceScore(
-            Math.floor(
-              75 + Math.random() * 20
-            )
-          );
 
-          setEyeContactScore(
-            Math.floor(
-              70 + Math.random() * 25
-            )
-          );
+    recognition.onstart = () => {
 
-          setCommunicationScore(
-            Math.floor(
-              72 + Math.random() * 20
-            )
-          );
+      setListening(true);
+    };
 
-          index++;
 
-        } else {
+    recognition.onend = () => {
 
-          if (intervalRef.current) {
+      setListening(false);
+    };
 
-            clearInterval(
-              intervalRef.current
-            );
-          }
 
-          setSessionStatus(
-            "Interview Completed"
-          );
-        }
+    recognition.onresult = (
+      event: any
+    ) => {
 
-      }, 3000);
-  };
+      let finalTranscript = "";
 
-  const startTimer = () => {
+      for (
+        let i = 0;
+        i < event.results.length;
+        i++
+      ) {
 
-    timerRef.current =
-      window.setInterval(() => {
+        finalTranscript +=
+          event.results[i][0]
+            .transcript + " ";
+      }
 
-        setSeconds(
-          (prev) => prev + 1
-        );
+      setTranscript(
+        finalTranscript
+      );
+    };
 
-      }, 1000);
-  };
 
-  const startCamera = async () => {
+    recognition.start();
+
+    recognitionRef.current =
+      recognition;
+  }
+
+
+  function stopListening() {
+
+    if (
+      recognitionRef.current
+    ) {
+
+      recognitionRef.current.stop();
+    }
+
+    setListening(false);
+  }
+
+
+  async function handleAnalyze() {
 
     try {
 
       setLoading(true);
 
-      setSessionStatus(
-        "Initializing AI"
-      );
+      const data =
+        await analyzeLiveInterview(
 
-      const stream =
-        await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true,
-        });
+          transcript,
+          role
+        );
 
-      if (videoRef.current) {
-
-        videoRef.current.srcObject =
-          stream;
-      }
-
-      setCameraOn(true);
-
-      setSessionStatus(
-        "AI Interview Active"
-      );
-
-      startTranscriptSimulation();
-
-      startTimer();
+      setResult(data);
 
     } catch (error) {
 
       console.error(error);
 
-      alert(
-        "Unable to access webcam."
-      );
-
-      setSessionStatus(
-        "Failed"
-      );
-
     } finally {
 
       setLoading(false);
     }
-  };
+  }
 
-  const stopCamera = () => {
-
-    const stream =
-      videoRef.current?.srcObject as MediaStream;
-
-    if (stream) {
-
-      stream
-        .getTracks()
-        .forEach((track) =>
-          track.stop()
-        );
-    }
-
-    if (intervalRef.current) {
-
-      clearInterval(
-        intervalRef.current
-      );
-    }
-
-    if (timerRef.current) {
-
-      clearInterval(
-        timerRef.current
-      );
-    }
-
-    setCameraOn(false);
-
-    setSessionStatus(
-      "Interview Ended"
-    );
-  };
-
-  useEffect(() => {
-
-    return () => {
-
-      stopCamera();
-    };
-
-  }, []);
 
   return (
+
     <MainLayout>
 
-      <div className="min-h-screen bg-[#050816] text-white px-8 py-10">
+      <div
+        className="
+          max-w-6xl
+          mx-auto
+        "
+      >
 
-        <div className="flex items-center justify-between">
+        <div
+          className="
+            mb-10
+          "
+        >
 
-          <div>
+          <h1
+            className="
+              text-4xl
+              font-black
+              text-white
+              mb-3
+            "
+          >
+            Live AI Interview
+          </h1>
 
-            <h1 className="text-5xl font-bold text-cyan-400">
-              Live AI Interview
-            </h1>
-
-            <p className="text-gray-400 mt-3">
-              Real-time multimodal AI interview session
-            </p>
-
-          </div>
-
-          <div className="flex items-center gap-5">
-
-            <div className="px-6 py-3 rounded-2xl bg-white/5 border border-cyan-500/20">
-
-              <p className="text-sm text-gray-400">
-                Session Timer
-              </p>
-
-              <p className="text-2xl font-bold text-cyan-400 mt-1">
-                {formatTime(seconds)}
-              </p>
-
-            </div>
-
-            <div className="px-6 py-3 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3">
-
-              <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
-
-              <span className="text-red-400 font-bold">
-                REC
-              </span>
-
-            </div>
-
-          </div>
+          <p
+            className="
+              text-gray-400
+            "
+          >
+            Real-time microphone interview analysis
+          </p>
 
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mt-12">
 
-          <div className="lg:col-span-2 space-y-8">
+        <div
+          className="
+            bg-white/5
+            border
+            border-white/10
+            rounded-3xl
+            p-8
+            mb-8
+          "
+        >
 
-            <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden h-125 relative flex items-center justify-center">
+          <select
+            value={role}
+            onChange={(e) =>
+              setRole(
+                e.target.value
+              )
+            }
+            className="
+              w-full
+              p-4
+              rounded-2xl
+              bg-[#111827]
+              border
+              border-white/10
+              text-white
+              mb-6
+            "
+          >
 
-              {!cameraOn && (
+            <option value="">
+              Select role
+            </option>
 
-                <div className="text-center">
+            <option>
+              Frontend Developer
+            </option>
 
-                  <p className="text-2xl text-gray-400">
-                    Camera Offline
-                  </p>
+            <option>
+              Backend Developer
+            </option>
 
-                  <p className="mt-3 text-gray-500">
-                    Start AI interview session
-                  </p>
+            <option>
+              AI Engineer
+            </option>
 
-                </div>
+            <option>
+              Data Analyst
+            </option>
 
-              )}
+          </select>
 
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                className={`w-full h-full object-cover ${
-                  cameraOn
-                    ? "block"
-                    : "hidden"
-                }`}
-              />
+
+          <div
+            className="
+              flex
+              flex-wrap
+              gap-4
+              mb-6
+            "
+          >
+
+            {!listening ? (
+
+              <button
+                onClick={
+                  startListening
+                }
+                className="
+                  bg-cyan-400
+                  hover:bg-cyan-300
+                  text-black
+                  font-bold
+                  px-6
+                  py-4
+                  rounded-2xl
+                  flex
+                  items-center
+                  gap-3
+                "
+              >
+
+                <Mic size={20} />
+
+                Start Mic
+
+              </button>
+
+            ) : (
+
+              <button
+                onClick={
+                  stopListening
+                }
+                className="
+                  bg-red-400
+                  hover:bg-red-300
+                  text-black
+                  font-bold
+                  px-6
+                  py-4
+                  rounded-2xl
+                  flex
+                  items-center
+                  gap-3
+                "
+              >
+
+                <Square size={18} />
+
+                Stop Mic
+
+              </button>
+            )}
+
+
+            <button
+              onClick={
+                handleAnalyze
+              }
+              disabled={
+                loading ||
+                !transcript ||
+                !role
+              }
+              className="
+                bg-green-400
+                hover:bg-green-300
+                disabled:opacity-50
+                text-black
+                font-bold
+                px-6
+                py-4
+                rounded-2xl
+              "
+            >
+
+              {
+                loading
+
+                  ? "Analyzing..."
+
+                  : "Analyze Interview"
+              }
+
+            </button>
+
+          </div>
+
+
+          <textarea
+            value={transcript}
+            onChange={(e) =>
+              setTranscript(
+                e.target.value
+              )
+            }
+            rows={10}
+            placeholder="Live transcript will appear here..."
+            className="
+              w-full
+              p-5
+              rounded-2xl
+              bg-[#111827]
+              border
+              border-white/10
+              text-white
+              resize-none
+            "
+          />
+
+        </div>
+
+
+        {result && (
+
+          <div
+            className="
+              grid
+              gap-6
+            "
+          >
+
+            <div
+              className="
+                grid
+                md:grid-cols-4
+                gap-5
+              "
+            >
+
+              <div
+                className="
+                  bg-white/5
+                  border
+                  border-white/10
+                  rounded-3xl
+                  p-6
+                "
+              >
+
+                <p
+                  className="
+                    text-gray-400
+                    mb-2
+                  "
+                >
+                  Confidence
+                </p>
+
+                <h3
+                  className="
+                    text-4xl
+                    font-black
+                    text-cyan-400
+                  "
+                >
+                  {
+                    result.confidence_score
+                  }%
+                </h3>
+
+              </div>
+
+
+              <div
+                className="
+                  bg-white/5
+                  border
+                  border-white/10
+                  rounded-3xl
+                  p-6
+                "
+              >
+
+                <p
+                  className="
+                    text-gray-400
+                    mb-2
+                  "
+                >
+                  Communication
+                </p>
+
+                <h3
+                  className="
+                    text-4xl
+                    font-black
+                    text-green-400
+                  "
+                >
+                  {
+                    result.communication_score
+                  }%
+                </h3>
+
+              </div>
+
+
+              <div
+                className="
+                  bg-white/5
+                  border
+                  border-white/10
+                  rounded-3xl
+                  p-6
+                "
+              >
+
+                <p
+                  className="
+                    text-gray-400
+                    mb-2
+                  "
+                >
+                  WPM
+                </p>
+
+                <h3
+                  className="
+                    text-4xl
+                    font-black
+                    text-orange-400
+                  "
+                >
+                  {
+                    result.words_per_minute
+                  }
+                </h3>
+
+              </div>
+
+
+              <div
+                className="
+                  bg-white/5
+                  border
+                  border-white/10
+                  rounded-3xl
+                  p-6
+                "
+              >
+
+                <p
+                  className="
+                    text-gray-400
+                    mb-2
+                  "
+                >
+                  Attention
+                </p>
+
+                <h3
+                  className="
+                    text-2xl
+                    font-black
+                    text-pink-400
+                  "
+                >
+                  {
+                    result.attention_status
+                  }
+                </h3>
+
+              </div>
 
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
 
-              <div className="flex items-center justify-between">
+            <div
+              className="
+                bg-white/5
+                border
+                border-white/10
+                rounded-3xl
+                p-8
+              "
+            >
 
-                <h2 className="text-3xl font-bold text-cyan-400">
-                  Live Transcript
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-3
+                  mb-5
+                "
+              >
+
+                <Brain
+                  className="
+                    text-cyan-400
+                  "
+                  size={24}
+                />
+
+                <h2
+                  className="
+                    text-2xl
+                    font-bold
+                    text-white
+                  "
+                >
+                  AI Feedback
                 </h2>
 
-                <div className="px-4 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
-
-                  {sessionStatus}
-
-                </div>
-
               </div>
 
-              <p className="mt-8 text-lg leading-8 text-gray-300 min-h-40">
 
-                {transcript ||
-                  "Waiting for interview..."}
+              <p
+                className="
+                  text-gray-300
+                  leading-8
+                "
+              >
+
+                {
+                  result.feedback
+                }
 
               </p>
 
             </div>
 
           </div>
-
-          <div className="space-y-6">
-
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
-
-              <h2 className="text-2xl font-bold text-cyan-400">
-                Live AI Metrics
-              </h2>
-
-              <div className="space-y-6 mt-8">
-
-                <div>
-
-                  <div className="flex justify-between">
-
-                    <span>
-                      Confidence
-                    </span>
-
-                    <span className="text-cyan-400">
-                      {confidenceScore}%
-                    </span>
-
-                  </div>
-
-                  <div className="w-full h-3 bg-white/10 rounded-full mt-2">
-
-                    <div
-                      className="h-full bg-cyan-400 rounded-full"
-                      style={{
-                        width: `${confidenceScore}%`,
-                      }}
-                    />
-
-                  </div>
-
-                </div>
-
-                <div>
-
-                  <div className="flex justify-between">
-
-                    <span>
-                      Eye Contact
-                    </span>
-
-                    <span className="text-purple-400">
-                      {eyeContactScore}%
-                    </span>
-
-                  </div>
-
-                  <div className="w-full h-3 bg-white/10 rounded-full mt-2">
-
-                    <div
-                      className="h-full bg-purple-400 rounded-full"
-                      style={{
-                        width: `${eyeContactScore}%`,
-                      }}
-                    />
-
-                  </div>
-
-                </div>
-
-                <div>
-
-                  <div className="flex justify-between">
-
-                    <span>
-                      Communication
-                    </span>
-
-                    <span className="text-pink-400">
-                      {communicationScore}%
-                    </span>
-
-                  </div>
-
-                  <div className="w-full h-3 bg-white/10 rounded-full mt-2">
-
-                    <div
-                      className="h-full bg-pink-400 rounded-full"
-                      style={{
-                        width: `${communicationScore}%`,
-                      }}
-                    />
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
-
-              <h2 className="text-2xl font-bold text-cyan-400">
-                Controls
-              </h2>
-
-              <div className="space-y-4 mt-8">
-
-                {!cameraOn ? (
-
-                  <button
-                    onClick={startCamera}
-                    disabled={loading}
-                    className="w-full py-4 rounded-2xl bg-cyan-500 hover:bg-cyan-400 transition font-bold"
-                  >
-                    {loading
-                      ? "Starting..."
-                      : "Start Interview"}
-                  </button>
-
-                ) : (
-
-                  <button
-                    onClick={stopCamera}
-                    className="w-full py-4 rounded-2xl bg-red-500 hover:bg-red-400 transition font-bold"
-                  >
-                    End Interview
-                  </button>
-
-                )}
-
-              </div>
-
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
-
-              <h2 className="text-2xl font-bold text-cyan-400">
-                AI Suggestions
-              </h2>
-
-              <div className="space-y-4 mt-8">
-
-                <div className="bg-white/5 rounded-2xl p-4">
-                  Maintain eye contact
-                </div>
-
-                <div className="bg-white/5 rounded-2xl p-4">
-                  Speak confidently
-                </div>
-
-                <div className="bg-white/5 rounded-2xl p-4">
-                  Keep responses structured
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
+        )}
 
       </div>
 
