@@ -78,6 +78,14 @@ export async function getDashboard(
 }
 
 
+export async function getDashboardStats(
+  userId: number
+) {
+
+  return getDashboard(userId);
+}
+
+
 export async function saveInterview(
   data: any
 ) {
@@ -111,6 +119,28 @@ export async function getInterviewSessions(
     await fetch(
 
       `${API_BASE_URL}/history/${userId}`
+    );
+
+  return response.json();
+}
+
+
+export async function getHistory(
+  userId: number
+) {
+
+  return getInterviewSessions(
+    userId
+  );
+}
+
+
+export async function getLeaderboard() {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/leaderboard`
     );
 
   return response.json();
@@ -176,7 +206,9 @@ export async function evaluateAnswer(
 }
 
 
-export async function getFinalReport() {
+export async function getFinalReport(
+  _data?: any
+) {
 
   const response =
     await fetch(
