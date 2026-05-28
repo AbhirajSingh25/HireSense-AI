@@ -281,3 +281,33 @@ export async function analyzeLiveInterview(
 
   return response.json();
 }
+export async function generateFollowupQuestion(
+
+  question: string,
+  answer: string
+
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/generate-followup`,
+
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+
+          question,
+          answer,
+        }),
+      }
+    );
+
+  return response.json();
+}

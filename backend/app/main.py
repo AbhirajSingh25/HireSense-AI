@@ -313,6 +313,64 @@ Rules:
     }
 
 
+@app.post("/generate-followup")
+async def generate_followup(
+    data: AnswerRequest
+):
+
+    prompt = f"""
+
+You are an AI interviewer.
+
+Previous Question:
+{data.question}
+
+Candidate Answer:
+{data.answer}
+
+Generate ONE intelligent follow-up interview question.
+
+Rules:
+- professional
+- concise
+- relevant to answer
+- conversational
+- technical if needed
+
+Return only the question.
+
+"""
+
+
+    completion = groq_client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+
+        temperature=0.7,
+    )
+
+
+    followup = (
+
+        completion
+        .choices[0]
+        .message.content
+        .strip()
+    )
+
+
+    return {
+        "question": followup
+    }
+
 # =========================
 # ANSWER EVALUATION
 # =========================

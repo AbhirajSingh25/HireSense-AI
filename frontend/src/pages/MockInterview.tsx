@@ -11,6 +11,7 @@ import {
 
   generateQuestions,
   evaluateAnswer,
+  generateFollowupQuestion,
   getFinalReport,
   saveInterview,
 
@@ -35,7 +36,7 @@ function MockInterview() {
   const [
     questions,
     setQuestions,
-  ] = useState<string[]>(([]));
+  ] = useState<string[]>([]);
 
   const [
     currentIndex,
@@ -153,12 +154,45 @@ function MockInterview() {
 
       setLoading(true);
 
-      await evaluateAnswer(
+      const currentQuestion =
+        questions[currentIndex];
 
-        questions[currentIndex],
 
-        answer
+      const evaluation =
+        await evaluateAnswer(
+
+          currentQuestion,
+
+          answer
+        );
+
+
+      console.log(
+        "Evaluation:",
+        evaluation
       );
+
+
+      const followup =
+        await generateFollowupQuestion(
+
+          currentQuestion,
+
+          answer
+        );
+
+
+      if (
+        followup?.question
+      ) {
+
+        setQuestions((prev) => [
+
+          ...prev,
+
+          followup.question
+        ]);
+      }
 
 
       if (
@@ -201,7 +235,8 @@ function MockInterview() {
           transcript:
             answer,
 
-          confidence_score: 85,
+          confidence_score:
+            evaluation.score || 85,
 
           communication_score: 88,
 
@@ -295,7 +330,7 @@ function MockInterview() {
                 text-gray-400
               "
             >
-              Practice realistic interview questions
+              Practice realistic AI-generated interviews
             </p>
 
           </div>
@@ -329,6 +364,7 @@ function MockInterview() {
                 className="
                   text-lg
                   font-semibold
+                  text-white
                 "
               >
                 {
@@ -398,7 +434,7 @@ function MockInterview() {
                     text-gray-400
                   "
                 >
-                  Choose a role to begin
+                  Select role and begin AI interview
                 </p>
 
               </div>
@@ -443,11 +479,11 @@ function MockInterview() {
               </option>
 
               <option>
-                Data Analyst
+                AI Engineer
               </option>
 
               <option>
-                AI Engineer
+                Data Analyst
               </option>
 
             </select>
@@ -469,14 +505,13 @@ function MockInterview() {
                 px-6
                 py-4
                 rounded-2xl
-                transition-all
               "
             >
 
               {
                 loading
 
-                  ? "Generating Questions..."
+                  ? "Generating..."
 
                   : "Start Interview"
               }
@@ -545,8 +580,6 @@ function MockInterview() {
                   Question
                   {" "}
                   {currentIndex + 1}
-                  /
-                  {questions.length}
 
                 </div>
 
@@ -594,7 +627,7 @@ function MockInterview() {
                   )
                 }
                 rows={8}
-                placeholder="Type your answer here..."
+                placeholder="Type your answer..."
                 className="
                   w-full
                   p-5
@@ -627,7 +660,6 @@ function MockInterview() {
                   px-6
                   py-4
                   rounded-2xl
-                  transition-all
                 "
               >
 
@@ -700,7 +732,7 @@ function MockInterview() {
                 mb-10
               "
             >
-              Your interview performance has been saved successfully
+              AI interview analysis completed successfully
             </p>
 
 
@@ -736,7 +768,9 @@ function MockInterview() {
                     text-cyan-400
                   "
                 >
-                  85%
+                  {
+                    report?.confidence_score || 85
+                  }%
                 </h3>
 
               </div>
@@ -766,7 +800,9 @@ function MockInterview() {
                     text-green-400
                   "
                 >
-                  88%
+                  {
+                    report?.communication_score || 88
+                  }%
                 </h3>
 
               </div>
@@ -796,7 +832,9 @@ function MockInterview() {
                     text-orange-400
                   "
                 >
-                  120
+                  {
+                    report?.words_per_minute || 120
+                  }
                 </h3>
 
               </div>
