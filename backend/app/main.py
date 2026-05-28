@@ -1,3 +1,8 @@
+import os
+
+from groq import Groq
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,7 +12,14 @@ import random
 
 app = FastAPI()
 
+load_dotenv()
 
+groq_client = Groq(
+
+    api_key=os.getenv(
+        "GROQ_API_KEY"
+    )
+)
 # =========================
 # CORS
 # =========================
@@ -248,63 +260,53 @@ async def generate_questions(
     role = data.role
 
 
-    question_bank = {
+    prompt = f"""
 
-        "Frontend Developer": [
+Generate 5 realistic interview questions
+for a {role} role.
 
-            "Explain React hooks.",
+Rules:
+- concise
+- professional
+- technical
+- mix beginner and intermediate
+- return plain list only
 
-            "What is Virtual DOM?",
+"""
 
-            "Difference between props and state?",
 
-            "Explain useEffect lifecycle.",
+    completion = groq_client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+
+            {
+                "role": "user",
+                "content": prompt,
+            }
         ],
 
-        "Backend Developer": [
-
-            "Explain REST APIs.",
-
-            "What is JWT authentication?",
-
-            "Difference between SQL and NoSQL?",
-
-            "Explain database indexing.",
-        ],
-
-        "AI Engineer": [
-
-            "Explain machine learning.",
-
-            "Difference between AI and ML?",
-
-            "What is overfitting?",
-
-            "Explain neural networks.",
-        ],
-
-        "Data Analyst": [
-
-            "Explain data cleaning.",
-
-            "What is data visualization?",
-
-            "Difference between mean and median?",
-
-            "Explain SQL joins.",
-        ],
-    }
-
-
-    questions = question_bank.get(
-
-        role,
-
-        [
-            "Tell me about yourself.",
-            "Why should we hire you?",
-        ]
+        temperature=0.7,
     )
+
+
+    content = (
+
+        completion
+        .choices[0]
+        .message.content
+    )
+
+
+    questions = [
+
+        q.strip("- ").strip()
+
+        for q in content.split("\n")
+
+        if q.strip()
+    ]
 
 
     return {
