@@ -22,6 +22,8 @@ import {
   Brain,
   Clock3,
   CheckCircle2,
+  Mic,
+  Square,
 
 } from "lucide-react";
 
@@ -72,6 +74,17 @@ function MockInterview() {
     seconds,
     setSeconds,
   ] = useState(0);
+
+  const [
+    listening,
+    setListening,
+  ] = useState(false);
+
+
+  const [
+    recognition,
+    setRecognition,
+  ] = useState<any>(null);
 
 
   useEffect(() => {
@@ -208,12 +221,12 @@ function MockInterview() {
       const followup =
         await generateFollowupQuestion(
 
-  currentQuestion,
+          currentQuestion,
 
-  answer,
+          answer,
 
-  chatMessages
-);
+          chatMessages
+        );
 
 
       if (
@@ -336,6 +349,94 @@ function MockInterview() {
   }
 
 
+  function startVoiceAnswer() {
+
+    const SpeechRecognition =
+
+      (window as any)
+        .SpeechRecognition ||
+
+      (window as any)
+        .webkitSpeechRecognition;
+
+
+    if (!SpeechRecognition) {
+
+      toast.error(
+        "Speech recognition not supported"
+      );
+
+      return;
+    }
+
+
+    const recognitionInstance =
+      new SpeechRecognition();
+
+    recognitionInstance.lang =
+      "en-US";
+
+    recognitionInstance.continuous =
+      true;
+
+    recognitionInstance.interimResults =
+      true;
+
+
+    recognitionInstance.onstart = () => {
+
+      setListening(true);
+    };
+
+
+    recognitionInstance.onend = () => {
+
+      setListening(false);
+    };
+
+
+    recognitionInstance.onresult = (
+      event: any
+    ) => {
+
+      let transcript = "";
+
+      for (
+        let i = 0;
+        i < event.results.length;
+        i++
+      ) {
+
+        transcript +=
+          event.results[i][0]
+            .transcript + " ";
+      }
+
+      setAnswer(
+        transcript
+      );
+    };
+
+
+    recognitionInstance.start();
+
+    setRecognition(
+      recognitionInstance
+    );
+  }
+
+
+  function stopVoiceAnswer() {
+
+    if (recognition) {
+
+      recognition.stop();
+    }
+
+    setListening(false);
+  }
+
+
   return (
 
     <MainLayout>
@@ -377,7 +478,7 @@ function MockInterview() {
                 text-gray-400
               "
             >
-              Conversational AI-powered interview experience
+              Conversational voice AI interview experience
             </p>
 
           </div>
@@ -712,6 +813,70 @@ function MockInterview() {
               </div>
 
 
+              <div
+                className="
+                  flex
+                  gap-4
+                  mb-5
+                "
+              >
+
+                {!listening ? (
+
+                  <button
+                    onClick={
+                      startVoiceAnswer
+                    }
+                    className="
+                      bg-cyan-400
+                      hover:bg-cyan-300
+                      text-black
+                      font-bold
+                      px-5
+                      py-3
+                      rounded-2xl
+                      flex
+                      items-center
+                      gap-3
+                    "
+                  >
+
+                    <Mic size={18} />
+
+                    Start Speaking
+
+                  </button>
+
+                ) : (
+
+                  <button
+                    onClick={
+                      stopVoiceAnswer
+                    }
+                    className="
+                      bg-red-400
+                      hover:bg-red-300
+                      text-black
+                      font-bold
+                      px-5
+                      py-3
+                      rounded-2xl
+                      flex
+                      items-center
+                      gap-3
+                    "
+                  >
+
+                    <Square size={18} />
+
+                    Stop Speaking
+
+                  </button>
+                )}
+
+              </div>
+
+
               <textarea
                 value={answer}
                 onChange={(e) =>
@@ -720,7 +885,7 @@ function MockInterview() {
                   )
                 }
                 rows={6}
-                placeholder="Type your answer..."
+                placeholder="Type or speak your answer..."
                 className="
                   w-full
                   p-5
