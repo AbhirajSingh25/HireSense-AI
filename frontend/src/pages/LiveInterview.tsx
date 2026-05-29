@@ -1,33 +1,40 @@
 import {
-  useState,
+  useEffect,
   useRef,
+  useState,
 } from "react";
 
 import MainLayout from "../components/MainLayout";
+
+import toast from "react-hot-toast";
+
+import {
+  Camera,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+} from "lucide-react";
 
 import {
   analyzeLiveInterview,
 } from "../services/api";
 
-import {
-
-  Mic,
-  Brain,
-  Square,
-
-} from "lucide-react";
-
-
-declare global {
-
-  interface Window {
-
-    webkitSpeechRecognition: any;
-  }
-}
-
 
 function LiveInterview() {
+
+  const videoRef =
+    useRef<HTMLVideoElement>(null);
+
+  const [
+    cameraOn,
+    setCameraOn,
+  ] = useState(false);
+
+  const [
+    micOn,
+    setMicOn,
+  ] = useState(false);
 
   const [
     transcript,
@@ -37,7 +44,14 @@ function LiveInterview() {
   const [
     role,
     setRole,
-  ] = useState("");
+  ] = useState(
+    "Frontend Developer"
+  );
+
+  const [
+    analysis,
+    setAnalysis,
+  ] = useState<any>(null);
 
   const [
     loading,
@@ -45,64 +59,117 @@ function LiveInterview() {
   ] = useState(false);
 
   const [
-    listening,
-    setListening,
-  ] = useState(false);
-
-  const [
-    result,
-    setResult,
+    recognition,
+    setRecognition,
   ] = useState<any>(null);
 
 
-  const recognitionRef =
-    useRef<any>(null);
+  async function startCamera() {
+
+    try {
+
+      const stream =
+
+        await navigator
+          .mediaDevices
+          .getUserMedia({
+
+            video: true,
+            audio: true,
+          });
 
 
-  function startListening() {
+      if (videoRef.current) {
+
+        videoRef.current.srcObject =
+          stream;
+      }
+
+      setCameraOn(true);
+
+      toast.success(
+        "Camera started"
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      toast.error(
+        "Camera access denied"
+      );
+    }
+  }
+
+
+  function stopCamera() {
+
+    const stream: any =
+      videoRef.current?.srcObject;
+
+    if (stream) {
+
+      stream
+        .getTracks()
+        .forEach((track: any) =>
+          track.stop()
+        );
+    }
+
+    setCameraOn(false);
+  }
+
+
+  function startVoice() {
 
     const SpeechRecognition =
-  (window as any)
-    .SpeechRecognition ||
 
-  window.webkitSpeechRecognition;
+      (window as any)
+        .SpeechRecognition ||
+
+      (window as any)
+        .webkitSpeechRecognition;
 
 
     if (!SpeechRecognition) {
 
-      alert(
-        "Speech recognition not supported in this browser"
+      toast.error(
+        "Speech recognition not supported"
       );
 
       return;
     }
 
 
-    const recognition =
+    const recognitionInstance =
       new SpeechRecognition();
 
-    recognition.lang = "en-US";
+    recognitionInstance.continuous =
+      true;
 
-    recognition.continuous = true;
+    recognitionInstance.interimResults =
+      true;
 
-    recognition.interimResults = true;
+    recognitionInstance.lang =
+      "en-US";
 
 
-    recognition.onstart = () => {
+    recognitionInstance.onstart =
+      () => {
 
-      setListening(true);
+      setMicOn(true);
     };
 
 
-    recognition.onend = () => {
+    recognitionInstance.onend =
+      () => {
 
-      setListening(false);
+      setMicOn(false);
     };
 
 
-    recognition.onresult = (
-      event: any
-    ) => {
+    recognitionInstance.onresult =
+      (event: any) => {
 
       let finalTranscript = "";
 
@@ -113,6 +180,7 @@ function LiveInterview() {
       ) {
 
         finalTranscript +=
+
           event.results[i][0]
             .transcript + " ";
       }
@@ -123,44 +191,53 @@ function LiveInterview() {
     };
 
 
-    recognition.start();
+    recognitionInstance.start();
 
-    recognitionRef.current =
-      recognition;
+    setRecognition(
+      recognitionInstance
+    );
   }
 
 
-  function stopListening() {
+  function stopVoice() {
 
-    if (
-      recognitionRef.current
-    ) {
+    if (recognition) {
 
-      recognitionRef.current.stop();
+      recognition.stop();
     }
 
-    setListening(false);
+    setMicOn(false);
   }
 
 
-  async function handleAnalyze() {
+  async function analyzeInterview() {
 
     try {
 
       setLoading(true);
 
-      const data =
+      const result =
+
         await analyzeLiveInterview(
 
           transcript,
+
           role
         );
 
-      setResult(data);
+      setAnalysis(result);
+
+      toast.success(
+        "Analysis completed"
+      );
 
     } catch (error) {
 
       console.error(error);
+
+      toast.error(
+        "Analysis failed"
+      );
 
     } finally {
 
@@ -169,13 +246,25 @@ function LiveInterview() {
   }
 
 
+  useEffect(() => {
+
+    return () => {
+
+      stopCamera();
+
+      stopVoice();
+    };
+
+  }, []);
+
+
   return (
 
     <MainLayout>
 
       <div
         className="
-          max-w-6xl
+          max-w-7xl
           mx-auto
         "
       >
@@ -202,7 +291,7 @@ function LiveInterview() {
               text-gray-400
             "
           >
-            Real-time microphone interview analysis
+            Real-time camera and voice interview analysis
           </p>
 
         </div>
@@ -210,332 +299,205 @@ function LiveInterview() {
 
         <div
           className="
-            bg-white/5
-            border
-            border-white/10
-            rounded-3xl
-            p-8
-            mb-8
+            grid
+            lg:grid-cols-2
+            gap-8
           "
         >
 
-          <select
-            value={role}
-            onChange={(e) =>
-              setRole(
-                e.target.value
-              )
-            }
-            className="
-              w-full
-              p-4
-              rounded-2xl
-              bg-[#111827]
-              border
-              border-white/10
-              text-white
-              mb-6
-            "
-          >
-
-            <option value="">
-              Select role
-            </option>
-
-            <option>
-              Frontend Developer
-            </option>
-
-            <option>
-              Backend Developer
-            </option>
-
-            <option>
-              AI Engineer
-            </option>
-
-            <option>
-              Data Analyst
-            </option>
-
-          </select>
-
-
           <div
             className="
-              flex
-              flex-wrap
-              gap-4
-              mb-6
-            "
-          >
-
-            {!listening ? (
-
-              <button
-                onClick={
-                  startListening
-                }
-                className="
-                  bg-cyan-400
-                  hover:bg-cyan-300
-                  text-black
-                  font-bold
-                  px-6
-                  py-4
-                  rounded-2xl
-                  flex
-                  items-center
-                  gap-3
-                "
-              >
-
-                <Mic size={20} />
-
-                Start Mic
-
-              </button>
-
-            ) : (
-
-              <button
-                onClick={
-                  stopListening
-                }
-                className="
-                  bg-red-400
-                  hover:bg-red-300
-                  text-black
-                  font-bold
-                  px-6
-                  py-4
-                  rounded-2xl
-                  flex
-                  items-center
-                  gap-3
-                "
-              >
-
-                <Square size={18} />
-
-                Stop Mic
-
-              </button>
-            )}
-
-
-            <button
-              onClick={
-                handleAnalyze
-              }
-              disabled={
-                loading ||
-                !transcript ||
-                !role
-              }
-              className="
-                bg-green-400
-                hover:bg-green-300
-                disabled:opacity-50
-                text-black
-                font-bold
-                px-6
-                py-4
-                rounded-2xl
-              "
-            >
-
-              {
-                loading
-
-                  ? "Analyzing..."
-
-                  : "Analyze Interview"
-              }
-
-            </button>
-
-          </div>
-
-
-          <textarea
-            value={transcript}
-            onChange={(e) =>
-              setTranscript(
-                e.target.value
-              )
-            }
-            rows={10}
-            placeholder="Live transcript will appear here..."
-            className="
-              w-full
-              p-5
-              rounded-2xl
-              bg-[#111827]
+              bg-white/5
               border
               border-white/10
-              text-white
-              resize-none
-            "
-          />
-
-        </div>
-
-
-        {result && (
-
-          <div
-            className="
-              grid
-              gap-6
+              rounded-3xl
+              p-6
             "
           >
 
             <div
               className="
-                grid
-                md:grid-cols-4
-                gap-5
+                aspect-video
+                bg-black
+                rounded-2xl
+                overflow-hidden
+                mb-6
+                flex
+                items-center
+                justify-center
               "
             >
 
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
+              {cameraOn ? (
 
-                <p
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
                   className="
-                    text-gray-400
-                    mb-2
+                    w-full
+                    h-full
+                    object-cover
+                  "
+                />
+
+              ) : (
+
+                <div
+                  className="
+                    text-center
                   "
                 >
-                  Confidence
-                </p>
 
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-cyan-400
-                  "
-                >
-                  {
-                    result.confidence_score
-                  }%
-                </h3>
+                  <Camera
+                    size={70}
+                    className="
+                      text-gray-600
+                      mx-auto
+                      mb-4
+                    "
+                  />
 
-              </div>
+                  <p
+                    className="
+                      text-gray-500
+                    "
+                  >
+                    Camera not started
+                  </p>
 
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Communication
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-green-400
-                  "
-                >
-                  {
-                    result.communication_score
-                  }%
-                </h3>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  WPM
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-orange-400
-                  "
-                >
-                  {
-                    result.words_per_minute
-                  }
-                </h3>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Attention
-                </p>
-
-                <h3
-                  className="
-                    text-2xl
-                    font-black
-                    text-pink-400
-                  "
-                >
-                  {
-                    result.attention_status
-                  }
-                </h3>
-
-              </div>
+                </div>
+              )}
 
             </div>
 
+
+            <div
+              className="
+                flex
+                flex-wrap
+                gap-4
+              "
+            >
+
+              {!cameraOn ? (
+
+                <button
+                  onClick={
+                    startCamera
+                  }
+                  className="
+                    bg-cyan-400
+                    hover:bg-cyan-300
+                    text-black
+                    font-bold
+                    px-5
+                    py-3
+                    rounded-2xl
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
+
+                  <Video size={18} />
+
+                  Start Camera
+
+                </button>
+
+              ) : (
+
+                <button
+                  onClick={
+                    stopCamera
+                  }
+                  className="
+                    bg-red-400
+                    hover:bg-red-300
+                    text-black
+                    font-bold
+                    px-5
+                    py-3
+                    rounded-2xl
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
+
+                  <VideoOff size={18} />
+
+                  Stop Camera
+
+                </button>
+              )}
+
+
+              {!micOn ? (
+
+                <button
+                  onClick={
+                    startVoice
+                  }
+                  className="
+                    bg-green-400
+                    hover:bg-green-300
+                    text-black
+                    font-bold
+                    px-5
+                    py-3
+                    rounded-2xl
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
+
+                  <Mic size={18} />
+
+                  Start Mic
+
+                </button>
+
+              ) : (
+
+                <button
+                  onClick={
+                    stopVoice
+                  }
+                  className="
+                    bg-orange-400
+                    hover:bg-orange-300
+                    text-black
+                    font-bold
+                    px-5
+                    py-3
+                    rounded-2xl
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
+
+                  <MicOff size={18} />
+
+                  Stop Mic
+
+                </button>
+              )}
+
+            </div>
+
+          </div>
+
+
+          <div
+            className="
+              space-y-6
+            "
+          >
 
             <div
               className="
@@ -543,56 +505,320 @@ function LiveInterview() {
                 border
                 border-white/10
                 rounded-3xl
-                p-8
+                p-6
               "
             >
 
-              <div
+              <h2
                 className="
-                  flex
-                  items-center
-                  gap-3
+                  text-2xl
+                  font-bold
                   mb-5
                 "
               >
+                Interview Settings
+              </h2>
 
-                <Brain
-                  className="
-                    text-cyan-400
-                  "
-                  size={24}
-                />
+
+              <select
+                value={role}
+                onChange={(e) =>
+                  setRole(
+                    e.target.value
+                  )
+                }
+                className="
+                  w-full
+                  p-4
+                  rounded-2xl
+                  bg-[#111827]
+                  border
+                  border-white/10
+                  text-white
+                  mb-5
+                  outline-none
+                "
+              >
+
+                <option>
+                  Frontend Developer
+                </option>
+
+                <option>
+                  Backend Developer
+                </option>
+
+                <option>
+                  Full Stack Developer
+                </option>
+
+                <option>
+                  AI Engineer
+                </option>
+
+              </select>
+
+
+              <textarea
+                value={transcript}
+                onChange={(e) =>
+                  setTranscript(
+                    e.target.value
+                  )
+                }
+                rows={8}
+                placeholder="Live transcript appears here..."
+                className="
+                  w-full
+                  p-5
+                  rounded-2xl
+                  bg-[#111827]
+                  border
+                  border-white/10
+                  text-white
+                  resize-none
+                  outline-none
+                  mb-5
+                "
+              />
+
+
+              <button
+                onClick={
+                  analyzeInterview
+                }
+                disabled={
+                  loading ||
+                  !transcript
+                }
+                className="
+                  bg-cyan-400
+                  hover:bg-cyan-300
+                  disabled:opacity-50
+                  text-black
+                  font-bold
+                  px-6
+                  py-4
+                  rounded-2xl
+                "
+              >
+
+                {
+                  loading
+
+                    ? "Analyzing..."
+
+                    : "Analyze Interview"
+                }
+
+              </button>
+
+            </div>
+
+
+            {analysis && (
+
+              <div
+                className="
+                  bg-white/5
+                  border
+                  border-white/10
+                  rounded-3xl
+                  p-6
+                "
+              >
 
                 <h2
                   className="
                     text-2xl
                     font-bold
-                    text-white
+                    mb-6
                   "
                 >
-                  AI Feedback
+                  AI Analysis
                 </h2>
 
+
+                <div
+                  className="
+                    grid
+                    grid-cols-2
+                    gap-5
+                  "
+                >
+
+                  <div
+                    className="
+                      bg-black/20
+                      rounded-2xl
+                      p-5
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-gray-400
+                        mb-2
+                      "
+                    >
+                      Confidence
+                    </p>
+
+                    <h3
+                      className="
+                        text-4xl
+                        font-black
+                        text-cyan-400
+                      "
+                    >
+                      {
+                        analysis
+                          ?.confidence_score
+                      }%
+                    </h3>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      bg-black/20
+                      rounded-2xl
+                      p-5
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-gray-400
+                        mb-2
+                      "
+                    >
+                      Communication
+                    </p>
+
+                    <h3
+                      className="
+                        text-4xl
+                        font-black
+                        text-green-400
+                      "
+                    >
+                      {
+                        analysis
+                          ?.communication_score
+                      }%
+                    </h3>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      bg-black/20
+                      rounded-2xl
+                      p-5
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-gray-400
+                        mb-2
+                      "
+                    >
+                      WPM
+                    </p>
+
+                    <h3
+                      className="
+                        text-4xl
+                        font-black
+                        text-orange-400
+                      "
+                    >
+                      {
+                        analysis
+                          ?.words_per_minute
+                      }
+                    </h3>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      bg-black/20
+                      rounded-2xl
+                      p-5
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-gray-400
+                        mb-2
+                      "
+                    >
+                      Attention
+                    </p>
+
+                    <h3
+                      className="
+                        text-2xl
+                        font-black
+                        text-pink-400
+                      "
+                    >
+                      {
+                        analysis
+                          ?.attention_status
+                      }
+                    </h3>
+
+                  </div>
+
+                </div>
+
+
+                <div
+                  className="
+                    mt-6
+                    bg-black/20
+                    rounded-2xl
+                    p-5
+                  "
+                >
+
+                  <h3
+                    className="
+                      font-bold
+                      mb-3
+                    "
+                  >
+                    AI Feedback
+                  </h3>
+
+                  <p
+                    className="
+                      text-gray-300
+                      leading-8
+                    "
+                  >
+                    {
+                      analysis
+                        ?.feedback
+                    }
+                  </p>
+
+                </div>
+
               </div>
-
-
-              <p
-                className="
-                  text-gray-300
-                  leading-8
-                "
-              >
-
-                {
-                  result.feedback
-                }
-
-              </p>
-
-            </div>
+            )}
 
           </div>
-        )}
+
+        </div>
 
       </div>
 
