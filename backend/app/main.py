@@ -540,9 +540,18 @@ async def generate_followup(
 
     prompt = f"""
 
-You are an advanced AI interviewer.
+You are a professional senior technical interviewer.
 
-Interview Conversation:
+Your job:
+- behave naturally
+- ask intelligent follow-up questions
+- adapt difficulty based on candidate quality
+- maintain conversational flow
+- avoid repetitive questions
+- ask concise questions
+- sound like a real interviewer
+
+Conversation History:
 {history_text}
 
 Current Question:
@@ -551,16 +560,20 @@ Current Question:
 Candidate Answer:
 {data.answer}
 
-Generate ONE smart follow-up question.
+Instructions:
+- if answer is weak:
+  ask simpler clarification
 
-Rules:
-- conversational
-- concise
-- technical
-- adaptive
-- non repetitive
+- if answer is strong:
+  ask deeper technical follow-up
 
-Return only the question.
+- if answer is vague:
+  ask for examples
+
+- if answer is excellent:
+  increase difficulty slightly
+
+Return ONLY the next interviewer question.
 
 """
 
@@ -572,12 +585,20 @@ Return only the question.
         messages=[
 
             {
+                "role": "system",
+
+                "content":
+                    "You are an expert AI interviewer."
+            },
+
+            {
                 "role": "user",
-                "content": prompt,
+
+                "content": prompt
             }
         ],
 
-        temperature=0.7,
+        temperature=0.8,
     )
 
 
@@ -606,7 +627,7 @@ async def evaluate_answer(
 
     prompt = f"""
 
-You are an AI interview evaluator.
+You are an elite FAANG interview evaluator.
 
 Question:
 {data.question}
@@ -614,15 +635,30 @@ Question:
 Candidate Answer:
 {data.answer}
 
-Evaluate professionally.
+Evaluate deeply.
 
-Return:
-1. Score out of 100
-2. Feedback
-3. Strengths
-4. Improvements
+Analyze:
+- technical accuracy
+- communication clarity
+- confidence
+- structure
+- problem solving
 
-Keep concise.
+Return STRICTLY:
+
+Score: <number>
+
+Strengths:
+- ...
+
+Weaknesses:
+- ...
+
+Improvement:
+- ...
+
+Final Feedback:
+...
 
 """
 
@@ -634,8 +670,16 @@ Keep concise.
         messages=[
 
             {
+                "role": "system",
+
+                "content":
+                    "You are an elite interview evaluator."
+            },
+
+            {
                 "role": "user",
-                "content": prompt,
+
+                "content": prompt
             }
         ],
 
