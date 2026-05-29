@@ -80,10 +80,19 @@ function MockInterview() {
     setListening,
   ] = useState(false);
 
-
   const [
     recognition,
     setRecognition,
+  ] = useState<any>(null);
+
+  const [
+    evaluations,
+    setEvaluations,
+  ] = useState<any[]>([]);
+
+  const [
+    currentEvaluation,
+    setCurrentEvaluation,
   ] = useState<any>(null);
 
 
@@ -212,10 +221,25 @@ function MockInterview() {
         );
 
 
-      console.log(
-        "Evaluation:",
+      setCurrentEvaluation(
         evaluation
       );
+
+
+      setEvaluations((prev) => [
+
+        ...prev,
+
+        {
+
+          question:
+            currentQuestion,
+
+          answer,
+
+          evaluation,
+        }
+      ]);
 
 
       const followup =
@@ -271,7 +295,7 @@ function MockInterview() {
       } else {
 
         const finalData =
-          await getFinalReport({});
+          await getFinalReport();
 
         setReport(finalData);
 
@@ -665,439 +689,6 @@ function MockInterview() {
               }
 
             </button>
-
-          </div>
-        )}
-
-
-        {!!questions.length &&
-          !completed && (
-
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-3xl
-              overflow-hidden
-            "
-          >
-
-            <div
-              className="
-                h-2
-                bg-black/20
-              "
-            >
-
-              <div
-                style={{
-                  width: `${progress}%`
-                }}
-                className="
-                  h-full
-                  bg-cyan-400
-                  transition-all
-                "
-              />
-
-            </div>
-
-
-            <div
-              className="
-                p-8
-              "
-            >
-
-              <div
-                className="
-                  flex
-                  justify-between
-                  items-center
-                  mb-8
-                "
-              >
-
-                <div
-                  className="
-                    text-gray-400
-                  "
-                >
-
-                  Question
-                  {" "}
-                  {currentIndex + 1}
-
-                </div>
-
-
-                <div
-                  className="
-                    bg-cyan-400
-                    text-black
-                    px-4
-                    py-2
-                    rounded-xl
-                    font-semibold
-                  "
-                >
-
-                  {Math.round(progress)}%
-
-                </div>
-
-              </div>
-
-
-              <div
-                className="
-                  space-y-5
-                  mb-8
-                  max-h-125
-                  overflow-y-auto
-                "
-              >
-
-                {chatMessages.map((
-                  msg,
-                  index
-                ) => (
-
-                  <div
-                    key={index}
-                    className={`
-                      flex
-
-                      ${
-                        msg.role === "user"
-
-                          ? "justify-end"
-
-                          : "justify-start"
-                      }
-                    `}
-                  >
-
-                    <div
-                      className={`
-                        max-w-[80%]
-                        px-5
-                        py-4
-                        rounded-3xl
-                        leading-8
-
-                        ${
-                          msg.role === "user"
-
-                            ? `
-                              bg-cyan-400
-                              text-black
-                            `
-
-                            : `
-                              bg-white/10
-                              text-white
-                            `
-                        }
-                      `}
-                    >
-
-                      {msg.content}
-
-                    </div>
-
-                  </div>
-                ))}
-
-              </div>
-
-
-              <div
-                className="
-                  flex
-                  gap-4
-                  mb-5
-                "
-              >
-
-                {!listening ? (
-
-                  <button
-                    onClick={
-                      startVoiceAnswer
-                    }
-                    className="
-                      bg-cyan-400
-                      hover:bg-cyan-300
-                      text-black
-                      font-bold
-                      px-5
-                      py-3
-                      rounded-2xl
-                      flex
-                      items-center
-                      gap-3
-                    "
-                  >
-
-                    <Mic size={18} />
-
-                    Start Speaking
-
-                  </button>
-
-                ) : (
-
-                  <button
-                    onClick={
-                      stopVoiceAnswer
-                    }
-                    className="
-                      bg-red-400
-                      hover:bg-red-300
-                      text-black
-                      font-bold
-                      px-5
-                      py-3
-                      rounded-2xl
-                      flex
-                      items-center
-                      gap-3
-                    "
-                  >
-
-                    <Square size={18} />
-
-                    Stop Speaking
-
-                  </button>
-                )}
-
-              </div>
-
-
-              <textarea
-                value={answer}
-                onChange={(e) =>
-                  setAnswer(
-                    e.target.value
-                  )
-                }
-                rows={6}
-                placeholder="Type or speak your answer..."
-                className="
-                  w-full
-                  p-5
-                  rounded-2xl
-                  bg-[#111827]
-                  border
-                  border-white/10
-                  text-white
-                  resize-none
-                  outline-none
-                  mb-6
-                "
-              />
-
-
-              <button
-                onClick={
-                  submitAnswer
-                }
-                disabled={
-                  loading ||
-                  !answer
-                }
-                className="
-                  bg-green-400
-                  hover:bg-green-300
-                  disabled:opacity-50
-                  text-black
-                  font-bold
-                  px-6
-                  py-4
-                  rounded-2xl
-                "
-              >
-
-                {
-                  loading
-
-                    ? "Submitting..."
-
-                    : "Submit Answer"
-                }
-
-              </button>
-
-            </div>
-
-          </div>
-        )}
-
-
-        {completed && (
-
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-3xl
-              p-10
-              text-center
-            "
-          >
-
-            <div
-              className="
-                w-20
-                h-20
-                rounded-full
-                bg-green-400
-                text-black
-                flex
-                items-center
-                justify-center
-                mx-auto
-                mb-6
-              "
-            >
-
-              <CheckCircle2
-                size={40}
-              />
-
-            </div>
-
-
-            <h2
-              className="
-                text-4xl
-                font-black
-                text-white
-                mb-4
-              "
-            >
-              Interview Completed
-            </h2>
-
-
-            <p
-              className="
-                text-gray-400
-                mb-10
-              "
-            >
-              AI interview analysis completed successfully
-            </p>
-
-
-            <div
-              className="
-                grid
-                md:grid-cols-3
-                gap-5
-              "
-            >
-
-              <div
-                className="
-                  bg-black/20
-                  rounded-2xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Confidence
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-cyan-400
-                  "
-                >
-                  {
-                    report?.confidence_score || 85
-                  }%
-                </h3>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-black/20
-                  rounded-2xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Communication
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-green-400
-                  "
-                >
-                  {
-                    report?.communication_score || 88
-                  }%
-                </h3>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-black/20
-                  rounded-2xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  WPM
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-orange-400
-                  "
-                >
-                  {
-                    report?.words_per_minute || 120
-                  }
-                </h3>
-
-              </div>
-
-            </div>
 
           </div>
         )}
