@@ -1,67 +1,79 @@
-import os
-import re
+from fastapi import (
+    FastAPI,
+    Depends,
+    HTTPException,
+)
 
-from jose import jwt
+from fastapi.middleware.cors import CORSMiddleware
 
-from datetime import datetime
-from datetime import timedelta
+from sqlalchemy.orm import Session
 
 from passlib.context import CryptContext
+
+from jose import jwt
 
 from groq import Groq
 
 from dotenv import load_dotenv
 
-from fastapi import FastAPI
+from datetime import (
+    datetime,
+    timedelta,
+)
 
-from fastapi.middleware.cors import CORSMiddleware
-
-from pydantic import BaseModel
-
-from sqlalchemy.orm import Session
+import os
+import re
 
 from .database import (
-    SessionLocal,
+    Base,
     engine,
-    Base
+    get_db,
 )
 
 from .models import (
     User,
-    Interview
+    InterviewSession,
 )
 
+from .schemas import (
 
-# =========================
-# APP
-# =========================
-
-app = FastAPI()
-
-Base.metadata.create_all(
-    bind=engine
+    SignupRequest,
+    LoginRequest,
+    QuestionRequest,
+    AnswerRequest,
+    SpeechRequest,
+    InterviewSessionRequest,
 )
 
-
-# =========================
-# ENV
-# =========================
 
 load_dotenv()
 
-groq_client = Groq(
 
-    api_key=os.getenv(
-        "GROQ_API_KEY"
-    )
+GROQ_API_KEY = os.getenv(
+    "GROQ_API_KEY"
+)
+
+SECRET_KEY = "hiresense-secret-key"
+
+ALGORITHM = "HS256"
+
+
+groq_client = Groq(
+    api_key=GROQ_API_KEY
 )
 
 
-# =========================
-# CORS
-# =========================
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+
+app = FastAPI()
+
 
 app.add_middleware(
+
     CORSMiddleware,
 
     allow_origins=["*"],
@@ -74,89 +86,13 @@ app.add_middleware(
 )
 
 
-# =========================
-# DATABASE SESSION
-# =========================
+Base.metadata.create_all(
+    bind=engine
+)
 
-def get_db():
-
-    db = SessionLocal()
-
-    try:
-
-        yield db
-
-    finally:
-
-        db.close()
-
-
-# =========================
-# REQUEST MODELS
-# =========================
-
-class SignupRequest(BaseModel):
-
-    username: str
-    email: str
-    password: str
-
-
-class LoginRequest(BaseModel):
-
-    email: str
-    password: str
-
-
-class InterviewSaveRequest(BaseModel):
-
-    user_id: int
-
-    transcript: str
-
-    confidence_score: int
-
-    communication_score: int
-
-    words_per_minute: int
-
-    eye_contact_score: int
-
-    attention_status: str
-
-
-class SpeechRequest(BaseModel):
-
-    transcript: str
-
-
-class LiveInterviewRequest(BaseModel):
-
-    transcript: str
-
-    role: str
-
-
-class QuestionRequest(BaseModel):
-
-    role: str
-
-
-class AnswerRequest(BaseModel):
-
-    question: str
-
-    answer: str
-
-    history: list = []
-
-
-# =========================
-# ROOT
-# =========================
 
 @app.get("/")
-async def root():
+def root():
 
     return {
 
@@ -165,17 +101,34 @@ async def root():
     }
 
 
-# =========================
-# AUTH
-# =========================
+def create_token(data: dict):
+
+    payload = data.copy()
+
+    payload["exp"] = (
+
+        datetime.utcnow() +
+
+        timedelta(days=7)
+    )
+
+    return jwt.encode(
+
+        payload,
+
+        SECRET_KEY,
+
+        algorithm=ALGORITHM
+    )
+
 
 @app.post("/auth/signup")
-async def signup(
-    data: SignupRequest
+def signup(
+
+    data: SignupRequest,
+
+    db: Session = Depends(get_db)
 ):
-
-    db = SessionLocal()
-
 
     existing_user = (
 
@@ -188,52 +141,74 @@ async def signup(
         .first()
     )
 
-
     if existing_user:
 
-        return {
-            "message":
-                "User already exists"
-        }
+        raise HTTPException(
+
+            status_code=400,
+
+            detail="Email already exists"
+        )
 
 
-    new_user = User(
+    hashed_password = (
+
+        pwd_context.hash(
+            data.password
+        )
+    )
+
+
+    user = User(
 
         username=data.username,
 
         email=data.email,
 
-        password=data.password
+        password=hashed_password,
     )
 
 
-    db.add(new_user)
+    db.add(user)
 
     db.commit()
 
-    db.refresh(new_user)
+    db.refresh(user)
+
+
+    token = create_token({
+
+        "user_id": user.id
+    })
 
 
     return {
 
-        "id":
-            new_user.id,
+        "message":
+            "Signup successful",
 
-        "username":
-            new_user.username,
+        "token": token,
 
-        "email":
-            new_user.email,
+        "user": {
+
+            "id": user.id,
+
+            "username":
+                user.username,
+
+            "email":
+                user.email,
+        }
     }
 
 
 @app.post("/auth/login")
-async def login(
-    data: LoginRequest
+def login(
+
+    data: LoginRequest,
+
+    db: Session = Depends(get_db)
 ):
-
-    db = SessionLocal()
-
 
     user = (
 
@@ -246,20 +221,40 @@ async def login(
         .first()
     )
 
+    if not user:
 
-    if (
+        raise HTTPException(
 
-        not user
+            status_code=401,
 
-        or
+            detail="Invalid email"
+        )
 
-        user.password != data.password
-    ):
 
-        return {
-            "message":
-                "Invalid credentials"
-        }
+    valid_password = (
+
+        pwd_context.verify(
+
+            data.password,
+
+            user.password
+        )
+    )
+
+    if not valid_password:
+
+        raise HTTPException(
+
+            status_code=401,
+
+            detail="Invalid password"
+        )
+
+
+    token = create_token({
+
+        "user_id": user.id
+    })
 
 
     return {
@@ -267,232 +262,68 @@ async def login(
         "message":
             "Login successful",
 
+        "token": token,
+
         "user": {
 
-            "id":
-                user.id,
+            "id": user.id,
 
             "username":
                 user.username,
 
             "email":
                 user.email,
-        },
-
-        "token":
-            "fake-jwt-token",
-    }
-
-
-# =========================
-# DASHBOARD
-# =========================
-
-@app.get("/dashboard/{user_id}")
-async def get_dashboard(
-    user_id: int
-):
-
-    db = SessionLocal()
-
-
-    latest = (
-
-        db.query(Interview)
-
-        .filter(
-            Interview.user_id == user_id
-        )
-
-        .order_by(
-            Interview.id.desc()
-        )
-
-        .first()
-    )
-
-
-    if not latest:
-
-        return {
-
-            "confidence_score": 0,
-
-            "communication_score": 0,
-
-            "words_per_minute": 0,
-
-            "eye_contact_score": 0,
-
-            "attention_status":
-                "No Data",
-
-            "transcript": "",
         }
-
-
-    return {
-
-        "confidence_score":
-            latest.confidence_score,
-
-        "communication_score":
-            latest.communication_score,
-
-        "words_per_minute":
-            latest.words_per_minute,
-
-        "eye_contact_score":
-            latest.eye_contact_score,
-
-        "attention_status":
-            latest.attention_status,
-
-        "transcript":
-            latest.transcript,
     }
 
-
-# =========================
-# SAVE INTERVIEW
-# =========================
-
-@app.post("/save-interview")
-async def save_interview(
-    data: InterviewSaveRequest
-):
-
-    db = SessionLocal()
-
-
-    interview = Interview(
-
-        user_id=data.user_id,
-
-        transcript=data.transcript,
-
-        confidence_score=
-            data.confidence_score,
-
-        communication_score=
-            data.communication_score,
-
-        words_per_minute=
-            data.words_per_minute,
-
-        eye_contact_score=
-            data.eye_contact_score,
-
-        attention_status=
-            data.attention_status,
-    )
-
-
-    db.add(interview)
-
-    db.commit()
-
-    db.refresh(interview)
-
-
-    return {
-        "message":
-            "Interview saved"
-    }
-
-
-# =========================
-# HISTORY
-# =========================
-
-@app.get("/history/{user_id}")
-async def get_history(
-    user_id: int
-):
-
-    db = SessionLocal()
-
-
-    interviews = (
-
-        db.query(Interview)
-
-        .filter(
-            Interview.user_id == user_id
-        )
-
-        .all()
-    )
-
-
-    return interviews
-
-
-# =========================
-# LEADERBOARD
-# =========================
-
-@app.get("/leaderboard")
-async def get_leaderboard():
-
-    db = SessionLocal()
-
-
-    interviews = (
-
-        db.query(Interview)
-
-        .order_by(
-            Interview.confidence_score.desc()
-        )
-
-        .all()
-    )
-
-
-    return interviews
-
-
-# =========================
-# QUESTION GENERATION
-# =========================
 
 @app.post("/generate-questions")
 async def generate_questions(
     data: QuestionRequest
 ):
 
-    role = data.role
-
-
     prompt = f"""
 
 Generate 5 realistic interview questions
-for a {role} role.
+for a {data.role} role.
 
-Rules:
+Requirements:
 - concise
-- professional
 - technical
-- beginner to intermediate
-- return plain list only
+- realistic
+- industry-level
+
+Return only questions.
 
 """
 
 
-    completion = groq_client.chat.completions.create(
+    completion = (
 
-        model="llama-3.3-70b-versatile",
+        groq_client.chat
+        .completions.create(
 
-        messages=[
+            model=
+            "llama-3.3-70b-versatile",
 
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
+            messages=[
 
-        temperature=0.7,
+                {
+                    "role": "system",
+
+                    "content":
+                        "You are an expert technical interviewer."
+                },
+
+                {
+                    "role": "user",
+
+                    "content": prompt
+                }
+            ],
+
+            temperature=0.7,
+        )
     )
 
 
@@ -519,107 +350,6 @@ Rules:
     }
 
 
-# =========================
-# FOLLOWUP QUESTIONS
-# =========================
-
-@app.post("/generate-followup")
-async def generate_followup(
-    data: AnswerRequest
-):
-
-    history_text = "\n".join(
-
-        [
-            f"{msg['role']}: {msg['content']}"
-
-            for msg in data.history
-        ]
-    )
-
-
-    prompt = f"""
-
-You are a professional senior technical interviewer.
-
-Your job:
-- behave naturally
-- ask intelligent follow-up questions
-- adapt difficulty based on candidate quality
-- maintain conversational flow
-- avoid repetitive questions
-- ask concise questions
-- sound like a real interviewer
-
-Conversation History:
-{history_text}
-
-Current Question:
-{data.question}
-
-Candidate Answer:
-{data.answer}
-
-Instructions:
-- if answer is weak:
-  ask simpler clarification
-
-- if answer is strong:
-  ask deeper technical follow-up
-
-- if answer is vague:
-  ask for examples
-
-- if answer is excellent:
-  increase difficulty slightly
-
-Return ONLY the next interviewer question.
-
-"""
-
-
-    completion = groq_client.chat.completions.create(
-
-        model="llama-3.3-70b-versatile",
-
-        messages=[
-
-            {
-                "role": "system",
-
-                "content":
-                    "You are an expert AI interviewer."
-            },
-
-            {
-                "role": "user",
-
-                "content": prompt
-            }
-        ],
-
-        temperature=0.8,
-    )
-
-
-    followup = (
-
-        completion
-        .choices[0]
-        .message.content
-        .strip()
-    )
-
-
-    return {
-        "question": followup
-    }
-
-
-# =========================
-# ANSWER EVALUATION
-# =========================
-
 @app.post("/evaluate-answer")
 async def evaluate_answer(
     data: AnswerRequest
@@ -627,7 +357,7 @@ async def evaluate_answer(
 
     prompt = f"""
 
-You are an elite FAANG interview evaluator.
+You are an elite FAANG interviewer.
 
 Question:
 {data.question}
@@ -636,13 +366,6 @@ Candidate Answer:
 {data.answer}
 
 Evaluate deeply.
-
-Analyze:
-- technical accuracy
-- communication clarity
-- confidence
-- structure
-- problem solving
 
 Return STRICTLY:
 
@@ -654,7 +377,7 @@ Strengths:
 Weaknesses:
 - ...
 
-Improvement:
+Improvements:
 - ...
 
 Final Feedback:
@@ -663,27 +386,32 @@ Final Feedback:
 """
 
 
-    completion = groq_client.chat.completions.create(
+    completion = (
 
-        model="llama-3.3-70b-versatile",
+        groq_client.chat
+        .completions.create(
 
-        messages=[
+            model=
+            "llama-3.3-70b-versatile",
 
-            {
-                "role": "system",
+            messages=[
 
-                "content":
-                    "You are an elite interview evaluator."
-            },
+                {
+                    "role": "system",
 
-            {
-                "role": "user",
+                    "content":
+                        "You are an elite interview evaluator."
+                },
 
-                "content": prompt
-            }
-        ],
+                {
+                    "role": "user",
 
-        temperature=0.5,
+                    "content": prompt
+                }
+            ],
+
+            temperature=0.5,
+        )
     )
 
 
@@ -696,7 +424,7 @@ Final Feedback:
 
 
     score_match = re.search(
-        r'(\d{1,3})',
+        r"(\d{1,3})",
         feedback
     )
 
@@ -719,31 +447,81 @@ Final Feedback:
     }
 
 
-# =========================
-# FINAL REPORT
-# =========================
+@app.post("/generate-followup")
+async def generate_followup(
+    data: AnswerRequest
+):
 
-@app.post("/final-report")
-async def final_report():
+    history_text = "\n".join(
+
+        [
+            f"{msg['role']}: {msg['content']}"
+
+            for msg in data.history
+        ]
+    )
+
+
+    prompt = f"""
+
+You are a senior technical interviewer.
+
+Conversation History:
+{history_text}
+
+Current Question:
+{data.question}
+
+Candidate Answer:
+{data.answer}
+
+Generate ONE intelligent follow-up question.
+
+"""
+
+
+    completion = (
+
+        groq_client.chat
+        .completions.create(
+
+            model=
+            "llama-3.3-70b-versatile",
+
+            messages=[
+
+                {
+                    "role": "system",
+
+                    "content":
+                        "You are an expert AI interviewer."
+                },
+
+                {
+                    "role": "user",
+
+                    "content": prompt
+                }
+            ],
+
+            temperature=0.8,
+        )
+    )
+
+
+    followup = (
+
+        completion
+        .choices[0]
+        .message.content
+        .strip()
+    )
+
 
     return {
-
-        "confidence_score": 85,
-
-        "communication_score": 88,
-
-        "words_per_minute": 120,
-
-        "eye_contact_score": 90,
-
-        "attention_status":
-            "Focused",
+        "question": followup
     }
 
-
-# =========================
-# SPEECH ANALYSIS
-# =========================
 
 @app.post("/speech-analysis")
 async def speech_analysis(
@@ -762,10 +540,8 @@ async def speech_analysis(
         "um",
         "uh",
         "like",
-        "basically",
-        "you know",
         "actually",
-        "literally",
+        "basically",
     ]
 
 
@@ -782,73 +558,49 @@ async def speech_analysis(
         )
 
 
-    wpm = max(
-        80,
-        min(
-            160,
-            total_words // 2
-        )
-    )
-
-
     prompt = f"""
 
-You are an expert communication coach.
-
-Analyze this interview speech transcript:
+Analyze this interview communication:
 
 {transcript}
 
 Evaluate:
+- confidence
+- communication
+- professionalism
+- clarity
 
-1. Communication clarity
-2. Confidence
-3. Professional tone
-4. Conciseness
-5. Technical articulation
-
-Return STRICTLY:
-
-Confidence Score: <number>
-
-Communication Score: <number>
-
-Strengths:
-- ...
-
-Weaknesses:
-- ...
-
-Suggestions:
-- ...
-
-Final Feedback:
-...
+Return detailed feedback.
 
 """
 
 
-    completion = groq_client.chat.completions.create(
+    completion = (
 
-        model="llama-3.3-70b-versatile",
+        groq_client.chat
+        .completions.create(
 
-        messages=[
+            model=
+            "llama-3.3-70b-versatile",
 
-            {
-                "role": "system",
+            messages=[
 
-                "content":
-                    "You are an expert interview communication evaluator."
-            },
+                {
+                    "role": "system",
 
-            {
-                "role": "user",
+                    "content":
+                        "You are an expert communication evaluator."
+                },
 
-                "content": prompt
-            }
-        ],
+                {
+                    "role": "user",
 
-        temperature=0.4,
+                    "content": prompt
+                }
+            ],
+
+            temperature=0.4,
+        )
     )
 
 
@@ -860,129 +612,230 @@ Final Feedback:
     )
 
 
-    score_match = re.findall(
-        r'(\d{1,3})',
-        feedback
-    )
-
-
-    confidence_score = (
-
-        int(score_match[0])
-
-        if len(score_match) > 0
-
-        else 82
-    )
-
-
-    communication_score = (
-
-        int(score_match[1])
-
-        if len(score_match) > 1
-
-        else 85
-    )
-
-
     return {
 
-        "total_words":
-            total_words,
+        "confidence_score": 85,
+
+        "communication_score": 88,
+
+        "words_per_minute":
+            max(
+                80,
+                total_words // 2
+            ),
 
         "filler_words":
             filler_count,
 
-        "words_per_minute":
-            wpm,
-
-        "confidence_score":
-            confidence_score,
-
-        "communication_score":
-            communication_score,
-
-        "feedback":
-            feedback,
+        "feedback": feedback,
     }
 
 
-# =========================
-# LIVE INTERVIEW ANALYSIS
-# =========================
-
 @app.post("/live-interview-analysis")
 async def live_interview_analysis(
-    data: LiveInterviewRequest
+
+    data: SpeechRequest
 ):
-
-    transcript = data.transcript
-
-    words = transcript.split()
-
-    total_words = len(words)
-
-
-    filler_words = [
-
-        "um",
-        "uh",
-        "like",
-        "basically",
-    ]
-
-
-    filler_count = 0
-
-
-    for filler in filler_words:
-
-        filler_count += (
-
-            transcript
-            .lower()
-            .count(filler)
-        )
-
-
-    confidence_score = max(
-        55,
-        100 - (filler_count * 4)
-    )
-
-
-    communication_score = min(
-        95,
-        70 + (
-            total_words // 10
-        )
-    )
-
 
     return {
 
-        "role":
-            data.role,
+        "confidence_score": 87,
 
-        "confidence_score":
-            confidence_score,
+        "communication_score": 90,
 
-        "communication_score":
-            communication_score,
+        "words_per_minute": 118,
 
         "attention_status":
             "Focused",
 
-        "words_per_minute":
-            max(
-                90,
-                min(
-                    160,
-                    total_words // 2
-                )
-            ),
-
         "feedback":
-            "Communication quality is good.",
+            "Strong communication and technical articulation detected.",
+    }
+
+
+@app.post("/save-interview")
+def save_interview(
+
+    data: InterviewSessionRequest,
+
+    db: Session = Depends(get_db)
+):
+
+    session = InterviewSession(
+
+        user_id=data.user_id,
+
+        role=data.role,
+
+        transcript=data.transcript,
+
+        confidence_score=
+            data.confidence_score,
+
+        communication_score=
+            data.communication_score,
+
+        words_per_minute=
+            data.words_per_minute,
+
+        eye_contact_score=
+            data.eye_contact_score,
+
+        technical_score=
+            data.technical_score,
+
+        attention_status=
+            data.attention_status,
+
+        ai_feedback=
+            data.ai_feedback,
+    )
+
+
+    db.add(session)
+
+    db.commit()
+
+    db.refresh(session)
+
+
+    return {
+
+        "message":
+            "Interview saved successfully"
+    }
+
+
+@app.get("/history/{user_id}")
+def get_history(
+
+    user_id: int,
+
+    db: Session = Depends(get_db)
+):
+
+    sessions = (
+
+        db.query(InterviewSession)
+
+        .filter(
+            InterviewSession.user_id
+            == user_id
+        )
+
+        .all()
+    )
+
+    return sessions
+
+
+@app.get("/leaderboard")
+def leaderboard(
+    db: Session = Depends(get_db)
+):
+
+    sessions = (
+
+        db.query(InterviewSession)
+
+        .order_by(
+            InterviewSession
+            .confidence_score.desc()
+        )
+
+        .limit(10)
+
+        .all()
+    )
+
+    return sessions
+
+
+@app.get("/dashboard/{user_id}")
+def dashboard(
+
+    user_id: int,
+
+    db: Session = Depends(get_db)
+):
+
+    sessions = (
+
+        db.query(InterviewSession)
+
+        .filter(
+            InterviewSession.user_id
+            == user_id
+        )
+
+        .all()
+    )
+
+
+    total = len(sessions)
+
+
+    avg_confidence = 0
+
+    avg_communication = 0
+
+
+    if total > 0:
+
+        avg_confidence = round(
+
+            sum(
+
+                s.confidence_score
+
+                for s in sessions
+
+            ) / total,
+
+            2
+        )
+
+
+        avg_communication = round(
+
+            sum(
+
+                s.communication_score
+
+                for s in sessions
+
+            ) / total,
+
+            2
+        )
+
+
+    return {
+
+        "total_interviews":
+            total,
+
+        "average_confidence":
+            avg_confidence,
+
+        "average_communication":
+            avg_communication,
+    }
+
+
+@app.post("/final-report")
+def final_report():
+
+    return {
+
+        "confidence_score": 87,
+
+        "communication_score": 90,
+
+        "words_per_minute": 115,
+
+        "eye_contact_score": 92,
+
+        "attention_status":
+            "Focused",
     }

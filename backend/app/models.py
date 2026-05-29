@@ -1,7 +1,13 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import Float
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    Text,
+    DateTime,
+)
+
+from sqlalchemy.sql import func
 
 from .database import Base
 
@@ -18,22 +24,29 @@ class User(Base):
 
     username = Column(
         String,
-        unique=True
+        nullable=False
     )
 
     email = Column(
         String,
-        unique=True
+        unique=True,
+        nullable=False
     )
 
     password = Column(
-        String
+        String,
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
     )
 
 
-class Interview(Base):
+class InterviewSession(Base):
 
-    __tablename__ = "interviews"
+    __tablename__ = "interview_sessions"
 
     id = Column(
         Integer,
@@ -42,29 +55,55 @@ class Interview(Base):
     )
 
     user_id = Column(
-        Integer
+        Integer,
+        nullable=False
+    )
+
+    role = Column(
+        String,
+        default="General"
     )
 
     transcript = Column(
-        String
+        Text
     )
 
     confidence_score = Column(
-        Float
+        Float,
+        default=0
     )
 
     communication_score = Column(
-        Float
+        Float,
+        default=0
     )
 
     words_per_minute = Column(
-        Float
+        Float,
+        default=0
     )
 
     eye_contact_score = Column(
-        Float
+        Float,
+        default=0
+    )
+
+    technical_score = Column(
+        Float,
+        default=0
     )
 
     attention_status = Column(
-        String
+        String,
+        default="Focused"
+    )
+
+    ai_feedback = Column(
+        Text,
+        default=""
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
     )
