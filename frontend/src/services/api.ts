@@ -2,10 +2,26 @@ const API_BASE_URL =
   "https://hiresense-ai-3jl0.onrender.com";
 
 
+function getAuthHeaders() {
+
+  const token =
+    localStorage.getItem(
+      "token"
+    );
+
+  return {
+
+    "Content-Type":
+      "application/json",
+
+    Authorization:
+      `Bearer ${token}`,
+  };
+}
+
+
 export async function signup(
-  username: string,
-  email: string,
-  password: string
+  data: any
 ) {
 
   const response =
@@ -21,12 +37,9 @@ export async function signup(
             "application/json",
         },
 
-        body: JSON.stringify({
-
-          username,
-          email,
-          password,
-        }),
+        body: JSON.stringify(
+          data
+        ),
       }
     );
 
@@ -35,8 +48,7 @@ export async function signup(
 
 
 export async function login(
-  email: string,
-  password: string
+  data: any
 ) {
 
   const response =
@@ -52,11 +64,9 @@ export async function login(
             "application/json",
         },
 
-        body: JSON.stringify({
-
-          email,
-          password,
-        }),
+        body: JSON.stringify(
+          data
+        ),
       }
     );
 
@@ -71,18 +81,15 @@ export async function getDashboard(
   const response =
     await fetch(
 
-      `${API_BASE_URL}/dashboard/${userId}`
+      `${API_BASE_URL}/dashboard/${userId}`,
+
+      {
+        headers:
+          getAuthHeaders(),
+      }
     );
 
   return response.json();
-}
-
-
-export async function getDashboardStats(
-  userId: number
-) {
-
-  return getDashboard(userId);
 }
 
 
@@ -98,27 +105,13 @@ export async function saveInterview(
       {
         method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+        headers:
+          getAuthHeaders(),
 
-        body: JSON.stringify(data),
+        body: JSON.stringify(
+          data
+        ),
       }
-    );
-
-  return response.json();
-}
-
-
-export async function getInterviewSessions(
-  userId: number
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/history/${userId}`
     );
 
   return response.json();
@@ -129,9 +122,18 @@ export async function getHistory(
   userId: number
 ) {
 
-  return getInterviewSessions(
-    userId
-  );
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/history/${userId}`,
+
+      {
+        headers:
+          getAuthHeaders(),
+      }
+    );
+
+  return response.json();
 }
 
 
@@ -140,7 +142,12 @@ export async function getLeaderboard() {
   const response =
     await fetch(
 
-      `${API_BASE_URL}/leaderboard`
+      `${API_BASE_URL}/leaderboard`,
+
+      {
+        headers:
+          getAuthHeaders(),
+      }
     );
 
   return response.json();
@@ -159,10 +166,8 @@ export async function generateQuestions(
       {
         method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+        headers:
+          getAuthHeaders(),
 
         body: JSON.stringify({
           role,
@@ -177,6 +182,7 @@ export async function generateQuestions(
 export async function evaluateAnswer(
 
   question: string,
+
   answer: string
 
 ) {
@@ -189,10 +195,8 @@ export async function evaluateAnswer(
       {
         method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+        headers:
+          getAuthHeaders(),
 
         body: JSON.stringify({
 
@@ -206,85 +210,12 @@ export async function evaluateAnswer(
 }
 
 
-export async function getFinalReport(
-  _data?: any
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/final-report`,
-
-      {
-        method: "POST",
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function analyzeSpeech(
-  transcript: string
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/speech-analysis`,
-
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          transcript,
-        }),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function analyzeLiveInterview(
-
-  transcript: string,
-  role: string
-
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/live-interview-analysis`,
-
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-
-          transcript,
-          role,
-        }),
-      }
-    );
-
-  return response.json();
-}
 export async function generateFollowupQuestion(
 
   question: string,
+
   answer: string,
+
   history: any[]
 
 ) {
@@ -297,16 +228,89 @@ export async function generateFollowupQuestion(
       {
         method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+        headers:
+          getAuthHeaders(),
 
         body: JSON.stringify({
 
           question,
           answer,
           history,
+        }),
+      }
+    );
+
+  return response.json();
+}
+
+
+export async function getFinalReport() {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/final-report`,
+
+      {
+        method: "POST",
+
+        headers:
+          getAuthHeaders(),
+      }
+    );
+
+  return response.json();
+}
+
+
+export async function speechAnalysis(
+  transcript: string
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/speech-analysis`,
+
+      {
+        method: "POST",
+
+        headers:
+          getAuthHeaders(),
+
+        body: JSON.stringify({
+          transcript,
+        }),
+      }
+    );
+
+  return response.json();
+}
+
+
+export async function liveInterviewAnalysis(
+
+  transcript: string,
+
+  role: string
+
+) {
+
+  const response =
+    await fetch(
+
+      `${API_BASE_URL}/live-interview-analysis`,
+
+      {
+        method: "POST",
+
+        headers:
+          getAuthHeaders(),
+
+        body: JSON.stringify({
+
+          transcript,
+          role,
         }),
       }
     );
