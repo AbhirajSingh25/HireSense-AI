@@ -10,7 +10,6 @@ import {
 } from "react-router-dom";
 
 import {
-
   LayoutDashboard,
   Brain,
   FileText,
@@ -22,14 +21,11 @@ import {
   LogOut,
   Mic,
   Camera,
-
 } from "lucide-react";
-
 
 type Props = {
   children: ReactNode;
 };
-
 
 function MainLayout({
   children,
@@ -46,6 +42,11 @@ function MainLayout({
     setMobileOpen,
   ] = useState(false);
 
+  const user = JSON.parse(
+    localStorage.getItem(
+      "user"
+    ) || "{}"
+  );
 
   function logout() {
 
@@ -53,9 +54,12 @@ function MainLayout({
       "user"
     );
 
+    localStorage.removeItem(
+      "token"
+    );
+
     navigate("/login");
   }
-
 
   const navItems = [
 
@@ -86,16 +90,21 @@ function MainLayout({
       icon:
         <FileText size={20} />,
     },
+
     {
-  name: "Speech Analysis",
-  path: "/speech-analysis",
-  icon: <Mic size={20} />,
-},
-{
-  name: "Vision Analysis",
-  path: "/vision-analysis",
-  icon: <Camera size={20} />,
-},
+      name: "Speech Analysis",
+      path: "/speech-analysis",
+      icon:
+        <Mic size={20} />,
+    },
+
+    {
+      name: "Vision Analysis",
+      path: "/vision-analysis",
+      icon:
+        <Camera size={20} />,
+    },
+
     {
       name: "Analytics",
       path: "/analytics",
@@ -110,7 +119,6 @@ function MainLayout({
         <Trophy size={20} />,
     },
   ];
-
 
   return (
 
@@ -139,7 +147,6 @@ function MainLayout({
         />
       )}
 
-
       <aside
         className={`
           fixed
@@ -148,7 +155,7 @@ function MainLayout({
           top-0
           left-0
           h-screen
-          w-62.5
+          w-65
           bg-[#0b1120]
           border-r
           border-white/10
@@ -158,9 +165,7 @@ function MainLayout({
 
           ${
             mobileOpen
-
               ? "translate-x-0"
-
               : "-translate-x-full md:translate-x-0"
           }
         `}
@@ -175,16 +180,29 @@ function MainLayout({
           "
         >
 
-          <h1
-            className="
-              text-2xl
-              font-black
-              text-cyan-400
-            "
-          >
-            HireSense
-          </h1>
+          <div>
 
+            <h1
+              className="
+                text-2xl
+                font-black
+                text-cyan-400
+              "
+            >
+              HireSense
+            </h1>
+
+            <p
+              className="
+                text-xs
+                text-gray-500
+                mt-1
+              "
+            >
+              AI Interview Platform
+            </p>
+
+          </div>
 
           <button
             className="
@@ -201,6 +219,52 @@ function MainLayout({
 
         </div>
 
+        <div
+          className="
+            bg-white/5
+            border
+            border-white/10
+            rounded-2xl
+            p-4
+            mb-8
+          "
+        >
+
+          <p
+            className="
+              text-gray-400
+              text-sm
+            "
+          >
+            Logged in as
+          </p>
+
+          <h3
+            className="
+              text-lg
+              font-bold
+              mt-1
+            "
+          >
+            {
+              user?.username || "User"
+            }
+          </h3>
+
+          <p
+            className="
+              text-xs
+              text-gray-500
+              mt-1
+              break-all
+            "
+          >
+            {
+              user?.email || ""
+            }
+          </p>
+
+        </div>
 
         <div
           className="
@@ -229,9 +293,15 @@ function MainLayout({
                   location.pathname ===
                   item.path
 
-                    ? "bg-cyan-400 text-black font-semibold"
+                    ? `
+                      bg-cyan-400
+                      text-black
+                      font-semibold
+                    `
 
-                    : "hover:bg-white/10"
+                    : `
+                      hover:bg-white/10
+                    `
                 }
               `}
             >
@@ -244,7 +314,6 @@ function MainLayout({
           ))}
 
         </div>
-
 
         <button
           onClick={logout}
@@ -262,6 +331,7 @@ function MainLayout({
             py-3
             rounded-xl
             font-semibold
+            transition-all
           "
         >
 
@@ -272,7 +342,6 @@ function MainLayout({
         </button>
 
       </aside>
-
 
       <main
         className="
@@ -320,7 +389,6 @@ function MainLayout({
 
             </button>
 
-
             <h2
               className="
                 text-lg
@@ -333,7 +401,6 @@ function MainLayout({
 
           </div>
 
-
           <div
             className="
               w-10
@@ -345,13 +412,16 @@ function MainLayout({
               justify-center
               text-black
               font-bold
+              uppercase
             "
           >
-            A
+            {
+              user?.username
+                ?.charAt(0) || "A"
+            }
           </div>
 
         </header>
-
 
         <div
           className="

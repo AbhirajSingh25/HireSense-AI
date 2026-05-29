@@ -2,27 +2,24 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import {
-  isAuthenticated,
-} from "../store/authStore";
-
 
 function ProtectedRoute({
-
   children,
-
 }: any) {
 
-  if (
-    !isAuthenticated()
-  ) {
+  const token =
+    localStorage.getItem(
+      "token"
+    );
+
+
+  if (!token) {
 
     return (
-      <Navigate
-        to="/login"
-      />
+      <Navigate to="/login" />
     );
   }
+
 
   return children;
 }
