@@ -4,14 +4,15 @@ import {
 
 import MainLayout from "../components/MainLayout";
 
+import toast from "react-hot-toast";
+
 import {
-  Upload,
   Mic,
-  Brain,
+  Square,
 } from "lucide-react";
 
 import {
-  analyzeSpeech as analyzeSpeechAPI,
+  analyzeSpeech,
 } from "../services/api";
 
 
@@ -23,27 +24,146 @@ function SpeechAnalysis() {
   ] = useState("");
 
   const [
+    listening,
+    setListening,
+  ] = useState(false);
+
+  const [
+    recognition,
+    setRecognition,
+  ] = useState<any>(null);
+
+  const [
     analysis,
     setAnalysis,
   ] = useState<any>(null);
 
+  const [
+    loading,
+    setLoading,
+  ] = useState(false);
 
-  async function analyzeSpeech() {
 
-  try {
+  function startListening() {
 
-    const data =
-      await analyzeSpeechAPI(
-        transcript
+    const SpeechRecognition =
+
+      (window as any)
+        .SpeechRecognition ||
+
+      (window as any)
+        .webkitSpeechRecognition;
+
+
+    if (!SpeechRecognition) {
+
+      toast.error(
+        "Speech recognition not supported"
       );
 
-    setAnalysis(data);
+      return;
+    }
 
-  } catch (error) {
 
-    console.error(error);
+    const recognitionInstance =
+      new SpeechRecognition();
+
+    recognitionInstance.continuous =
+      true;
+
+    recognitionInstance.interimResults =
+      true;
+
+    recognitionInstance.lang =
+      "en-US";
+
+
+    recognitionInstance.onstart =
+      () => {
+
+      setListening(true);
+    };
+
+
+    recognitionInstance.onend =
+      () => {
+
+      setListening(false);
+    };
+
+
+    recognitionInstance.onresult =
+      (event: any) => {
+
+      let finalTranscript = "";
+
+      for (
+        let i = 0;
+        i < event.results.length;
+        i++
+      ) {
+
+        finalTranscript +=
+
+          event.results[i][0]
+            .transcript + " ";
+      }
+
+      setTranscript(
+        finalTranscript
+      );
+    };
+
+
+    recognitionInstance.start();
+
+    setRecognition(
+      recognitionInstance
+    );
   }
-}
+
+
+  function stopListening() {
+
+    if (recognition) {
+
+      recognition.stop();
+    }
+
+    setListening(false);
+  }
+
+
+  async function analyze() {
+
+    try {
+
+      setLoading(true);
+
+      const result =
+        await analyzeSpeech(
+          transcript
+        );
+
+      setAnalysis(result);
+
+      toast.success(
+        "Speech analyzed"
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      toast.error(
+        "Analysis failed"
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  }
 
 
   return (
@@ -52,7 +172,7 @@ function SpeechAnalysis() {
 
       <div
         className="
-          max-w-5xl
+          max-w-6xl
           mx-auto
         "
       >
@@ -79,7 +199,7 @@ function SpeechAnalysis() {
               text-gray-400
             "
           >
-            Analyze communication quality and speaking clarity
+            Analyze communication and speaking confidence
           </p>
 
         </div>
@@ -87,274 +207,142 @@ function SpeechAnalysis() {
 
         <div
           className="
-            bg-white/5
-            border
-            border-white/10
-            rounded-3xl
-            p-8
-            mb-8
+            grid
+            lg:grid-cols-2
+            gap-8
           "
         >
 
           <div
             className="
-              flex
-              items-center
-              gap-4
-              mb-8
+              bg-white/5
+              border
+              border-white/10
+              rounded-3xl
+              p-6
             "
           >
 
+            <textarea
+              value={transcript}
+              onChange={(e) =>
+                setTranscript(
+                  e.target.value
+                )
+              }
+              rows={12}
+              placeholder="Speak or type interview response..."
+              className="
+                w-full
+                p-5
+                rounded-2xl
+                bg-[#111827]
+                border
+                border-white/10
+                text-white
+                resize-none
+                outline-none
+                mb-6
+              "
+            />
+
+
             <div
               className="
-                w-14
-                h-14
-                rounded-2xl
-                bg-cyan-400
-                text-black
                 flex
-                items-center
-                justify-center
+                flex-wrap
+                gap-4
               "
             >
 
-              <Mic size={28} />
+              {!listening ? (
 
-            </div>
+                <button
+                  onClick={
+                    startListening
+                  }
+                  className="
+                    bg-cyan-400
+                    hover:bg-cyan-300
+                    text-black
+                    font-bold
+                    px-5
+                    py-3
+                    rounded-2xl
+                    flex
+                    items-center
+                    gap-3
+                  "
+                >
+
+                  <Mic size={18} />
+
+                  Start Recording
+
+                </button>
+
+              ) : (
+
+                <button
+                  onClick={
+                    stopListening
+                  }
+                  className="
+                    bg-red-400
+                    hover:bg-red-300
+                    text-black
+                    font-bold
+                    px-5
+                    py-3
+                    rounded-2xl
+                    flex
+                    items-center
+                    gap-3
+                  "
+                >
+
+                  <Square size={18} />
+
+                  Stop Recording
+
+                </button>
+              )}
 
 
-            <div>
-
-              <h2
+              <button
+                onClick={analyze}
+                disabled={
+                  loading ||
+                  !transcript
+                }
                 className="
-                  text-2xl
+                  bg-green-400
+                  hover:bg-green-300
+                  disabled:opacity-50
+                  text-black
                   font-bold
-                  text-white
+                  px-5
+                  py-3
+                  rounded-2xl
                 "
               >
-                Speech Transcript
-              </h2>
 
-              <p
-                className="
-                  text-gray-400
-                "
-              >
-                Paste interview answer transcript
-              </p>
+                {
+                  loading
+
+                    ? "Analyzing..."
+
+                    : "Analyze Speech"
+                }
+
+              </button>
 
             </div>
 
           </div>
 
 
-          <textarea
-            value={transcript}
-            onChange={(e) =>
-              setTranscript(
-                e.target.value
-              )
-            }
-            rows={10}
-            placeholder="Paste your interview answer transcript..."
-            className="
-              w-full
-              p-5
-              rounded-2xl
-              bg-[#111827]
-              border
-              border-white/10
-              text-white
-              resize-none
-              outline-none
-              mb-6
-            "
-          />
-
-
-          <button
-            onClick={
-              analyzeSpeech
-            }
-            disabled={!transcript}
-            className="
-              bg-cyan-400
-              hover:bg-cyan-300
-              disabled:opacity-50
-              text-black
-              font-bold
-              px-6
-              py-4
-              rounded-2xl
-              flex
-              items-center
-              gap-3
-            "
-          >
-
-            <Upload size={20} />
-
-            Analyze Speech
-
-          </button>
-
-        </div>
-
-
-        {analysis && (
-
-          <div
-            className="
-              grid
-              gap-6
-            "
-          >
-
-            <div
-              className="
-                grid
-                md:grid-cols-4
-                gap-5
-              "
-            >
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Total Words
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-white
-                  "
-                >
-                  {
-                    analysis.words
-                  }
-                </h3>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Filler Words
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-orange-400
-                  "
-                >
-                  {
-                    analysis.fillerCount
-                  }
-                </h3>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  WPM
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-cyan-400
-                  "
-                >
-                  {
-                    analysis.wpm
-                  }
-                </h3>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Confidence
-                </p>
-
-                <h3
-                  className="
-                    text-4xl
-                    font-black
-                    text-green-400
-                  "
-                >
-                  {
-                    analysis.confidence
-                  }%
-                </h3>
-
-              </div>
-
-            </div>
-
+          {analysis && (
 
             <div
               className="
@@ -362,56 +350,203 @@ function SpeechAnalysis() {
                 border
                 border-white/10
                 rounded-3xl
-                p-8
+                p-6
               "
             >
 
+              <h2
+                className="
+                  text-2xl
+                  font-bold
+                  mb-6
+                "
+              >
+                AI Communication Report
+              </h2>
+
+
               <div
                 className="
-                  flex
-                  items-center
-                  gap-3
-                  mb-5
+                  grid
+                  grid-cols-2
+                  gap-5
+                  mb-6
                 "
               >
 
-                <Brain
+                <div
                   className="
-                    text-cyan-400
-                  "
-                  size={24}
-                />
-
-                <h2
-                  className="
-                    text-2xl
-                    font-bold
-                    text-white
+                    bg-black/20
+                    rounded-2xl
+                    p-5
                   "
                 >
-                  AI Feedback
-                </h2>
+
+                  <p
+                    className="
+                      text-gray-400
+                      mb-2
+                    "
+                  >
+                    Confidence
+                  </p>
+
+                  <h3
+                    className="
+                      text-4xl
+                      font-black
+                      text-cyan-400
+                    "
+                  >
+                    {
+                      analysis
+                        ?.confidence_score
+                    }%
+                  </h3>
+
+                </div>
+
+
+                <div
+                  className="
+                    bg-black/20
+                    rounded-2xl
+                    p-5
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      mb-2
+                    "
+                  >
+                    Communication
+                  </p>
+
+                  <h3
+                    className="
+                      text-4xl
+                      font-black
+                      text-green-400
+                    "
+                  >
+                    {
+                      analysis
+                        ?.communication_score
+                    }%
+                  </h3>
+
+                </div>
+
+
+                <div
+                  className="
+                    bg-black/20
+                    rounded-2xl
+                    p-5
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      mb-2
+                    "
+                  >
+                    Words
+                  </p>
+
+                  <h3
+                    className="
+                      text-4xl
+                      font-black
+                      text-orange-400
+                    "
+                  >
+                    {
+                      analysis
+                        ?.total_words
+                    }
+                  </h3>
+
+                </div>
+
+
+                <div
+                  className="
+                    bg-black/20
+                    rounded-2xl
+                    p-5
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      mb-2
+                    "
+                  >
+                    Filler Words
+                  </p>
+
+                  <h3
+                    className="
+                      text-4xl
+                      font-black
+                      text-pink-400
+                    "
+                  >
+                    {
+                      analysis
+                        ?.filler_words
+                    }
+                  </h3>
+
+                </div>
 
               </div>
 
 
-              <p
+              <div
                 className="
-                  text-gray-300
-                  leading-8
+                  bg-black/20
+                  rounded-2xl
+                  p-5
                 "
               >
 
-                {
-                  analysis.feedback
-                }
+                <h3
+                  className="
+                    text-xl
+                    font-bold
+                    mb-4
+                  "
+                >
+                  AI Feedback
+                </h3>
 
-              </p>
+                <div
+                  className="
+                    text-gray-300
+                    leading-8
+                    whitespace-pre-wrap
+                  "
+                >
+
+                  {
+                    analysis
+                      ?.feedback
+                  }
+
+                </div>
+
+              </div>
 
             </div>
+          )}
 
-          </div>
-        )}
+        </div>
 
       </div>
 

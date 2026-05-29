@@ -764,6 +764,8 @@ async def speech_analysis(
         "like",
         "basically",
         "you know",
+        "actually",
+        "literally",
     ]
 
 
@@ -789,9 +791,98 @@ async def speech_analysis(
     )
 
 
-    confidence_score = max(
-        50,
-        100 - (filler_count * 5)
+    prompt = f"""
+
+You are an expert communication coach.
+
+Analyze this interview speech transcript:
+
+{transcript}
+
+Evaluate:
+
+1. Communication clarity
+2. Confidence
+3. Professional tone
+4. Conciseness
+5. Technical articulation
+
+Return STRICTLY:
+
+Confidence Score: <number>
+
+Communication Score: <number>
+
+Strengths:
+- ...
+
+Weaknesses:
+- ...
+
+Suggestions:
+- ...
+
+Final Feedback:
+...
+
+"""
+
+
+    completion = groq_client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+
+            {
+                "role": "system",
+
+                "content":
+                    "You are an expert interview communication evaluator."
+            },
+
+            {
+                "role": "user",
+
+                "content": prompt
+            }
+        ],
+
+        temperature=0.4,
+    )
+
+
+    feedback = (
+
+        completion
+        .choices[0]
+        .message.content
+    )
+
+
+    score_match = re.findall(
+        r'(\d{1,3})',
+        feedback
+    )
+
+
+    confidence_score = (
+
+        int(score_match[0])
+
+        if len(score_match) > 0
+
+        else 82
+    )
+
+
+    communication_score = (
+
+        int(score_match[1])
+
+        if len(score_match) > 1
+
+        else 85
     )
 
 
@@ -809,8 +900,11 @@ async def speech_analysis(
         "confidence_score":
             confidence_score,
 
+        "communication_score":
+            communication_score,
+
         "feedback":
-            "Speech analyzed successfully",
+            feedback,
     }
 
 
