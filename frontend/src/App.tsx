@@ -2,15 +2,21 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  Navigate,
 } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+
 import Dashboard from "./pages/Dashboard";
 import MockInterview from "./pages/MockInterview";
 import History from "./pages/History";
 import Analytics from "./pages/Analytics";
 import Leaderboard from "./pages/Leaderboard";
+
+import Reports from "./pages/Reports";
+import SpeechAnalysis from "./pages/SpeechAnalysis";
+import LiveInterview from "./pages/LiveInterview";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -22,6 +28,13 @@ function App() {
     <BrowserRouter>
 
       <Routes>
+
+        <Route
+          path="/"
+          element={
+            <Navigate to="/login" />
+          }
+        />
 
         <Route
           path="/login"
@@ -85,8 +98,40 @@ function App() {
 
 
         <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/speech-analysis"
+          element={
+            <ProtectedRoute>
+              <SpeechAnalysis />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/live-interview"
+          element={
+            <ProtectedRoute>
+              <LiveInterview />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
           path="*"
-          element={<Login />}
+          element={
+            <Navigate to="/login" />
+          }
         />
 
       </Routes>
