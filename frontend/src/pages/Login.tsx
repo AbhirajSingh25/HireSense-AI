@@ -7,15 +7,25 @@ import {
   Link,
 } from "react-router-dom";
 
+import toast from "react-hot-toast";
+
 import {
   login,
 } from "../services/api";
+
+import {
+  useAuth,
+} from "../context/AuthContext";
 
 
 function Login() {
 
   const navigate =
     useNavigate();
+
+  const auth =
+    useAuth();
+
 
   const [
     email,
@@ -28,9 +38,9 @@ function Login() {
   ] = useState("");
 
   const [
-    error,
-    setError,
-  ] = useState("");
+    loading,
+    setLoading,
+  ] = useState(false);
 
 
   async function handleLogin(
@@ -39,43 +49,41 @@ function Login() {
 
     e.preventDefault();
 
-    setError("");
-
     try {
 
-      const data =
+      setLoading(true);
+
+      const response =
         await login(
           email,
           password
         );
 
-      console.log(data);
 
       if (
-        data.message ===
-        "Login successful"
+        response.token
       ) {
 
-        localStorage.setItem(
+        auth.login(
 
-          "user",
+          response.user,
 
-          JSON.stringify(
-            data.user
-          )
+          response.token
         );
 
-        localStorage.setItem(
-          "token",
-          data.token
+        toast.success(
+          "Login successful"
         );
 
-        navigate("/dashboard");
+        navigate(
+          "/dashboard"
+        );
 
       } else {
 
-        setError(
-          "Invalid credentials"
+        toast.error(
+          response.detail ||
+          "Login failed"
         );
       }
 
@@ -83,9 +91,13 @@ function Login() {
 
       console.error(error);
 
-      setError(
-        "Login failed"
+      toast.error(
+        "Something went wrong"
       );
+
+    } finally {
+
+      setLoading(false);
     }
   }
 
@@ -95,49 +107,45 @@ function Login() {
     <div
       className="
         min-h-screen
-        bg-[#020817]
+        bg-[#050816]
         flex
         items-center
         justify-center
-        px-4
+        px-5
       "
     >
 
       <form
-        onSubmit={
-          handleLogin
-        }
+        onSubmit={handleLogin}
         className="
-          bg-[#0f172a]
+          w-full
+          max-w-md
+          bg-white/5
           border
           border-white/10
           rounded-3xl
-          p-10
-          w-full
-          max-w-md
+          p-8
         "
       >
 
         <h1
           className="
-            text-5xl
+            text-4xl
             font-black
             text-white
-            text-center
             mb-3
           "
         >
-          Welcome Back
+          HireSense AI
         </h1>
 
         <p
           className="
             text-gray-400
-            text-center
-            mb-10
+            mb-8
           "
         >
-          Login to HireSense AI
+          AI-powered interview intelligence
         </p>
 
 
@@ -152,13 +160,15 @@ function Login() {
           }
           className="
             w-full
-            p-5
+            p-4
             rounded-2xl
-            bg-gray-200
+            bg-[#111827]
+            border
+            border-white/10
+            text-white
             mb-5
             outline-none
           "
-          required
         />
 
 
@@ -173,66 +183,60 @@ function Login() {
           }
           className="
             w-full
-            p-5
+            p-4
             rounded-2xl
-            bg-[#020817]
+            bg-[#111827]
             border
             border-white/10
             text-white
-            mb-5
+            mb-6
             outline-none
           "
-          required
         />
-
-
-        {error && (
-
-          <p
-            className="
-              text-red-400
-              mb-5
-            "
-          >
-            {error}
-          </p>
-        )}
 
 
         <button
           type="submit"
+          disabled={loading}
           className="
             w-full
             bg-cyan-400
             hover:bg-cyan-300
+            disabled:opacity-50
             text-black
             font-bold
-            py-5
+            py-4
             rounded-2xl
-            transition
           "
         >
 
-          Login
+          {
+            loading
+
+              ? "Signing in..."
+
+              : "Login"
+          }
 
         </button>
 
 
         <p
           className="
-            text-center
             text-gray-400
-            mt-8
+            mt-6
+            text-center
           "
         >
 
-          Don't have an account?{" "}
+          Don't have an account?
+
+          {" "}
 
           <Link
             to="/signup"
             className="
               text-cyan-400
-              font-semibold
             "
           >
             Signup

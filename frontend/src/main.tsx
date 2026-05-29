@@ -10,38 +10,28 @@ import {
   Toaster,
 } from "react-hot-toast";
 
+import {
+  AuthProvider,
+} from "./context/AuthContext";
+
 
 ReactDOM.createRoot(
 
-  document.getElementById(
-    "root"
-  )!
+  document.getElementById("root")!
 
 ).render(
 
   <React.StrictMode>
 
-    <App />
+    <AuthProvider>
 
-    <Toaster
+      <App />
 
-      position="top-right"
+      <Toaster
+        position="top-right"
+      />
 
-      toastOptions={{
-
-        style: {
-
-          background: "#111",
-
-          color: "#fff",
-
-          border:
-            "1px solid rgba(255,255,255,0.1)",
-
-          borderRadius: "16px",
-        },
-      }}
-    />
+    </AuthProvider>
 
   </React.StrictMode>
 );

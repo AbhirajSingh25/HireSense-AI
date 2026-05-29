@@ -1,5 +1,6 @@
 const API_BASE_URL =
-  "https://hiresense-ai-3jl0.onrender.com";
+  import.meta.env
+    .VITE_API_BASE_URL;
 
 
 function getAuthHeaders() {

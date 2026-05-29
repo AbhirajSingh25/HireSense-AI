@@ -5,121 +5,91 @@ import {
   useState,
 } from "react";
 
-import type {
-  ReactNode,
-} from "react";
-
-
-interface User {
-
-  id: number;
-
-  name?: string;
-
-  email: string;
-}
-
-
-interface AuthContextType {
-
-  user: User | null;
-
-  login: (
-    user: User
-  ) => void;
-
-  logout: () => void;
-
-  isAuthenticated: boolean;
-}
-
 
 const AuthContext =
-  createContext<AuthContextType>(
-
-    {} as AuthContextType
-  );
+  createContext<any>(null);
 
 
 export function AuthProvider({
-
   children,
-
-}: {
-
-  children: ReactNode;
-}) {
+}: any) {
 
   const [
     user,
     setUser,
-  ] = useState<User | null>(
-    null
-  );
+  ] = useState<any>(null);
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
 
   useEffect(() => {
 
     const storedUser =
       localStorage.getItem(
-        "hiresense_user"
+        "user"
       );
-
 
     if (storedUser) {
 
       setUser(
-        JSON.parse(
-          storedUser
-        )
+        JSON.parse(storedUser)
       );
     }
+
+    setLoading(false);
 
   }, []);
 
 
   function login(
-    userData: User
+    userData: any,
+    token: string
   ) {
 
     localStorage.setItem(
-
-      "hiresense_user",
-
-      JSON.stringify(
-        userData
-      )
+      "user",
+      JSON.stringify(userData)
     );
 
-    setUser(
-      userData
+    localStorage.setItem(
+      "token",
+      token
     );
+
+    setUser(userData);
   }
 
 
   function logout() {
 
     localStorage.removeItem(
-      "hiresense_user"
+      "user"
+    );
+
+    localStorage.removeItem(
+      "token"
     );
 
     setUser(null);
+
+    window.location.href =
+      "/login";
   }
 
 
   return (
 
     <AuthContext.Provider
+
       value={{
 
         user,
-
         login,
-
         logout,
-
-        isAuthenticated:
-          !!user,
+        loading,
       }}
     >
 
