@@ -21,7 +21,9 @@ function getAuthHeaders() {
 
 
 export async function signup(
-  data: any
+  username: string,
+  email: string,
+  password: string
 ) {
 
   const response =
@@ -37,9 +39,12 @@ export async function signup(
             "application/json",
         },
 
-        body: JSON.stringify(
-          data
-        ),
+        body: JSON.stringify({
+
+          username,
+          email,
+          password,
+        }),
       }
     );
 
@@ -48,7 +53,8 @@ export async function signup(
 
 
 export async function login(
-  data: any
+  email: string,
+  password: string
 ) {
 
   const response =
@@ -64,9 +70,11 @@ export async function login(
             "application/json",
         },
 
-        body: JSON.stringify(
-          data
-        ),
+        body: JSON.stringify({
+
+          email,
+          password,
+        }),
       }
     );
 
@@ -90,6 +98,16 @@ export async function getDashboard(
     );
 
   return response.json();
+}
+
+
+export async function getDashboardStats(
+  userId: number
+) {
+
+  return getDashboard(
+    userId
+  );
 }
 
 
@@ -134,6 +152,28 @@ export async function getHistory(
     );
 
   return response.json();
+}
+
+
+export async function getInterviewSessions(
+  userId?: number
+) {
+
+  if (!userId) {
+
+    const user = JSON.parse(
+
+      localStorage.getItem(
+        "user"
+      ) || "{}"
+    );
+
+    userId = user.id;
+  }
+
+  return getHistory(
+    userId
+  );
 }
 
 
@@ -244,7 +284,9 @@ export async function generateFollowupQuestion(
 }
 
 
-export async function getFinalReport() {
+export async function getFinalReport(
+  data?: any
+) {
 
   const response =
     await fetch(
@@ -256,6 +298,10 @@ export async function getFinalReport() {
 
         headers:
           getAuthHeaders(),
+
+        body: JSON.stringify(
+          data || {}
+        ),
       }
     );
 
@@ -263,7 +309,7 @@ export async function getFinalReport() {
 }
 
 
-export async function speechAnalysis(
+export async function analyzeSpeech(
   transcript: string
 ) {
 
@@ -288,7 +334,17 @@ export async function speechAnalysis(
 }
 
 
-export async function liveInterviewAnalysis(
+export async function speechAnalysis(
+  transcript: string
+) {
+
+  return analyzeSpeech(
+    transcript
+  );
+}
+
+
+export async function analyzeLiveInterview(
 
   transcript: string,
 
@@ -316,4 +372,19 @@ export async function liveInterviewAnalysis(
     );
 
   return response.json();
+}
+
+
+export async function liveInterviewAnalysis(
+
+  transcript: string,
+
+  role: string
+
+) {
+
+  return analyzeLiveInterview(
+    transcript,
+    role
+  );
 }
