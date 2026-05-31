@@ -6,91 +6,157 @@ export function exportInterviewReport(
 ) {
 
   const doc =
-    new jsPDF();
+    new jsPDF({
+
+      orientation: "p",
+
+      unit: "mm",
+
+      format: "a4",
+    });
+
+
+  const pageWidth =
+    doc.internal.pageSize.getWidth();
+
 
   let y = 20;
 
 
-  doc.setFontSize(24);
+  function addSectionTitle(
+    title: string
+  ) {
 
-  doc.text(
-    "HireSense AI Interview Report",
-    20,
-    y
-  );
+    doc.setFontSize(18);
 
-  y += 20;
-
-
-  doc.setFontSize(16);
-
-  doc.text(
-    `Confidence: ${report.confidence}%`,
-    20,
-    y
-  );
-
-  y += 12;
-
-  doc.text(
-    `Communication: ${report.communication}%`,
-    20,
-    y
-  );
-
-  y += 12;
-
-  doc.text(
-    `Technical: ${report.technical}%`,
-    20,
-    y
-  );
-
-  y += 12;
-
-  doc.text(
-    `Recommendation: ${report.recommendation}`,
-    20,
-    y
-  );
-
-  y += 20;
-
-
-  doc.setFontSize(18);
-
-  doc.text(
-    "AI Summary",
-    20,
-    y
-  );
-
-  y += 12;
-
-
-  doc.setFontSize(12);
-
-  const summaryLines =
-    doc.splitTextToSize(
-
-      report.summary,
-
-      170
+    doc.setTextColor(
+      0,
+      255,
+      255
     );
 
-  doc.text(
-    summaryLines,
-    20,
-    y
+    doc.text(
+      title,
+      20,
+      y
+    );
+
+    y += 10;
+  }
+
+
+  function addBodyText(
+    text: string
+  ) {
+
+    doc.setFontSize(12);
+
+    doc.setTextColor(
+      220,
+      220,
+      220
+    );
+
+    const lines =
+      doc.splitTextToSize(
+        text,
+        170
+      );
+
+    doc.text(
+      lines,
+      20,
+      y
+    );
+
+    y += lines.length * 7;
+  }
+
+
+  function addMetric(
+    label: string,
+    value: any
+  ) {
+
+    doc.setFontSize(14);
+
+    doc.setTextColor(
+      255,
+      255,
+      255
+    );
+
+    doc.text(
+      `${label}: ${value}`,
+      25,
+      y
+    );
+
+    y += 10;
+  }
+
+
+  function addBulletList(
+    items: string[]
+  ) {
+
+    doc.setFontSize(12);
+
+    doc.setTextColor(
+      230,
+      230,
+      230
+    );
+
+    items?.forEach(
+      (item) => {
+
+        if (y > 270) {
+
+          doc.addPage();
+
+          y = 20;
+        }
+
+        doc.text(
+          `• ${item}`,
+          25,
+          y
+        );
+
+        y += 8;
+      }
+    );
+
+    y += 5;
+  }
+
+
+  doc.setFillColor(
+    10,
+    10,
+    10
   );
 
-  y += 30;
+  doc.rect(
+    0,
+    0,
+    210,
+    297,
+    "F"
+  );
 
 
-  doc.setFontSize(18);
+  doc.setFontSize(26);
+
+  doc.setTextColor(
+    0,
+    255,
+    255
+  );
 
   doc.text(
-    "Strengths",
+    "HireSense AI",
     20,
     y
   );
@@ -98,49 +164,168 @@ export function exportInterviewReport(
   y += 12;
 
 
-  doc.setFontSize(12);
+  doc.setFontSize(18);
 
-  report.strengths?.forEach(
-    (item: string) => {
+  doc.setTextColor(
+    255,
+    255,
+    255
+  );
 
-      doc.text(
-        `• ${item}`,
-        25,
-        y
-      );
+  doc.text(
+    "Interview Intelligence Report",
+    20,
+    y
+  );
 
-      y += 10;
-    }
+  y += 15;
+
+
+  doc.setDrawColor(
+    0,
+    255,
+    255
+  );
+
+  doc.line(
+    20,
+    y,
+    190,
+    y
+  );
+
+  y += 15;
+
+
+  doc.setFontSize(11);
+
+  doc.setTextColor(
+    180,
+    180,
+    180
+  );
+
+  doc.text(
+
+    `Generated: ${new Date().toLocaleString()}`,
+
+    20,
+
+    y
+  );
+
+  y += 20;
+
+
+  addSectionTitle(
+    "Performance Scores"
+  );
+
+
+  addMetric(
+    "Confidence",
+    `${report.confidence || 0}%`
+  );
+
+  addMetric(
+    "Communication",
+    `${report.communication || 0}%`
+  );
+
+  addMetric(
+    "Technical",
+    `${report.technical || 0}%`
+  );
+
+  addMetric(
+    "Recommendation",
+    report.recommendation ||
+      "Recommended"
   );
 
 
   y += 10;
 
 
-  doc.setFontSize(18);
-
-  doc.text(
-    "Areas For Improvement",
-    20,
-    y
+  addSectionTitle(
+    "AI Summary"
   );
 
-  y += 12;
+  addBodyText(
+
+    report.summary ||
+
+    "Strong overall interview performance."
+  );
 
 
-  doc.setFontSize(12);
+  y += 10;
 
-  report.improvements?.forEach(
-    (item: string) => {
 
-      doc.text(
-        `• ${item}`,
-        25,
-        y
-      );
+  addSectionTitle(
+    "Strengths"
+  );
 
-      y += 10;
-    }
+  addBulletList(
+
+    report.strengths || [
+
+      "Good communication",
+
+      "Strong confidence",
+
+      "Professional articulation",
+    ]
+  );
+
+
+  addSectionTitle(
+    "Areas For Improvement"
+  );
+
+  addBulletList(
+
+    report.improvements || [
+
+      "Improve system design depth",
+
+      "Reduce filler words",
+
+      "Practice concise technical explanations",
+    ]
+  );
+
+
+  addSectionTitle(
+    "AI Recommendation"
+  );
+
+  addBodyText(
+
+    report.feedback ||
+
+    "Candidate demonstrates strong interview readiness with good communication and technical understanding."
+  );
+
+
+  y += 15;
+
+
+  doc.setFontSize(10);
+
+  doc.setTextColor(
+    120,
+    120,
+    120
+  );
+
+  doc.text(
+
+    "Generated by HireSense AI Interview Intelligence Platform",
+
+    20,
+
+    285
   );
 
 

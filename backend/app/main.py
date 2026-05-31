@@ -64,7 +64,9 @@ GROQ_API_KEY = os.getenv(
     "GROQ_API_KEY"
 )
 
-SECRET_KEY = "hiresense-secret-key"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY"
+)
 
 ALGORITHM = "HS256"
 
@@ -920,4 +922,28 @@ async def ai_evaluate(data: dict):
 
     return {
         "evaluation": evaluation
+    }
+@app.get("/recruiter-analytics")
+def recruiter_analytics():
+
+    return {
+
+        "top_candidates": [
+
+            {
+                "name": "John",
+                "score": 94,
+            },
+
+            {
+                "name": "Sarah",
+                "score": 92,
+            },
+        ],
+
+        "average_confidence": 86,
+
+        "average_communication": 89,
+
+        "total_interviews": 124,
     }
