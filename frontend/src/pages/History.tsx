@@ -6,7 +6,7 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getHistory,
+  getInterviewSessions,
 } from "../services/api";
 
 import {
@@ -45,7 +45,7 @@ function History() {
 
 
       const data =
-        await getHistory(
+        await getInterviewSessions(
           user.id || 1
         );
 

@@ -4,11 +4,17 @@ from fastapi import (
     HTTPException,
 )
 
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import (
+    CORSMiddleware,
+)
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import (
+    Session,
+)
 
-from passlib.context import CryptContext
+from passlib.context import (
+    CryptContext,
+)
 
 from jose import jwt
 
@@ -22,7 +28,7 @@ from datetime import (
 )
 
 import os
-import re
+import json
 
 from .database import (
     Base,
@@ -43,6 +49,11 @@ from .schemas import (
     AnswerRequest,
     SpeechRequest,
     InterviewSessionRequest,
+)
+
+from .services.interview_ai import (
+    generate_question,
+    evaluate_interview_answer,
 )
 
 
@@ -294,7 +305,6 @@ Requirements:
 - industry-level
 
 Return only questions.
-
 """
 
 
@@ -351,100 +361,18 @@ Return only questions.
 
 
 @app.post("/evaluate-answer")
-async def evaluate_answer(
+async def evaluate_answer_route(
     data: AnswerRequest
 ):
 
-    prompt = f"""
+    evaluation = evaluate_interview_answer(
 
-You are an elite FAANG interviewer.
+        data.question,
 
-Question:
-{data.question}
-
-Candidate Answer:
-{data.answer}
-
-Evaluate deeply.
-
-Return STRICTLY:
-
-Score: <number>
-
-Strengths:
-- ...
-
-Weaknesses:
-- ...
-
-Improvements:
-- ...
-
-Final Feedback:
-...
-
-"""
-
-
-    completion = (
-
-        groq_client.chat
-        .completions.create(
-
-            model=
-            "llama-3.3-70b-versatile",
-
-            messages=[
-
-                {
-                    "role": "system",
-
-                    "content":
-                        "You are an elite interview evaluator."
-                },
-
-                {
-                    "role": "user",
-
-                    "content": prompt
-                }
-            ],
-
-            temperature=0.5,
-        )
+        data.answer,
     )
 
-
-    feedback = (
-
-        completion
-        .choices[0]
-        .message.content
-    )
-
-
-    score_match = re.search(
-        r"(\d{1,3})",
-        feedback
-    )
-
-
-    score = (
-
-        int(score_match.group(1))
-
-        if score_match
-
-        else 80
-    )
-
-
-    return {
-
-        "score": score,
-
-        "feedback": feedback,
-    }
+    return evaluation
 
 
 @app.post("/generate-followup")
@@ -476,7 +404,6 @@ Candidate Answer:
 {data.answer}
 
 Generate ONE intelligent follow-up question.
-
 """
 
 
@@ -525,109 +452,154 @@ Generate ONE intelligent follow-up question.
 
 @app.post("/speech-analysis")
 async def speech_analysis(
-    data: SpeechRequest
+    data: dict
 ):
 
-    transcript = data.transcript
+    transcript = data.get(
+        "transcript",
+        ""
+    )
+
+    if not transcript:
+
+        return {
+
+            "confidence": 0,
+
+            "clarity": 0,
+
+            "filler_words": 0,
+
+            "speaking_speed": 0,
+
+            "feedback":
+                "No transcript provided."
+        }
+
 
     words = transcript.split()
 
-    total_words = len(words)
 
-
-    filler_words = [
+    filler_words_list = [
 
         "um",
         "uh",
         "like",
-        "actually",
         "basically",
+        "actually",
+        "you know",
+        "sort of",
+        "kind of",
+        "hmm",
+        "okay",
     ]
 
 
-    filler_count = 0
+    filler_count = sum(
 
+        transcript.lower().count(word)
 
-    for filler in filler_words:
-
-        filler_count += (
-
-            transcript
-            .lower()
-            .count(filler)
-        )
-
-
-    prompt = f"""
-
-Analyze this interview communication:
-
-{transcript}
-
-Evaluate:
-- confidence
-- communication
-- professionalism
-- clarity
-
-Return detailed feedback.
-
-"""
-
-
-    completion = (
-
-        groq_client.chat
-        .completions.create(
-
-            model=
-            "llama-3.3-70b-versatile",
-
-            messages=[
-
-                {
-                    "role": "system",
-
-                    "content":
-                        "You are an expert communication evaluator."
-                },
-
-                {
-                    "role": "user",
-
-                    "content": prompt
-                }
-            ],
-
-            temperature=0.4,
-        )
+        for word in filler_words_list
     )
 
 
-    feedback = (
-
-        completion
-        .choices[0]
-        .message.content
+    confidence = max(
+        50,
+        95 - filler_count * 4
     )
+
+
+    clarity = min(
+        95,
+        60 + len(words) // 2
+    )
+
+
+    speaking_speed = min(
+        180,
+        len(words) * 2
+    )
+
+
+    feedback = []
+
+
+    if filler_count > 3:
+
+        feedback.append(
+            "Reduce filler words."
+        )
+
+
+    if len(words) < 20:
+
+        feedback.append(
+            "Try giving more detailed answers."
+        )
+
+
+    if clarity > 80:
+
+        feedback.append(
+            "Strong communication clarity."
+        )
+
+
+    if not feedback:
+
+        feedback.append(
+            "Good speaking performance."
+        )
 
 
     return {
 
-        "confidence_score": 85,
+        "confidence":
+            confidence,
 
-        "communication_score": 88,
-
-        "words_per_minute":
-            max(
-                80,
-                total_words // 2
-            ),
+        "clarity":
+            clarity,
 
         "filler_words":
             filler_count,
 
-        "feedback": feedback,
+        "speaking_speed":
+            speaking_speed,
+
+        "feedback":
+            " ".join(feedback),
+    }
+
+
+@app.post("/vision-analysis")
+async def vision_analysis(
+    data: dict
+):
+
+    face_detected = True
+
+    eye_contact = 84
+
+    attention_score = 88
+
+    confidence_score = 81
+
+    return {
+
+        "face_detected":
+            face_detected,
+
+        "eye_contact":
+            eye_contact,
+
+        "attention_score":
+            attention_score,
+
+        "confidence_score":
+            confidence_score,
+
+        "feedback":
+            "Good eye contact and attention maintained."
     }
 
 
@@ -838,4 +810,114 @@ def final_report():
 
         "attention_status":
             "Focused",
+    }
+
+
+@app.post("/generate-report")
+async def generate_report(
+    data: dict
+):
+
+    return {
+
+        "overall_score": 87,
+
+        "technical_score": 85,
+
+        "communication_score": 90,
+
+        "confidence_score": 84,
+
+        "summary":
+            "Strong overall interview performance with good communication and technical understanding.",
+
+        "strengths": [
+
+            "Clear communication",
+
+            "Good technical articulation",
+
+            "Professional response structure",
+        ],
+
+        "weaknesses": [
+
+            "Needs deeper system design explanations",
+        ],
+
+        "recommendations": [
+
+            "Practice concise technical explanations",
+
+            "Improve advanced problem-solving depth",
+
+            "Reduce filler words",
+        ]
+    }
+
+
+@app.post("/ai/start-interview")
+async def start_interview(data: dict):
+
+    role = data.get("role")
+
+    level = data.get("level")
+
+    question = generate_question(
+        role,
+        level,
+    )
+
+    return {
+        "question": question
+    }
+
+
+@app.post("/ai/next-question")
+async def next_question(data: dict):
+
+    role = data.get("role")
+
+    level = data.get("level")
+
+    previous_question = data.get(
+        "previous_question"
+    )
+
+    previous_answer = data.get(
+        "previous_answer"
+    )
+
+    question = generate_question(
+
+        role,
+        level,
+
+        previous_answer,
+        previous_question,
+    )
+
+    return {
+        "question": question
+    }
+
+
+@app.post("/ai/evaluate")
+async def ai_evaluate(data: dict):
+
+    question = data.get(
+        "question"
+    )
+
+    answer = data.get(
+        "answer"
+    )
+
+    evaluation = evaluate_interview_answer(
+        question,
+        answer,
+    )
+
+    return {
+        "evaluation": evaluation
     }

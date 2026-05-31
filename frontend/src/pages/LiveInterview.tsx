@@ -4,117 +4,171 @@ import {
   useState,
 } from "react";
 
-import * as faceapi from "face-api.js";
-
 import MainLayout from "../components/MainLayout";
 
-import toast from "react-hot-toast";
+import {
+  analyzeLiveInterview,
+} from "../services/api";
 
 import {
-  Camera,
-  Video,
-  VideoOff,
+
+  Mic,
+  MicOff,
+  Brain,
+
 } from "lucide-react";
+
+
+declare global {
+
+  interface Window {
+
+    SpeechRecognition: any;
+
+    webkitSpeechRecognition: any;
+  }
+}
 
 
 function LiveInterview() {
 
-  const videoRef =
-    useRef<HTMLVideoElement>(null);
-
-  const canvasRef =
-    useRef<HTMLCanvasElement>(null);
+  const [
+    listening,
+    setListening,
+  ] = useState(false);
 
   const [
-    cameraOn,
-    setCameraOn,
-  ] = useState(false);
+    transcript,
+    setTranscript,
+  ] = useState("");
+
+  const [
+    aiFeedback,
+    setAiFeedback,
+  ] = useState<any>(null);
 
   const [
     loading,
     setLoading,
   ] = useState(false);
 
-  const [
-    attentionStatus,
-    setAttentionStatus,
-  ] = useState("Waiting");
 
-  const [
-    confidence,
-    setConfidence,
-  ] = useState(0);
-
-  const [
-    faceDetected,
-    setFaceDetected,
-  ] = useState(false);
+  const recognitionRef =
+    useRef<any>(null);
 
 
-  async function loadModels() {
+  useEffect(() => {
 
-    const MODEL_URL =
-      "/models";
+    const SpeechRecognition =
 
-    await Promise.all([
+      window.SpeechRecognition ||
 
-      faceapi.nets
-        .tinyFaceDetector
-        .loadFromUri(MODEL_URL),
+      window.webkitSpeechRecognition;
 
-      faceapi.nets
-        .faceLandmark68Net
-        .loadFromUri(MODEL_URL),
 
-      faceapi.nets
-        .faceExpressionNet
-        .loadFromUri(MODEL_URL),
-    ]);
+    if (!SpeechRecognition)
+      return;
 
-    console.log(
-      "Face API models loaded"
-    );
+
+    const recognition =
+      new SpeechRecognition();
+
+
+    recognition.continuous =
+      true;
+
+    recognition.interimResults =
+      true;
+
+    recognition.lang =
+      "en-US";
+
+
+    recognition.onresult = (
+      event: any
+    ) => {
+
+      let finalTranscript =
+        "";
+
+
+      for (
+
+        let i = 0;
+
+        i <
+        event.results.length;
+
+        i++
+      ) {
+
+        finalTranscript +=
+
+          event.results[i][0]
+            .transcript;
+      }
+
+
+      setTranscript(
+        finalTranscript
+      );
+    };
+
+
+    recognitionRef.current =
+      recognition;
+
+  }, []);
+
+
+  async function startListening() {
+
+    if (
+      recognitionRef.current
+    ) {
+
+      recognitionRef
+        .current
+        .start();
+
+      setListening(true);
+    }
   }
 
 
-  async function startCamera() {
+  function stopListening() {
+
+    if (
+      recognitionRef.current
+    ) {
+
+      recognitionRef
+        .current
+        .stop();
+
+      setListening(false);
+    }
+  }
+
+
+  async function analyzeInterview() {
 
     try {
 
       setLoading(true);
 
-      await loadModels();
+      const response =
+
+        await analyzeLiveInterview(
+          transcript
+        );
 
 
-      const stream =
-
-        await navigator
-          .mediaDevices
-          .getUserMedia({
-
-            video: true,
-          });
-
-
-      if (videoRef.current) {
-
-        videoRef.current.srcObject =
-          stream;
-      }
-
-      setCameraOn(true);
-
-      toast.success(
-        "Camera started"
-      );
+      setAiFeedback(response);
 
     } catch (error) {
 
       console.error(error);
-
-      toast.error(
-        "Camera failed"
-      );
 
     } finally {
 
@@ -123,175 +177,13 @@ function LiveInterview() {
   }
 
 
-  function stopCamera() {
-
-    const stream: any =
-      videoRef.current?.srcObject;
-
-    if (stream) {
-
-      stream
-        .getTracks()
-        .forEach((track: any) =>
-          track.stop()
-        );
-    }
-
-    setCameraOn(false);
-
-    setFaceDetected(false);
-
-    setAttentionStatus(
-      "Stopped"
-    );
-  }
-
-
-  async function detectFace() {
-
-    if (
-      !videoRef.current
-    ) return;
-
-
-    const detections =
-
-      await faceapi
-
-        .detectAllFaces(
-
-          videoRef.current,
-
-          new faceapi
-            .TinyFaceDetectorOptions()
-
-        )
-
-        .withFaceLandmarks()
-
-        .withFaceExpressions();
-
-
-    const canvas =
-      canvasRef.current;
-
-    if (
-      !canvas
-    ) return;
-
-
-    const displaySize = {
-
-      width:
-        videoRef.current.width,
-
-      height:
-        videoRef.current.height,
-    };
-
-
-    faceapi.matchDimensions(
-      canvas,
-      displaySize
-    );
-
-
-    const resized =
-      faceapi.resizeResults(
-
-        detections,
-
-        displaySize
-      );
-
-
-    const ctx =
-      canvas.getContext("2d");
-
-    if (!ctx) return;
-
-    ctx.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-
-    faceapi.draw.drawDetections(
-      canvas,
-      resized
-    );
-
-
-    faceapi.draw.drawFaceLandmarks(
-      canvas,
-      resized
-    );
-
-
-    if (
-      detections.length > 0
-    ) {
-
-      setFaceDetected(true);
-
-      setAttentionStatus(
-        "Focused"
-      );
-
-      const score = Math.min(
-
-        95,
-
-        70 + (
-          detections.length * 10
-        )
-      );
-
-      setConfidence(score);
-
-    } else {
-
-      setFaceDetected(false);
-
-      setAttentionStatus(
-        "Face Not Detected"
-      );
-
-      setConfidence(40);
-    }
-  }
-
-
-  useEffect(() => {
-
-    let interval: any;
-
-    if (cameraOn) {
-
-      interval = setInterval(() => {
-
-        detectFace();
-
-      }, 1200);
-    }
-
-    return () => {
-
-      clearInterval(interval);
-    };
-
-  }, [cameraOn]);
-
-
   return (
 
     <MainLayout>
 
       <div
         className="
-          max-w-7xl
+          max-w-6xl
           mx-auto
         "
       >
@@ -304,21 +196,22 @@ function LiveInterview() {
 
           <h1
             className="
-              text-4xl
+              text-5xl
               font-black
               text-white
               mb-3
             "
           >
-            AI Vision Analysis
+            Live AI Interview
           </h1>
 
           <p
             className="
               text-gray-400
+              text-lg
             "
           >
-            Real-time face and attention tracking
+            Realtime voice interview analysis
           </p>
 
         </div>
@@ -338,173 +231,16 @@ function LiveInterview() {
               border
               border-white/10
               rounded-3xl
-              p-6
+              p-8
             "
           >
-
-            <div
-              className="
-                relative
-                aspect-video
-                bg-black
-                rounded-2xl
-                overflow-hidden
-                mb-6
-              "
-            >
-
-              {cameraOn ? (
-
-                <>
-
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    muted
-                    width={720}
-                    height={560}
-                    className="
-                      w-full
-                      h-full
-                      object-cover
-                    "
-                  />
-
-                  <canvas
-                    ref={canvasRef}
-                    width={720}
-                    height={560}
-                    className="
-                      absolute
-                      top-0
-                      left-0
-                      w-full
-                      h-full
-                    "
-                  />
-
-                </>
-
-              ) : (
-
-                <div
-                  className="
-                    h-full
-                    flex
-                    items-center
-                    justify-center
-                    flex-col
-                  "
-                >
-
-                  <Camera
-                    size={70}
-                    className="
-                      text-gray-600
-                      mb-4
-                    "
-                  />
-
-                  <p
-                    className="
-                      text-gray-500
-                    "
-                  >
-                    Camera inactive
-                  </p>
-
-                </div>
-              )}
-
-            </div>
-
 
             <div
               className="
                 flex
-                gap-4
-              "
-            >
-
-              {!cameraOn ? (
-
-                <button
-                  onClick={
-                    startCamera
-                  }
-                  disabled={loading}
-                  className="
-                    bg-cyan-400
-                    hover:bg-cyan-300
-                    disabled:opacity-50
-                    text-black
-                    font-bold
-                    px-6
-                    py-4
-                    rounded-2xl
-                    flex
-                    items-center
-                    gap-3
-                  "
-                >
-
-                  <Video size={18} />
-
-                  {
-                    loading
-
-                      ? "Loading..."
-
-                      : "Start Camera"
-                  }
-
-                </button>
-
-              ) : (
-
-                <button
-                  onClick={
-                    stopCamera
-                  }
-                  className="
-                    bg-red-400
-                    hover:bg-red-300
-                    text-black
-                    font-bold
-                    px-6
-                    py-4
-                    rounded-2xl
-                    flex
-                    items-center
-                    gap-3
-                  "
-                >
-
-                  <VideoOff size={18} />
-
-                  Stop Camera
-
-                </button>
-              )}
-
-            </div>
-
-          </div>
-
-
-          <div
-            className="
-              space-y-6
-            "
-          >
-
-            <div
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-6
+                items-center
+                justify-between
+                mb-8
               "
             >
 
@@ -512,24 +248,186 @@ function LiveInterview() {
                 className="
                   text-2xl
                   font-bold
-                  mb-6
                 "
               >
-                AI Attention Metrics
+                Live Transcript
               </h2>
 
 
+              <button
+
+                onClick={
+                  listening
+
+                    ? stopListening
+
+                    : startListening
+                }
+
+                className={`
+                  flex
+                  items-center
+                  gap-3
+                  px-6
+                  py-4
+                  rounded-2xl
+                  font-bold
+
+                  ${
+                    listening
+
+                      ? `
+                        bg-red-500
+                        text-white
+                      `
+
+                      : `
+                        bg-cyan-400
+                        text-black
+                      `
+                  }
+                `}
+              >
+
+                {
+                  listening
+
+                    ? (
+                      <MicOff
+                        size={20}
+                      />
+                    )
+
+                    : (
+                      <Mic
+                        size={20}
+                      />
+                    )
+                }
+
+                {
+                  listening
+
+                    ? "Stop"
+
+                    : "Start"
+                }
+
+              </button>
+
+            </div>
+
+
+            <div
+              className="
+                min-h-100
+                bg-[#111827]
+                border
+                border-white/10
+                rounded-3xl
+                p-6
+                text-gray-300
+                leading-9
+              "
+            >
+
+              {
+                transcript ||
+
+                "Your realtime transcript will appear here..."
+              }
+
+            </div>
+
+
+            <button
+              onClick={
+                analyzeInterview
+              }
+              disabled={
+                loading ||
+                !transcript
+              }
+              className="
+                mt-6
+                bg-cyan-400
+                hover:bg-cyan-300
+                text-black
+                px-7
+                py-4
+                rounded-2xl
+                font-bold
+                flex
+                items-center
+                gap-3
+              "
+            >
+
+              <Brain size={20} />
+
+              {
+                loading
+
+                  ? "Analyzing..."
+
+                  : "Analyze Interview"
+              }
+
+            </button>
+
+          </div>
+
+
+          <div
+            className="
+              bg-white/5
+              border
+              border-white/10
+              rounded-3xl
+              p-8
+            "
+          >
+
+            <h2
+              className="
+                text-2xl
+                font-bold
+                mb-8
+              "
+            >
+              AI Feedback
+            </h2>
+
+
+            {!aiFeedback ? (
+
               <div
                 className="
-                  grid
-                  grid-cols-2
-                  gap-5
+                  h-100
+                  flex
+                  items-center
+                  justify-center
+                  text-gray-500
+                "
+              >
+
+                AI analysis will appear here
+
+              </div>
+
+            ) : (
+
+              <div
+                className="
+                  space-y-6
                 "
               >
 
                 <div
                   className="
-                    bg-black/20
+                    bg-[#111827]
+                    border
+                    border-white/10
                     rounded-2xl
                     p-5
                   "
@@ -538,137 +436,101 @@ function LiveInterview() {
                   <p
                     className="
                       text-gray-400
-                      mb-2
-                    "
-                  >
-                    Face Detection
-                  </p>
-
-                  <h3
-                    className={`
-                      text-2xl
-                      font-black
-
-                      ${
-                        faceDetected
-
-                          ? "text-green-400"
-
-                          : "text-red-400"
-                      }
-                    `}
-                  >
-
-                    {
-                      faceDetected
-
-                        ? "Detected"
-
-                        : "Missing"
-                    }
-
-                  </h3>
-
-                </div>
-
-
-                <div
-                  className="
-                    bg-black/20
-                    rounded-2xl
-                    p-5
-                  "
-                >
-
-                  <p
-                    className="
-                      text-gray-400
-                      mb-2
-                    "
-                  >
-                    Attention
-                  </p>
-
-                  <h3
-                    className="
-                      text-2xl
-                      font-black
-                      text-cyan-400
-                    "
-                  >
-
-                    {attentionStatus}
-
-                  </h3>
-
-                </div>
-
-
-                <div
-                  className="
-                    col-span-2
-                    bg-black/20
-                    rounded-2xl
-                    p-5
-                  "
-                >
-
-                  <div
-                    className="
-                      flex
-                      justify-between
                       mb-3
                     "
                   >
+                    Confidence
+                  </p>
 
-                    <p
-                      className="
-                        text-gray-400
-                      "
-                    >
-                      Confidence Score
-                    </p>
-
-                    <p
-                      className="
-                        font-bold
-                        text-white
-                      "
-                    >
-                      {confidence}%
-                    </p>
-
-                  </div>
-
-
-                  <div
+                  <h3
                     className="
-                      h-4
-                      bg-white/10
-                      rounded-full
-                      overflow-hidden
+                      text-4xl
+                      font-bold
+                      text-cyan-400
                     "
                   >
+                    {
+                      aiFeedback
+                        ?.confidence || 0
+                    }
+                    %
+                  </h3>
 
-                    <div
-                      style={{
-                        width:
-                          `${confidence}%`
-                      }}
-                      className="
-                        h-full
-                        bg-cyan-400
-                        transition-all
-                      "
-                    />
+                </div>
 
-                  </div>
+
+                <div
+                  className="
+                    bg-[#111827]
+                    border
+                    border-white/10
+                    rounded-2xl
+                    p-5
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      mb-3
+                    "
+                  >
+                    Communication
+                  </p>
+
+                  <h3
+                    className="
+                      text-4xl
+                      font-bold
+                      text-cyan-400
+                    "
+                  >
+                    {
+                      aiFeedback
+                        ?.communication || 0
+                    }
+                    %
+                  </h3>
+
+                </div>
+
+
+                <div
+                  className="
+                    bg-[#111827]
+                    border
+                    border-white/10
+                    rounded-2xl
+                    p-5
+                  "
+                >
+
+                  <p
+                    className="
+                      text-gray-400
+                      mb-3
+                    "
+                  >
+                    AI Feedback
+                  </p>
+
+                  <p
+                    className="
+                      text-gray-300
+                      leading-8
+                    "
+                  >
+                    {
+                      aiFeedback
+                        ?.feedback ||
+                      "No feedback yet."
+                    }
+                  </p>
 
                 </div>
 
               </div>
-
-            </div>
+            )}
 
           </div>
 

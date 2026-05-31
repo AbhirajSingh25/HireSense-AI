@@ -10,7 +10,7 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getDashboardStats,
+  getDashboard,
 } from "../services/api";
 
 import {
@@ -54,7 +54,7 @@ function Dashboard() {
 
 
       const data =
-        await getDashboardStats(
+        await getDashboard(
           user.id || 1
         );
 

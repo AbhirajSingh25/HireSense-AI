@@ -1,113 +1,312 @@
 const API_BASE_URL =
+
   import.meta.env
     .VITE_API_BASE_URL;
 
 
-function getAuthHeaders() {
+async function request(
 
-  const token =
-    localStorage.getItem(
-      "token"
+  endpoint: string,
+
+  options: RequestInit = {}
+) {
+
+  const response = await fetch(
+
+    `${API_BASE_URL}${endpoint}`,
+
+    {
+      headers: {
+
+        "Content-Type":
+          "application/json",
+
+        ...options.headers,
+      },
+
+      ...options,
+    }
+  );
+
+
+  if (!response.ok) {
+
+    const text =
+      await response.text();
+
+    throw new Error(
+      text || "API request failed"
     );
+  }
 
-  return {
 
-    "Content-Type":
-      "application/json",
-
-    Authorization:
-      `Bearer ${token}`,
-  };
+  return response.json();
 }
 
 
 export async function signup(
+
   username: string,
+
   email: string,
+
   password: string
 ) {
 
-  const response =
-    await fetch(
+  return request(
 
-      `${API_BASE_URL}/auth/signup`,
+    "/auth/signup",
 
-      {
-        method: "POST",
+    {
+      method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+      body: JSON.stringify({
 
-        body: JSON.stringify({
-
-          username,
-          email,
-          password,
-        }),
-      }
-    );
-
-  return response.json();
+        username,
+        email,
+        password,
+      }),
+    }
+  );
 }
 
 
 export async function login(
+
   email: string,
+
   password: string
 ) {
 
-  const response =
-    await fetch(
+  return request(
 
-      `${API_BASE_URL}/auth/login`,
+    "/auth/login",
 
-      {
-        method: "POST",
+    {
+      method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+      body: JSON.stringify({
 
-        body: JSON.stringify({
-
-          email,
-          password,
-        }),
-      }
-    );
-
-  return response.json();
+        email,
+        password,
+      }),
+    }
+  );
 }
 
 
-export async function getDashboard(
-  userId: number
+export async function generateQuestions(
+  role: string
 ) {
 
-  const response =
-    await fetch(
+  return request(
 
-      `${API_BASE_URL}/dashboard/${userId}`,
+    "/generate-questions",
 
-      {
-        headers:
-          getAuthHeaders(),
-      }
-    );
+    {
+      method: "POST",
 
-  return response.json();
+      body: JSON.stringify({
+        role,
+      }),
+    }
+  );
 }
 
 
-export async function getDashboardStats(
-  userId: number
+export async function evaluateAnswer(
+
+  question: string,
+
+  answer: string,
+
+  history: any[] = []
 ) {
 
-  return getDashboard(
-    userId
+  return request(
+
+    "/evaluate-answer",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        question,
+
+        answer,
+
+        history,
+      }),
+    }
+  );
+}
+
+
+export async function generateFollowup(
+
+  question: string,
+
+  answer: string,
+
+  history: any[]
+) {
+
+  return request(
+
+    "/generate-followup",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        question,
+
+        answer,
+
+        history,
+      }),
+    }
+  );
+}
+
+
+export async function startInterview(
+
+  role: string,
+
+  level: string
+) {
+
+  return request(
+
+    "/ai/start-interview",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        role,
+        level,
+      }),
+    }
+  );
+}
+
+
+export async function getNextQuestion(
+
+  role: string,
+
+  level: string,
+
+  previousQuestion: string,
+
+  previousAnswer: string
+) {
+
+  return request(
+
+    "/ai/next-question",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        role,
+        level,
+
+        previous_question:
+          previousQuestion,
+
+        previous_answer:
+          previousAnswer,
+      }),
+    }
+  );
+}
+
+
+export async function aiEvaluate(
+
+  question: string,
+
+  answer: string
+) {
+
+  return request(
+
+    "/ai/evaluate",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        question,
+        answer,
+      }),
+    }
+  );
+}
+
+
+export async function analyzeSpeech(
+  transcript: string
+) {
+
+  return request(
+
+    "/speech-analysis",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+        transcript,
+      }),
+    }
+  );
+}
+
+
+export async function analyzeVision(
+  imageData: any = {}
+) {
+
+  return request(
+
+    "/vision-analysis",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify(
+        imageData
+      ),
+    }
+  );
+}
+
+
+export async function analyzeLiveInterview(
+  transcript: string
+) {
+
+  return request(
+
+    "/live-interview-analysis",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+        transcript,
+      }),
+    }
   );
 }
 
@@ -116,172 +315,44 @@ export async function saveInterview(
   data: any
 ) {
 
-  const response =
-    await fetch(
+  return request(
 
-      `${API_BASE_URL}/save-interview`,
+    "/save-interview",
 
-      {
-        method: "POST",
+    {
+      method: "POST",
 
-        headers:
-          getAuthHeaders(),
-
-        body: JSON.stringify(
-          data
-        ),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function getHistory(
-  userId: number
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/history/${userId}`,
-
-      {
-        headers:
-          getAuthHeaders(),
-      }
-    );
-
-  return response.json();
+      body: JSON.stringify(data),
+    }
+  );
 }
 
 
 export async function getInterviewSessions(
-  userId?: number
+  userId: number
 ) {
 
-  if (!userId) {
-
-    const user = JSON.parse(
-
-      localStorage.getItem(
-        "user"
-      ) || "{}"
-    );
-
-    userId = user.id;
-  }
-
-  return getHistory(
-    userId
+  return request(
+    `/history/${userId}`
   );
 }
 
 
 export async function getLeaderboard() {
 
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/leaderboard`,
-
-      {
-        headers:
-          getAuthHeaders(),
-      }
-    );
-
-  return response.json();
+  return request(
+    "/leaderboard"
+  );
 }
 
 
-export async function generateQuestions(
-  role: string
+export async function getDashboard(
+  userId: number
 ) {
 
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/generate-questions`,
-
-      {
-        method: "POST",
-
-        headers:
-          getAuthHeaders(),
-
-        body: JSON.stringify({
-          role,
-        }),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function evaluateAnswer(
-
-  question: string,
-
-  answer: string
-
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/evaluate-answer`,
-
-      {
-        method: "POST",
-
-        headers:
-          getAuthHeaders(),
-
-        body: JSON.stringify({
-
-          question,
-          answer,
-        }),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function generateFollowupQuestion(
-
-  question: string,
-
-  answer: string,
-
-  history: any[]
-
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/generate-followup`,
-
-      {
-        method: "POST",
-
-        headers:
-          getAuthHeaders(),
-
-        body: JSON.stringify({
-
-          question,
-          answer,
-          history,
-        }),
-      }
-    );
-
-  return response.json();
+  return request(
+    `/dashboard/${userId}`
+  );
 }
 
 
@@ -289,103 +360,31 @@ export async function getFinalReport(
   data?: any
 ) {
 
-  const response =
-    await fetch(
+  return request(
+    "/final-report",
+    {
+      method: "POST",
 
-      `${API_BASE_URL}/final-report`,
-
-      {
-        method: "POST",
-
-        headers:
-          getAuthHeaders(),
-
-        body: JSON.stringify(
-          data || {}
-        ),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function analyzeSpeech(
-  transcript: string
-) {
-
-  const response =
-    await fetch(
-
-      `${API_BASE_URL}/speech-analysis`,
-
-      {
-        method: "POST",
-
-        headers:
-          getAuthHeaders(),
-
-        body: JSON.stringify({
-          transcript,
-        }),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function speechAnalysis(
-  transcript: string
-) {
-
-  return analyzeSpeech(
-    transcript
+      body: JSON.stringify(
+        data || {}
+      ),
+    }
   );
 }
 
 
-export async function analyzeLiveInterview(
-
-  transcript: string,
-
-  role: string
-
+export async function generateFinalReport(
+  data: any
 ) {
 
-  const response =
-    await fetch(
+  return request(
 
-      `${API_BASE_URL}/live-interview-analysis`,
+    "/generate-report",
 
-      {
-        method: "POST",
+    {
+      method: "POST",
 
-        headers:
-          getAuthHeaders(),
-
-        body: JSON.stringify({
-
-          transcript,
-          role,
-        }),
-      }
-    );
-
-  return response.json();
-}
-
-
-export async function liveInterviewAnalysis(
-
-  transcript: string,
-
-  role: string
-
-) {
-
-  return analyzeLiveInterview(
-    transcript,
-    role
+      body: JSON.stringify(data),
+    }
   );
 }
