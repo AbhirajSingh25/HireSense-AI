@@ -1,27 +1,27 @@
 import os
 
+from sqlalchemy import (
+    create_engine,
+)
+
+from sqlalchemy.ext.declarative import (
+    declarative_base,
+)
+
+from sqlalchemy.orm import (
+    sessionmaker,
+)
+
 from dotenv import load_dotenv
-
-from sqlalchemy import create_engine
-
-from sqlalchemy.ext.declarative import declarative_base
-
-from sqlalchemy.orm import sessionmaker
 
 
 load_dotenv()
 
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL"
+    "DATABASE_URL",
+    "postgresql://neondb_owner:npg_tBJc1iGUmx0F@ep-solitary-sky-apknjjyi-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 )
-
-
-if not DATABASE_URL:
-
-    DATABASE_URL = (
-        "sqlite:///./hiresense.db"
-    )
 
 
 if DATABASE_URL.startswith(
@@ -50,7 +50,7 @@ SessionLocal = sessionmaker(
 
     autoflush=False,
 
-    bind=engine
+    bind=engine,
 )
 
 
