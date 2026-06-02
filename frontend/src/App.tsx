@@ -35,7 +35,10 @@ function App() {
             <Navigate to="/login" />
           }
         />
-
+<Route
+  path="/live-interview"
+  element={<LiveInterview />}
+/>
         <Route
           path="/login"
           element={<Login />}

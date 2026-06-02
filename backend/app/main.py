@@ -26,6 +26,8 @@ from datetime import (
     datetime,
     timedelta,
 )
+from pydantic import BaseModel
+
 
 import os
 import json
@@ -98,7 +100,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from .models import InterviewSession
 
+
+InterviewSession.__table__.drop(
+    engine,
+    checkfirst=True
+)
 Base.metadata.create_all(
     bind=engine
 )
@@ -133,7 +141,76 @@ def create_token(data: dict):
 
         algorithm=ALGORITHM
     )
+class InterviewRequest(BaseModel):
 
+    transcript: str
+@app.post("/ai-interview-feedback")
+
+def ai_interview_feedback(
+
+    data: InterviewRequest
+):
+
+    try:
+
+        client = Groq(
+
+            api_key=os.getenv(
+                "GROQ_API_KEY"
+            )
+        )
+
+
+        prompt = f"""
+
+        Analyze this interview transcript.
+
+        Give:
+        1. Communication score
+        2. Confidence score
+        3. Technical score
+        4. Short AI feedback
+        5. Improvement suggestions
+
+        Transcript:
+        {data.transcript}
+
+        """
+
+
+        completion = client.chat.completions.create(
+
+            model="llama3-70b-8192",
+
+            messages=[
+
+                {
+                    "role": "user",
+
+                    "content": prompt
+                }
+            ]
+        )
+
+
+        return {
+
+            "success": True,
+
+            "feedback":
+
+            completion.choices[0]
+            .message.content
+        }
+
+    except Exception as e:
+
+        return {
+
+            "success": False,
+
+            "error": str(e)
+        }
 
 @app.post("/auth/signup")
 def signup(
@@ -946,4 +1023,10 @@ def recruiter_analytics():
         "average_communication": 89,
 
         "total_interviews": 124,
+    }
+@app.get("/health")
+def health():
+
+    return {
+        "status": "ok"
     }

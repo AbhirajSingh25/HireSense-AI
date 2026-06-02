@@ -1,5 +1,4 @@
 const API_BASE_URL =
-
   import.meta.env
     .VITE_API_BASE_URL;
 
@@ -29,18 +28,33 @@ async function request(
   );
 
 
+  let data: any = null;
+
+  try {
+
+    data =
+      await response.json();
+
+  } catch {
+
+    data = null;
+  }
+
+
   if (!response.ok) {
 
-    const text =
-      await response.text();
-
     throw new Error(
-      text || "API request failed"
+
+      data?.detail ||
+
+      data?.error ||
+
+      "API request failed"
     );
   }
 
 
-  return response.json();
+  return data;
 }
 
 
@@ -361,13 +375,37 @@ export async function getFinalReport(
 ) {
 
   return request(
+
     "/final-report",
+
     {
       method: "POST",
 
       body: JSON.stringify(
         data || {}
       ),
+    }
+  );
+}
+
+
+export async function
+getAIInterviewFeedback(
+
+  transcript: string
+) {
+
+  return request(
+
+    "/ai-interview-feedback",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        transcript,
+      }),
     }
   );
 }

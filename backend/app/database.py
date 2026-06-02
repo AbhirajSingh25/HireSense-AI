@@ -19,29 +19,22 @@ load_dotenv()
 
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://neondb_owner:npg_tBJc1iGUmx0F@ep-solitary-sky-apknjjyi-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+    "DATABASE_URL"
 )
 
 
-if DATABASE_URL.startswith(
-    "sqlite"
-):
+engine = create_engine(
 
-    engine = create_engine(
+    DATABASE_URL,
 
-        DATABASE_URL,
+    pool_pre_ping=True,
 
-        connect_args={
-            "check_same_thread": False
-        }
-    )
+    pool_recycle=300,
 
-else:
+    pool_size=10,
 
-    engine = create_engine(
-        DATABASE_URL
-    )
+    max_overflow=20,
+)
 
 
 SessionLocal = sessionmaker(

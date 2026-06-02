@@ -1,478 +1,342 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
-import {
-  useNavigate,
-} from "react-router-dom";
-
 import MainLayout from "../components/MainLayout";
 
-import {
-  getDashboard,
-} from "../services/api";
+import PageHeader from "../components/ui/PageHeader.tsx";
+
+import StatCard from "../components/ui/StatCard.tsx";
+
+import Card from "../components/ui/Card.tsx";
 
 import {
-
   Brain,
+  Mic,
+  Camera,
   Trophy,
-  BarChart3,
-  Clock,
-  ArrowRight,
-
 } from "lucide-react";
 
 
 function Dashboard() {
 
-  const navigate =
-    useNavigate();
-
-
-  const [
-    stats,
-    setStats,
-  ] = useState<any>(null);
-
-
-  useEffect(() => {
-
-    loadStats();
-
-  }, []);
-
-
-  async function loadStats() {
-
-    try {
-
-      const user =
-        JSON.parse(
-          localStorage.getItem("user") || "{}"
-        );
-
-
-      const data =
-        await getDashboard(
-          user.id || 1
-        );
-
-
-      setStats(data);
-
-    } catch (error) {
-
-      console.error(error);
-    }
-  }
-
-
-  const cards = [
-
-    {
-      title: "Confidence",
-      value:
-        `${stats?.confidence_score || 0}%`,
-      icon:
-        <Brain size={24} />,
-      color:
-        "from-cyan-500 to-blue-500",
-    },
-
-    {
-      title: "Communication",
-      value:
-        `${stats?.communication_score || 0}%`,
-      icon:
-        <BarChart3 size={24} />,
-      color:
-        "from-green-500 to-emerald-500",
-    },
-
-    {
-      title: "Eye Contact",
-      value:
-        `${stats?.eye_contact_score || 0}%`,
-      icon:
-        <Trophy size={24} />,
-      color:
-        "from-pink-500 to-purple-500",
-    },
-
-    {
-      title: "Words / Min",
-      value:
-        stats?.words_per_minute || 0,
-      icon:
-        <Clock size={24} />,
-      color:
-        "from-orange-500 to-red-500",
-    },
-  ];
-
-
   return (
 
     <MainLayout>
 
+      <PageHeader
+
+        title="Welcome Back"
+
+        subtitle="AI Interview Intelligence Dashboard"
+      />
+
+
+      {/* STATS */}
+
       <div
         className="
-          max-w-7xl
-          mx-auto
+          grid
+          grid-cols-1
+          md:grid-cols-2
+          xl:grid-cols-4
+          gap-6
+          mb-8
         "
       >
 
-        <div
-          className="
-            flex
-            flex-col
-            md:flex-row
-            md:items-center
-            md:justify-between
-            gap-5
-            mb-10
-          "
-        >
+        <StatCard
+          title="Confidence"
+          value="87%"
+          icon={Brain}
+          color="cyan"
+        />
 
-          <div>
+        <StatCard
+          title="Communication"
+          value="91%"
+          icon={Mic}
+          color="green"
+        />
 
-            <h1
-              className="
-                text-4xl
-                font-black
-                text-white
-                mb-2
-              "
-            >
-              Dashboard
-            </h1>
+        <StatCard
+          title="Eye Contact"
+          value="84%"
+          icon={Camera}
+          color="purple"
+        />
 
-            <p
-              className="
-                text-gray-400
-              "
-            >
-              AI Interview Analytics Overview
-            </p>
+        <StatCard
+          title="Global Rank"
+          value="#12"
+          icon={Trophy}
+          color="orange"
+        />
 
-          </div>
+      </div>
 
 
-          <button
-            onClick={() =>
-              navigate(
-                "/mock-interview"
-              )
-            }
-            className="
-              bg-cyan-400
-              hover:bg-cyan-300
-              text-black
-              font-bold
-              px-6
-              py-4
-              rounded-2xl
-              flex
-              items-center
-              gap-3
-              transition-all
-            "
-          >
+      {/* MAIN GRID */}
 
-            Start Interview
+      <div
+        className="
+          grid
+          grid-cols-1
+          xl:grid-cols-3
+          gap-8
+        "
+      >
 
-            <ArrowRight size={20} />
-
-          </button>
-
-        </div>
-
+        {/* LEFT */}
 
         <div
           className="
-            grid
-            grid-cols-1
-            sm:grid-cols-2
-            xl:grid-cols-4
-            gap-6
-            mb-10
+            xl:col-span-2
+            space-y-8
           "
         >
 
-          {cards.map((card) => (
-
-            <div
-              key={card.title}
-              className={`
-                bg-linear-to-br
-                ${card.color}
-                rounded-3xl
-                p-6
-                text-white
-                shadow-xl
-              `}
-            >
-
-              <div
-                className="
-                  flex
-                  justify-between
-                  items-start
-                  mb-6
-                "
-              >
-
-                <div
-                  className="
-                    w-12
-                    h-12
-                    rounded-2xl
-                    bg-white/20
-                    flex
-                    items-center
-                    justify-center
-                  "
-                >
-
-                  {card.icon}
-
-                </div>
-
-              </div>
-
-
-              <h3
-                className="
-                  text-gray-100
-                  mb-2
-                "
-              >
-                {card.title}
-              </h3>
-
-
-              <p
-                className="
-                  text-4xl
-                  font-black
-                "
-              >
-                {card.value}
-              </p>
-
-            </div>
-          ))}
-
-        </div>
-
-
-        <div
-          className="
-            grid
-            lg:grid-cols-2
-            gap-6
-          "
-        >
-
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-3xl
-              p-6
-            "
-          >
+          <Card className="p-8">
 
             <h2
               className="
-                text-2xl
+                text-3xl
                 font-bold
-                text-white
-                mb-6
+                mb-8
               "
             >
-              Interview Summary
+              Performance Overview
             </h2>
 
 
             <div
               className="
-                space-y-5
+                h-[320px]
+                rounded-3xl
+                bg-black/40
+                border
+                border-white/5
+                flex
+                items-center
+                justify-center
+                text-zinc-500
               "
             >
 
-              <div>
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Attention Status
-                </p>
-
-                <div
-                  className="
-                    inline-flex
-                    px-4
-                    py-2
-                    rounded-xl
-                    bg-cyan-400
-                    text-black
-                    font-semibold
-                  "
-                >
-
-                  {
-                    stats?.attention_status ||
-                    "Focused"
-                  }
-
-                </div>
-
-              </div>
-
-
-              <div>
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-2
-                  "
-                >
-                  Last Transcript
-                </p>
-
-                <p
-                  className="
-                    text-gray-300
-                    leading-7
-                  "
-                >
-
-                  {
-                    stats?.transcript ||
-                    "No interview completed yet."
-                  }
-
-                </p>
-
-              </div>
+              Realtime AI Analytics Graph
 
             </div>
 
-          </div>
+          </Card>
 
 
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-3xl
-              p-6
-            "
-          >
+          <Card className="p-8">
+
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                mb-8
+              "
+            >
+
+              <h2
+                className="
+                  text-3xl
+                  font-bold
+                "
+              >
+                Recent Interviews
+              </h2>
+
+
+              <button
+                className="
+                  px-5
+                  py-2
+                  rounded-xl
+                  bg-cyan-400
+                  text-black
+                  font-bold
+                "
+              >
+                View All
+              </button>
+
+            </div>
+
+
+            <div className="space-y-4">
+
+              {[1, 2, 3].map((item) => (
+
+                <div
+                  key={item}
+                  className="
+                    p-5
+                    rounded-2xl
+                    border
+                    border-white/5
+                    bg-black/30
+                    flex
+                    items-center
+                    justify-between
+                  "
+                >
+
+                  <div>
+
+                    <h3
+                      className="
+                        font-bold
+                        text-lg
+                      "
+                    >
+                      Frontend Interview
+                    </h3>
+
+                    <p
+                      className="
+                        text-zinc-500
+                      "
+                    >
+                      AI Communication Round
+                    </p>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      text-right
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-cyan-400
+                        font-black
+                        text-2xl
+                      "
+                    >
+                      91%
+                    </p>
+
+                    <p
+                      className="
+                        text-zinc-500
+                        text-sm
+                      "
+                    >
+                      Score
+                    </p>
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+
+          </Card>
+
+        </div>
+
+
+        {/* RIGHT */}
+
+        <div className="space-y-8">
+
+          <Card className="p-8">
 
             <h2
               className="
-                text-2xl
+                text-3xl
                 font-bold
-                text-white
-                mb-6
+                mb-8
+              "
+            >
+              AI Insights
+            </h2>
+
+
+            <div className="space-y-4">
+
+              {[
+                "Communication improved significantly",
+                "Strong confidence growth",
+                "Technical articulation improving",
+                "Maintain better eye contact",
+              ].map((item) => (
+
+                <div
+                  key={item}
+                  className="
+                    p-5
+                    rounded-2xl
+                    bg-black/40
+                    border
+                    border-white/5
+                  "
+                >
+
+                  <p
+                    className="
+                      text-zinc-300
+                    "
+                  >
+                    {item}
+                  </p>
+
+                </div>
+              ))}
+
+            </div>
+
+          </Card>
+
+
+          <Card className="p-8">
+
+            <h2
+              className="
+                text-3xl
+                font-bold
+                mb-8
               "
             >
               Quick Actions
             </h2>
 
 
-            <div
-              className="
-                grid
-                gap-4
-              "
-            >
+            <div className="space-y-4">
 
-              <button
-                onClick={() =>
-                  navigate("/history")
-                }
-                className="
-                  bg-black/30
-                  hover:bg-black/50
-                  border
-                  border-white/10
-                  rounded-2xl
-                  p-5
-                  text-left
-                  transition-all
-                "
-              >
+              {[
+                "Start Mock Interview",
+                "Analyze Resume",
+                "Speech Analysis",
+                "View Reports",
+              ].map((item) => (
 
-                <h3
+                <button
+                  key={item}
                   className="
-                    text-white
-                    font-semibold
-                    mb-2
+                    w-full
+                    p-5
+                    rounded-2xl
+                    bg-cyan-400
+                    hover:bg-cyan-300
+                    text-black
+                    font-bold
+                    transition-all
                   "
                 >
-                  Interview History
-                </h3>
 
-                <p
-                  className="
-                    text-gray-400
-                  "
-                >
-                  Review previous interview sessions
-                </p>
+                  {item}
 
-              </button>
-
-
-              <button
-                onClick={() =>
-                  navigate("/reports")
-                }
-                className="
-                  bg-black/30
-                  hover:bg-black/50
-                  border
-                  border-white/10
-                  rounded-2xl
-                  p-5
-                  text-left
-                  transition-all
-                "
-              >
-
-                <h3
-                  className="
-                    text-white
-                    font-semibold
-                    mb-2
-                  "
-                >
-                  AI Reports
-                </h3>
-
-                <p
-                  className="
-                    text-gray-400
-                  "
-                >
-                  Detailed AI performance reports
-                </p>
-
-              </button>
+                </button>
+              ))}
 
             </div>
 
-          </div>
+          </Card>
 
         </div>
 
