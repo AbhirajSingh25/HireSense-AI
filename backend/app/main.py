@@ -83,7 +83,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
     "http://localhost:5173",
-    "https://hire-sense-ai-gamma.vercel.app/",
+    "https://YOUR-VERCEL-APP.vercel.app",
 ],
     allow_credentials=True,
     allow_methods=["*"],
