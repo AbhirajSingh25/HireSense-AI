@@ -3,17 +3,23 @@ import {
 } from "react-router-dom";
 
 import {
-  isAuthenticated,
-} from "../utils/auth";
+  useAuth,
+} from "../context/AuthContext";
 
+interface Props {
+
+  children: React.ReactNode;
+}
 
 function ProtectedRoute({
-  children,
-}: any) {
 
-  if (
-    !isAuthenticated()
-  ) {
+  children,
+}: Props) {
+
+  const auth =
+    useAuth();
+
+  if (!auth.user) {
 
     return (
       <Navigate to="/login" />

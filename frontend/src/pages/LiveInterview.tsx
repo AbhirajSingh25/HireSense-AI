@@ -1,6 +1,4 @@
 import {
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -10,131 +8,79 @@ import Card from "../components/ui/Card";
 
 import Button from "../components/ui/Button";
 
+import AIOrb from "../components/ui/AIOrb";
+
+import TranscriptPanel from "../components/ui/TranscriptPanel";
+
+import RealtimeFeedback from "../components/ui/RealtimeFeedback";
+
 import {
   Mic,
-  Camera,
-  Timer,
   Brain,
-  Save,
+  Sparkles,
 } from "lucide-react";
 
 import {
-  getAIInterviewFeedback,
-  analyzeSpeech,
-  saveInterview,
+  aiEvaluate,
+  getNextQuestion,
 } from "../services/api";
 
 
 function LiveInterview() {
-
-  const videoRef =
-    useRef<HTMLVideoElement>(null);
-
 
   const [
     transcript,
     setTranscript,
   ] = useState("");
 
-
   const [
     listening,
     setListening,
   ] = useState(false);
-
-
-  const [
-    seconds,
-    setSeconds,
-  ] = useState(0);
-
 
   const [
     loading,
     setLoading,
   ] = useState(false);
 
+  const [
+    question,
+    setQuestion,
+  ] = useState(
+    "Tell me about yourself."
+  );
 
   const [
     aiFeedback,
     setAiFeedback,
-  ] = useState<string[]>([]);
-
+  ] = useState("");
 
   const [
-    scores,
-    setScores,
-  ] = useState({
+    confidence,
+    setConfidence,
+  ] = useState(72);
 
-    confidence: 0,
+  const [
+    communication,
+    setCommunication,
+  ] = useState(81);
 
-    communication: 0,
-
-    technical: 0,
-
-    filler_words: 0,
-  });
-
-
-  useEffect(() => {
-
-    let interval: any;
-
-    if (listening) {
-
-      interval = setInterval(() => {
-
-        setSeconds(
-          (prev) => prev + 1
-        );
-
-      }, 1000);
-    }
-
-    return () =>
-      clearInterval(interval);
-
-  }, [listening]);
+  const [
+    technical,
+    setTechnical,
+  ] = useState(68);
 
 
-  async function startCamera() {
-
-    try {
-
-      const stream =
-
-        await navigator
-        .mediaDevices
-        .getUserMedia({
-
-          video: true,
-
-          audio: true,
-        });
-
-
-      if (videoRef.current) {
-
-        videoRef.current.srcObject =
-          stream;
-      }
-
-    } catch (error) {
-
-      console.error(error);
-    }
-  }
-
-
-  function startSpeechRecognition() {
+  async function startInterview() {
 
     const SpeechRecognition =
+      (
+        window as any
+      ).SpeechRecognition ||
 
-      (window as any)
-        .webkitSpeechRecognition ||
-
-      (window as any)
-        .SpeechRecognition;
+      (
+        window as any
+      ).webkitSpeechRecognition;
 
 
     if (!SpeechRecognition) {
@@ -150,162 +96,124 @@ function LiveInterview() {
     const recognition =
       new SpeechRecognition();
 
-
     recognition.continuous =
       true;
 
     recognition.interimResults =
       true;
 
+    recognition.lang =
+      "en-US";
 
-    recognition.onresult =
-      (event: any) => {
 
-        let text = "";
+    recognition.onstart = () => {
 
-        for (
+      setListening(true);
+    };
 
-          let i = 0;
 
-          i < event.results.length;
+    recognition.onresult = (
+      event: any
+    ) => {
 
-          i++
-        ) {
+      let finalTranscript = "";
 
-          text +=
+      for (
+        let i = 0;
 
-            event.results[i][0]
-            .transcript + " ";
-        }
+        i < event.results.length;
 
-        setTranscript(text);
-      };
+        i++
+      ) {
+
+        finalTranscript +=
+          event.results[i][0]
+          .transcript;
+      }
+
+      setTranscript(
+        finalTranscript
+      );
+    };
 
 
     recognition.start();
-
-    setListening(true);
   }
 
 
-  function formatTime(
-    total: number
-  ) {
-
-    const mins =
-      Math.floor(total / 60);
-
-    const secs =
-      total % 60;
-
-    return `${mins}:${
-      secs < 10
-        ? "0"
-        : ""
-    }${secs}`;
-  }
-
-
-  async function analyzeInterview() {
+  async function analyzeAnswer() {
 
     try {
 
       setLoading(true);
 
 
-      const speechData =
+      const evaluation =
 
-        await analyzeSpeech(
+        await aiEvaluate(
+
+          question,
+
           transcript
         );
 
 
-      const aiData =
+      setAiFeedback(
 
-        await getAIInterviewFeedback(
+        evaluation.feedback ||
+        "Good response."
+      );
+
+
+      setConfidence(
+
+        evaluation.confidence || 80
+      );
+
+      setCommunication(
+
+        evaluation.communication || 82
+      );
+
+      setTechnical(
+
+        evaluation.technical || 75
+      );
+
+
+      const nextQuestion =
+
+        await getNextQuestion(
+
+          "Frontend Developer",
+
+          "Intermediate",
+
+          question,
+
           transcript
         );
 
 
-      setScores({
+      setQuestion(
 
-        confidence:
-          speechData.confidence,
+        nextQuestion.question ||
+        "Explain React hooks."
+      );
 
-        communication:
-          speechData.clarity,
-
-        technical: 84,
-
-        filler_words:
-          speechData.filler_words,
-      });
-
-
-      setAiFeedback([
-
-        aiData.feedback
-      ]);
+      setTranscript("");
 
     } catch (error) {
 
       console.error(error);
+
+      alert(
+        "AI analysis failed"
+      );
 
     } finally {
 
       setLoading(false);
-    }
-  }
-
-
-  async function handleSaveInterview() {
-
-    try {
-
-      const user = JSON.parse(
-
-        localStorage.getItem(
-          "user"
-        ) || "{}"
-      );
-
-
-      await saveInterview({
-
-        user_id: user.id,
-
-        role: "AI Interview",
-
-        transcript,
-
-        confidence_score:
-          scores.confidence,
-
-        communication_score:
-          scores.communication,
-
-        words_per_minute: 120,
-
-        eye_contact_score: 86,
-
-        technical_score:
-          scores.technical,
-
-        attention_status:
-          "Focused",
-
-        ai_feedback:
-          aiFeedback.join("\n"),
-      });
-
-
-      alert(
-        "Interview saved successfully"
-      );
-
-    } catch (error) {
-
-      console.error(error);
     }
   }
 
@@ -327,8 +235,9 @@ function LiveInterview() {
 
           <h1
             className="
-              text-5xl
+              text-6xl
               font-black
+              mb-4
             "
           >
             Live AI Interview
@@ -336,43 +245,50 @@ function LiveInterview() {
 
           <p
             className="
-              text-zinc-500
-              mt-2
+              text-zinc-400
+              text-xl
             "
           >
-            Realtime AI Interview Intelligence
+            Adaptive AI interview engine
           </p>
 
         </div>
 
 
-        <div
-          className="
-            flex
-            items-center
-            gap-3
+        <div className="flex gap-4">
 
-            bg-[#101010]
-            border
-            border-white/5
-
-            px-5
-            py-3
-
-            rounded-2xl
-          "
-        >
-
-          <Timer size={20} />
-
-          <span
-            className="
-              text-2xl
-              font-bold
-            "
+          <Button
+            onClick={startInterview}
           >
-            {formatTime(seconds)}
-          </span>
+
+            <Mic size={20} />
+
+            {
+              listening
+
+                ? "Listening..."
+
+                : "Start Recording"
+            }
+
+          </Button>
+
+
+          <Button
+            onClick={analyzeAnswer}
+          >
+
+            <Brain size={20} />
+
+            {
+              loading
+
+                ? "Analyzing..."
+
+                : "Analyze Answer"
+            }
+
+          </Button>
 
         </div>
 
@@ -382,11 +298,24 @@ function LiveInterview() {
       <div
         className="
           grid
-          grid-cols-1
           xl:grid-cols-3
           gap-8
         "
       >
+
+        <Card
+          className="
+            p-10
+            flex
+            items-center
+            justify-center
+          "
+        >
+
+          <AIOrb />
+
+        </Card>
+
 
         <div
           className="
@@ -395,26 +324,58 @@ function LiveInterview() {
           "
         >
 
-          <Card className="p-5">
+          <Card className="p-8">
 
-            <video
-
-              ref={videoRef}
-
-              autoPlay
-
-              muted
-
+            <div
               className="
-                w-full
-                h-[500px]
-                object-cover
-                rounded-3xl
-                bg-black
+                flex
+                items-center
+                gap-3
+                mb-5
               "
-            />
+            >
+
+              <Sparkles
+                className="
+                  text-cyan-400
+                "
+              />
+
+              <h2
+                className="
+                  text-2xl
+                  font-bold
+                "
+              >
+                Current Question
+              </h2>
+
+            </div>
+
+
+            <p
+              className="
+                text-2xl
+                leading-relaxed
+                text-zinc-200
+              "
+            >
+              {question}
+            </p>
 
           </Card>
+
+
+          <TranscriptPanel
+            transcript={transcript}
+          />
+
+
+          <RealtimeFeedback
+            confidence={confidence}
+            communication={communication}
+            technical={technical}
+          />
 
 
           <Card className="p-8">
@@ -424,11 +385,11 @@ function LiveInterview() {
                 flex
                 items-center
                 gap-3
-                mb-6
+                mb-5
               "
             >
 
-              <Mic
+              <Brain
                 className="
                   text-cyan-400
                 "
@@ -436,263 +397,29 @@ function LiveInterview() {
 
               <h2
                 className="
-                  text-3xl
+                  text-2xl
                   font-bold
                 "
               >
-                Live Transcript
+                AI Recruiter Feedback
               </h2>
 
             </div>
 
 
-            <div
+            <p
               className="
-                h-[220px]
-                overflow-y-auto
-                bg-black/30
-                border
-                border-white/5
-                rounded-2xl
-                p-5
                 text-zinc-300
-                leading-relaxed
+                leading-loose
+                text-lg
               "
             >
-
               {
-                transcript ||
+                aiFeedback ||
 
-                "Speech transcript will appear here..."
+                "AI feedback will appear here after analysis."
               }
-
-            </div>
-
-          </Card>
-
-        </div>
-
-
-        <div className="space-y-8">
-
-          <Card className="p-8">
-
-            <h2
-              className="
-                text-3xl
-                font-bold
-                mb-8
-              "
-            >
-              Controls
-            </h2>
-
-
-            <div className="space-y-4">
-
-              <Button
-                onClick={startCamera}
-                className="w-full"
-              >
-
-                <Camera size={20} />
-
-                Start Camera
-
-              </Button>
-
-
-              <Button
-                onClick={
-                  startSpeechRecognition
-                }
-                className="w-full"
-              >
-
-                <Mic size={20} />
-
-                Start Listening
-
-              </Button>
-
-
-              <Button
-                onClick={analyzeInterview}
-                className="w-full"
-              >
-
-                <Brain size={20} />
-
-                {
-                  loading
-                    ? "Analyzing..."
-                    : "Analyze Interview"
-                }
-
-              </Button>
-
-
-              <Button
-                onClick={
-                  handleSaveInterview
-                }
-                className="
-                  w-full
-                  bg-green-500
-                  hover:bg-green-400
-                "
-              >
-
-                <Save size={20} />
-
-                Save Interview
-
-              </Button>
-
-            </div>
-
-          </Card>
-
-
-          <Card className="p-8">
-
-            <h2
-              className="
-                text-3xl
-                font-bold
-                mb-8
-              "
-            >
-              AI Feedback
-            </h2>
-
-
-            <div className="space-y-4">
-
-              {aiFeedback.map(
-                (item, index) => (
-
-                  <div
-                    key={index}
-                    className="
-                      p-4
-                      rounded-2xl
-                      bg-black/30
-                      border
-                      border-white/5
-                    "
-                  >
-
-                    <p
-                      className="
-                        text-zinc-300
-                        whitespace-pre-wrap
-                      "
-                    >
-                      {item}
-                    </p>
-
-                  </div>
-                )
-              )}
-
-            </div>
-
-          </Card>
-
-
-          <Card className="p-8">
-
-            <h2
-              className="
-                text-3xl
-                font-bold
-                mb-8
-              "
-            >
-              Live Scores
-            </h2>
-
-
-            <div className="space-y-6">
-
-              {[
-                {
-                  label:
-                    "Confidence",
-                  value:
-                    scores.confidence,
-                },
-
-                {
-                  label:
-                    "Communication",
-                  value:
-                    scores.communication,
-                },
-
-                {
-                  label:
-                    "Technical",
-                  value:
-                    scores.technical,
-                },
-              ].map((item) => (
-
-                <div key={item.label}>
-
-                  <div
-                    className="
-                      flex
-                      justify-between
-                      mb-2
-                    "
-                  >
-
-                    <span>
-                      {item.label}
-                    </span>
-
-                    <span
-                      className="
-                        text-cyan-400
-                        font-bold
-                      "
-                    >
-                      {item.value}%
-                    </span>
-
-                  </div>
-
-
-                  <div
-                    className="
-                      w-full
-                      h-3
-                      bg-black
-                      rounded-full
-                      overflow-hidden
-                    "
-                  >
-
-                    <div
-                      className="
-                        h-full
-                        bg-cyan-400
-                        rounded-full
-                      "
-                      style={{
-                        width:
-                          `${item.value}%`,
-                      }}
-                    />
-
-                  </div>
-
-                </div>
-              ))}
-
-            </div>
+            </p>
 
           </Card>
 

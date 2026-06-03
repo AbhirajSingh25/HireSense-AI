@@ -1,37 +1,80 @@
-import { ButtonHTMLAttributes } from "react";
+import {
+  motion,
+} from "framer-motion";
 
-interface Props
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface Props {
+
   children: React.ReactNode;
+
+  onClick?: () => void;
+
+  className?: string;
 }
 
 function Button({
+
   children,
+
+  onClick,
+
   className = "",
-  ...props
 }: Props) {
+
   return (
-    <button
-      {...props}
+
+    <motion.button
+
+      whileHover={{
+        scale: 1.03,
+      }}
+
+      whileTap={{
+        scale: 0.98,
+      }}
+
+      onClick={onClick}
+
       className={`
-        px-6
-        py-3
+        relative
+        overflow-hidden
+        px-7
+        py-4
         rounded-2xl
-        bg-cyan-400
-        hover:bg-cyan-300
+        bg-cyan-500
         text-black
         font-bold
+        flex
+        items-center
+        justify-center
+        gap-3
+        shadow-[0_0_30px_rgba(34,211,238,0.35)]
         transition-all
         duration-300
-        hover:scale-[1.02]
-        active:scale-[0.98]
-        shadow-lg
-        shadow-cyan-500/20
+        hover:shadow-[0_0_50px_rgba(34,211,238,0.5)]
         ${className}
       `}
     >
-      {children}
-    </button>
+
+      <div
+        className="
+          absolute
+          inset-0
+          bg-gradient-to-r
+          from-white/20
+          to-transparent
+          opacity-0
+          hover:opacity-100
+          transition-all
+        "
+      />
+
+      <span className="relative z-10">
+
+        {children}
+
+      </span>
+
+    </motion.button>
   );
 }
 

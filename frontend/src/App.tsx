@@ -1,3 +1,5 @@
+// frontend/src/App.tsx
+
 import {
   BrowserRouter,
   Routes,
@@ -9,14 +11,24 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 import Dashboard from "./pages/Dashboard";
+
 import MockInterview from "./pages/MockInterview";
-import History from "./pages/History";
+
+import LiveInterview from "./pages/LiveInterview";
+
+import SpeechAnalysis from "./pages/SpeechAnalysis";
+
 import Analytics from "./pages/Analytics";
-import Leaderboard from "./pages/Leaderboard";
+
+import History from "./pages/History";
 
 import Reports from "./pages/Reports";
-import SpeechAnalysis from "./pages/SpeechAnalysis";
-import LiveInterview from "./pages/LiveInterview";
+
+import Leaderboard from "./pages/Leaderboard";
+
+import RecruiterInsights from "./pages/RecruiterInsights";
+
+import VisionAnalysis from "./pages/VisionAnalysis";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -35,10 +47,8 @@ function App() {
             <Navigate to="/login" />
           }
         />
-<Route
-  path="/live-interview"
-  element={<LiveInterview />}
-/>
+
+
         <Route
           path="/login"
           element={<Login />}
@@ -71,40 +81,10 @@ function App() {
 
 
         <Route
-          path="/history"
+          path="/live-interview"
           element={
             <ProtectedRoute>
-              <History />
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-          path="/analytics"
-          element={
-            <ProtectedRoute>
-              <Analytics />
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-          path="/leaderboard"
-          element={
-            <ProtectedRoute>
-              <Leaderboard />
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-          path="/reports"
-          element={
-            <ProtectedRoute>
-              <Reports />
+              <LiveInterview />
             </ProtectedRoute>
           }
         />
@@ -121,10 +101,60 @@ function App() {
 
 
         <Route
-          path="/live-interview"
+          path="/analytics"
           element={
             <ProtectedRoute>
-              <LiveInterview />
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/leaderboard"
+          element={
+            <ProtectedRoute>
+              <Leaderboard />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/recruiter-insights"
+          element={
+            <ProtectedRoute>
+              <RecruiterInsights />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/vision-analysis"
+          element={
+            <ProtectedRoute>
+              <VisionAnalysis />
             </ProtectedRoute>
           }
         />

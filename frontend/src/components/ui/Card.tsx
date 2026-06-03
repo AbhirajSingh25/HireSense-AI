@@ -1,32 +1,65 @@
-import { ReactNode } from "react";
+import { motion } from "framer-motion";
 
 interface Props {
-  children: ReactNode;
+
+  children: React.ReactNode;
+
   className?: string;
 }
 
 function Card({
+
   children,
+
   className = "",
 }: Props) {
 
   return (
 
-    <div
+    <motion.div
+
+      whileHover={{
+        y: -4,
+      }}
+
+      transition={{
+        duration: 0.25,
+      }}
+
       className={`
-        bg-[#101010]
+        relative
+        overflow-hidden
+        rounded-[32px]
         border
         border-white/5
-        rounded-3xl
-        shadow-2xl
+        bg-gradient-to-b
+        from-[#0f172a]
+        to-[#020617]
         backdrop-blur-xl
+        shadow-[0_0_40px_rgba(0,0,0,0.4)]
         ${className}
       `}
     >
 
-      {children}
+      <div
+        className="
+          absolute
+          top-0
+          left-0
+          w-full
+          h-full
+          bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_60%)]
+          pointer-events-none
+        "
+      />
 
-    </div>
+      <div className="relative z-10">
+
+        {children}
+
+      </div>
+
+    </motion.div>
   );
 }
 

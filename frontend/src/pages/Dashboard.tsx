@@ -1,10 +1,14 @@
 import MainLayout from "../components/MainLayout";
 
-import PageHeader from "../components/ui/PageHeader.tsx";
+import Card from "../components/ui/Card";
 
-import StatCard from "../components/ui/StatCard.tsx";
+import StatCard from "../components/ui/StatCard";
 
-import Card from "../components/ui/Card.tsx";
+import PageHeader from "../components/ui/PageHeader";
+
+import PerformanceChart from "../components/ui/PerformanceChart";
+
+import InsightCard from "../components/ui/InsightCard";
 
 import {
   Brain,
@@ -12,7 +16,12 @@ import {
   Camera,
   Trophy,
 } from "lucide-react";
+import QuickAction from "../components/ui/QuickAction";
 
+import {
+  Video,
+  FileText,
+} from "lucide-react";
 
 function Dashboard() {
 
@@ -20,330 +29,264 @@ function Dashboard() {
 
     <MainLayout>
 
-      <PageHeader
+      
 
-        title="Welcome Back"
-
-        subtitle="AI Interview Intelligence Dashboard"
-      />
-
-
-      {/* STATS */}
 
       <div
         className="
           grid
-          grid-cols-1
-          md:grid-cols-2
           xl:grid-cols-4
+          md:grid-cols-2
           gap-6
           mb-8
         "
       >
 
         <StatCard
+          title="Total Interviews"
+          value="24"
+          icon={Brain}
+          change="+12%"
+        />
+
+        <StatCard
           title="Confidence"
           value="87%"
-          icon={Brain}
-          color="cyan"
+          icon={Mic}
+          change="+8%"
         />
 
         <StatCard
           title="Communication"
-          value="91%"
-          icon={Mic}
-          color="green"
-        />
-
-        <StatCard
-          title="Eye Contact"
-          value="84%"
+          value="90%"
           icon={Camera}
-          color="purple"
+          change="+5%"
         />
 
         <StatCard
-          title="Global Rank"
+          title="AI Rank"
           value="#12"
           icon={Trophy}
-          color="orange"
+          change="Top 15%"
         />
 
       </div>
 
 
-      {/* MAIN GRID */}
-
       <div
         className="
           grid
-          grid-cols-1
           xl:grid-cols-3
           gap-8
         "
       >
 
-        {/* LEFT */}
-
-        <div
+        <Card
           className="
             xl:col-span-2
-            space-y-8
+            p-8
           "
         >
 
-          <Card className="p-8">
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              mb-8
+            "
+          >
 
             <h2
               className="
                 text-3xl
                 font-bold
-                mb-8
               "
             >
               Performance Overview
             </h2>
 
-
-            <div
+            <button
               className="
-                h-[320px]
-                rounded-3xl
-                bg-black/40
+                px-5
+                py-2
+                rounded-2xl
+                bg-black/30
                 border
-                border-white/5
-                flex
-                items-center
-                justify-center
-                text-zinc-500
+                border-white/10
               "
             >
+              This Month
+            </button>
 
-              Realtime AI Analytics Graph
+          </div>
 
-            </div>
+          <PerformanceChart />
 
-          </Card>
-
-
-          <Card className="p-8">
-
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                mb-8
-              "
-            >
-
-              <h2
-                className="
-                  text-3xl
-                  font-bold
-                "
-              >
-                Recent Interviews
-              </h2>
+        </Card>
 
 
-              <button
-                className="
-                  px-5
-                  py-2
-                  rounded-xl
-                  bg-cyan-400
-                  text-black
-                  font-bold
-                "
-              >
-                View All
-              </button>
+        <Card className="p-8">
 
-            </div>
+          <h2
+            className="
+              text-3xl
+              font-bold
+              mb-8
+            "
+          >
+            AI Insights
+          </h2>
 
+          <div className="space-y-5">
 
-            <div className="space-y-4">
+            <InsightCard
+              title="Strong Communication"
+              description="Your speaking clarity improved significantly."
+            />
 
-              {[1, 2, 3].map((item) => (
+            <InsightCard
+              title="Technical Growth"
+              description="Problem-solving speed increased this week."
+            />
 
-                <div
-                  key={item}
-                  className="
-                    p-5
-                    rounded-2xl
-                    border
-                    border-white/5
-                    bg-black/30
-                    flex
-                    items-center
-                    justify-between
-                  "
-                >
+            <InsightCard
+              title="Confidence Rising"
+              description="Eye contact and posture improved."
+            />
 
-                  <div>
+            <InsightCard
+              title="Reduce Filler Words"
+              description="Avoid repeated hesitation phrases."
+            />
 
-                    <h3
-                      className="
-                        font-bold
-                        text-lg
-                      "
-                    >
-                      Frontend Interview
-                    </h3>
+          </div>
 
-                    <p
-                      className="
-                        text-zinc-500
-                      "
-                    >
-                      AI Communication Round
-                    </p>
-
-                  </div>
-
-
-                  <div
-                    className="
-                      text-right
-                    "
-                  >
-
-                    <p
-                      className="
-                        text-cyan-400
-                        font-black
-                        text-2xl
-                      "
-                    >
-                      91%
-                    </p>
-
-                    <p
-                      className="
-                        text-zinc-500
-                        text-sm
-                      "
-                    >
-                      Score
-                    </p>
-
-                  </div>
-
-                </div>
-              ))}
-
-            </div>
-
-          </Card>
-
-        </div>
-
-
-        {/* RIGHT */}
-
-        <div className="space-y-8">
-
-          <Card className="p-8">
-
-            <h2
-              className="
-                text-3xl
-                font-bold
-                mb-8
-              "
-            >
-              AI Insights
-            </h2>
-
-
-            <div className="space-y-4">
-
-              {[
-                "Communication improved significantly",
-                "Strong confidence growth",
-                "Technical articulation improving",
-                "Maintain better eye contact",
-              ].map((item) => (
-
-                <div
-                  key={item}
-                  className="
-                    p-5
-                    rounded-2xl
-                    bg-black/40
-                    border
-                    border-white/5
-                  "
-                >
-
-                  <p
-                    className="
-                      text-zinc-300
-                    "
-                  >
-                    {item}
-                  </p>
-
-                </div>
-              ))}
-
-            </div>
-
-          </Card>
-
-
-          <Card className="p-8">
-
-            <h2
-              className="
-                text-3xl
-                font-bold
-                mb-8
-              "
-            >
-              Quick Actions
-            </h2>
-
-
-            <div className="space-y-4">
-
-              {[
-                "Start Mock Interview",
-                "Analyze Resume",
-                "Speech Analysis",
-                "View Reports",
-              ].map((item) => (
-
-                <button
-                  key={item}
-                  className="
-                    w-full
-                    p-5
-                    rounded-2xl
-                    bg-cyan-400
-                    hover:bg-cyan-300
-                    text-black
-                    font-bold
-                    transition-all
-                  "
-                >
-
-                  {item}
-
-                </button>
-              ))}
-
-            </div>
-
-          </Card>
-
-        </div>
+        </Card>
 
       </div>
 
     </MainLayout>
   );
 }
+<div
+  className="
+    grid
+    md:grid-cols-2
+    gap-8
+    mt-8
+  "
+>
 
+  <Card className="p-8">
+
+    <h2
+      className="
+        text-3xl
+        font-bold
+        mb-8
+      "
+    >
+      Quick Actions
+    </h2>
+
+    <div className="space-y-5">
+
+      <QuickAction
+        icon={Brain}
+        title="Mock Interview"
+        description="Practice adaptive AI interviews."
+      />
+
+      <QuickAction
+        icon={Video}
+        title="Live Interview"
+        description="Realtime webcam interview simulation."
+      />
+
+      <QuickAction
+        icon={FileText}
+        title="AI Reports"
+        description="Download recruiter-grade reports."
+      />
+
+    </div>
+
+  </Card>
+
+
+  <Card className="p-8">
+
+    <h2
+      className="
+        text-3xl
+        font-bold
+        mb-8
+      "
+    >
+      Recent Interviews
+    </h2>
+
+    <div className="space-y-5">
+
+      {[
+        "Frontend Developer",
+        "React Engineer",
+        "AI Engineer",
+      ].map((item, index) => (
+
+        <div
+          key={index}
+          className="
+            flex
+            items-center
+            justify-between
+            p-5
+            rounded-2xl
+            bg-black/30
+            border
+            border-white/5
+          "
+        >
+
+          <div>
+
+            <h3
+              className="
+                text-xl
+                font-bold
+                mb-1
+              "
+            >
+              {item}
+            </h3>
+
+            <p
+              className="
+                text-zinc-500
+              "
+            >
+              Completed Interview
+            </p>
+
+          </div>
+
+          <div
+            className="
+              text-cyan-400
+              font-bold
+              text-xl
+            "
+          >
+            92%
+          </div>
+
+        </div>
+      ))}
+
+    </div>
+
+  </Card>
+
+</div>
 export default Dashboard;

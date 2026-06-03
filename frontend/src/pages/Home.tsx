@@ -17,7 +17,7 @@ import PageLayout from "../components/PageLayout";
 
 import PremiumCard from "../components/PremiumCard";
 
-import EmptyState from "../components/EmptyState";
+import EmptyState from "../components/ui/EmptyState";
 
 function History() {
 

@@ -6,7 +6,7 @@ import {
   useNavigate,
   Link,
 } from "react-router-dom";
-
+import LoadingScreen from "../components/ui/LoadingScreen";
 import toast from "react-hot-toast";
 
 import {
@@ -32,17 +32,22 @@ function Login() {
     setEmail,
   ] = useState("");
 
+
   const [
     password,
     setPassword,
   ] = useState("");
+
 
   const [
     loading,
     setLoading,
   ] = useState(false);
 
+if (loading) {
 
+  return <LoadingScreen />;
+}
   async function handleLogin(
     e: any
   ) {
@@ -53,27 +58,64 @@ function Login() {
 
       setLoading(true);
 
+
       const response =
         await login(
+
           email,
           password
         );
 
 
-      if (
-        response.token
-      ) {
+      console.log(
+        "LOGIN RESPONSE:",
+        response
+      );
+
+
+      const token =
+
+        response.token ||
+
+        response.access_token;
+
+
+      const user =
+
+        response.user || {
+
+          email,
+        };
+
+
+      if (token) {
+
+        localStorage.setItem(
+
+          "token",
+
+          token
+        );
+
+
+        localStorage.setItem(
+
+          "user",
+
+          JSON.stringify(user)
+        );
+
 
         auth.login(
-
-          response.user,
-
-          response.token
+          user,
+          token
         );
+
 
         toast.success(
           "Login successful"
         );
+
 
         navigate(
           "/dashboard"
@@ -82,16 +124,22 @@ function Login() {
       } else {
 
         toast.error(
+
           response.detail ||
+
           "Login failed"
         );
       }
 
-    } catch (error) {
+    } catch (error: any) {
 
       console.error(error);
 
+
       toast.error(
+
+        error.message ||
+
         "Something went wrong"
       );
 
@@ -125,6 +173,8 @@ function Login() {
           border-white/10
           rounded-3xl
           p-8
+          backdrop-blur-xl
+          shadow-2xl
         "
       >
 
@@ -138,6 +188,7 @@ function Login() {
         >
           HireSense AI
         </h1>
+
 
         <p
           className="
@@ -168,7 +219,9 @@ function Login() {
             text-white
             mb-5
             outline-none
+            focus:border-cyan-400
           "
+          required
         />
 
 
@@ -191,7 +244,9 @@ function Login() {
             text-white
             mb-6
             outline-none
+            focus:border-cyan-400
           "
+          required
         />
 
 
@@ -207,6 +262,8 @@ function Login() {
             font-bold
             py-4
             rounded-2xl
+            transition-all
+            duration-300
           "
         >
 
@@ -237,6 +294,7 @@ function Login() {
             to="/signup"
             className="
               text-cyan-400
+              hover:text-cyan-300
             "
           >
             Signup

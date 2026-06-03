@@ -1,3 +1,5 @@
+// frontend/src/pages/VisionAnalysis.tsx
+
 import {
   useEffect,
   useRef,
@@ -6,13 +8,19 @@ import {
 
 import MainLayout from "../components/MainLayout";
 
-import {
+import Card from "../components/ui/Card";
 
+import Button from "../components/ui/Button";
+
+import {
   Camera,
   Eye,
   Brain,
-
 } from "lucide-react";
+
+import {
+  analyzeVision,
+} from "../services/api";
 
 
 function VisionAnalysis() {
@@ -21,19 +29,19 @@ function VisionAnalysis() {
     useRef<HTMLVideoElement>(null);
 
   const [
-    active,
-    setActive,
+    started,
+    setStarted,
   ] = useState(false);
 
   const [
-    confidence,
-    setConfidence,
-  ] = useState(82);
+    results,
+    setResults,
+  ] = useState<any>(null);
 
   const [
-    attention,
-    setAttention,
-  ] = useState("Focused");
+    loading,
+    setLoading,
+  ] = useState(false);
 
 
   async function startCamera() {
@@ -41,11 +49,13 @@ function VisionAnalysis() {
     try {
 
       const stream =
-        await navigator.mediaDevices.getUserMedia({
+
+        await navigator
+        .mediaDevices
+        .getUserMedia({
 
           video: true,
         });
-
 
       if (videoRef.current) {
 
@@ -53,404 +63,281 @@ function VisionAnalysis() {
           stream;
       }
 
-      setActive(true);
+      setStarted(true);
 
     } catch (error) {
 
       console.error(error);
+
+      alert(
+        "Camera access denied"
+      );
+    }
+  }
+
+
+  async function handleAnalyze() {
+
+    try {
+
+      setLoading(true);
+
+      const data =
+
+        await analyzeVision();
+
+      setResults(data);
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Vision analysis failed"
+      );
+
+    } finally {
+
+      setLoading(false);
     }
   }
 
 
   useEffect(() => {
 
-    let interval: any;
+    startCamera();
 
-    if (active) {
-
-      interval =
-        setInterval(() => {
-
-          const random =
-            75 +
-            Math.floor(
-              Math.random() * 20
-            );
-
-          setConfidence(random);
-
-          setAttention(
-
-            random > 80
-
-              ? "Focused"
-
-              : "Distracted"
-          );
-
-        }, 3000);
-    }
-
-    return () =>
-      clearInterval(interval);
-
-  }, [active]);
+  }, []);
 
 
   return (
 
     <MainLayout>
 
+      <div className="mb-10">
+
+        <h1
+          className="
+            text-6xl
+            font-black
+            mb-4
+          "
+        >
+          Vision Analytics
+        </h1>
+
+        <p
+          className="
+            text-zinc-400
+            text-xl
+          "
+        >
+          AI-powered eye contact
+          and attention analysis
+        </p>
+
+      </div>
+
+
       <div
         className="
-          max-w-6xl
-          mx-auto
+          grid
+          xl:grid-cols-2
+          gap-8
         "
       >
 
-        <div
-          className="
-            mb-10
-          "
-        >
+        <Card className="p-6">
 
-          <h1
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
             className="
-              text-4xl
-              font-black
-              text-white
-              mb-3
-            "
-          >
-            Vision Analysis
-          </h1>
-
-          <p
-            className="
-              text-gray-400
-            "
-          >
-            AI-powered eye contact and attention tracking
-          </p>
-
-        </div>
-
-
-        <div
-          className="
-            grid
-            lg:grid-cols-2
-            gap-8
-          "
-        >
-
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
+              w-full
+              h-[500px]
+              object-cover
               rounded-3xl
-              overflow-hidden
+              bg-black
             "
-          >
+          />
 
-            <div
+        </Card>
+
+
+        <div className="space-y-8">
+
+          <Card className="p-8">
+
+            <h2
               className="
-                p-5
-                border-b
-                border-white/10
-                flex
-                items-center
-                justify-between
+                text-3xl
+                font-bold
+                mb-8
               "
             >
+              AI Vision Controls
+            </h2>
 
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-3
-                "
+            <div className="space-y-4">
+
+              <Button
+                onClick={startCamera}
+                className="w-full"
               >
 
-                <Camera
-                  className="
-                    text-cyan-400
-                  "
-                  size={24}
-                />
+                <Camera size={20} />
 
-                <h2
-                  className="
-                    text-2xl
-                    font-bold
-                    text-white
-                  "
-                >
-                  Live Camera
-                </h2>
+                Start Camera
 
-              </div>
+              </Button>
 
+              <Button
+                onClick={handleAnalyze}
+                className="w-full"
+              >
 
-              {!active && (
+                <Brain size={20} />
 
-                <button
-                  onClick={
-                    startCamera
-                  }
-                  className="
-                    bg-cyan-400
-                    hover:bg-cyan-300
-                    text-black
-                    font-bold
-                    px-5
-                    py-3
-                    rounded-2xl
-                  "
-                >
+                {
+                  loading
 
-                  Start
+                    ? "Analyzing..."
 
-                </button>
-              )}
+                    : "Analyze Vision"
+                }
+
+              </Button>
 
             </div>
 
-
-            <div
-              className="
-                bg-black
-                aspect-video
-                flex
-                items-center
-                justify-center
-              "
-            >
-
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                className="
-                  w-full
-                  h-full
-                  object-cover
-                "
-              />
-
-            </div>
-
-          </div>
+          </Card>
 
 
-          <div
-            className="
-              grid
-              gap-6
-            "
-          >
+          {
+            results && (
 
-            <div
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-6
-              "
-            >
-
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-3
-                  mb-5
-                "
-              >
-
-                <Eye
-                  className="
-                    text-pink-400
-                  "
-                  size={24}
-                />
-
-                <h2
-                  className="
-                    text-2xl
-                    font-bold
-                    text-white
-                  "
-                >
-                  Eye Contact
-                </h2>
-
-              </div>
-
-
-              <div
-                className="
-                  h-4
-                  bg-black/20
-                  rounded-full
-                  overflow-hidden
-                  mb-4
-                "
-              >
+              <Card className="p-8">
 
                 <div
-                  style={{
-                    width: `${confidence}%`
-                  }}
                   className="
-                    h-full
-                    bg-pink-400
-                    transition-all
-                  "
-                />
-
-              </div>
-
-
-              <div
-                className="
-                  flex
-                  justify-between
-                  items-center
-                "
-              >
-
-                <span
-                  className="
-                    text-gray-400
+                    flex
+                    items-center
+                    gap-3
+                    mb-8
                   "
                 >
-                  Confidence Level
-                </span>
 
-                <span
-                  className="
-                    text-3xl
-                    font-black
-                    text-white
-                  "
-                >
-                  {confidence}%
-                </span>
+                  <Eye
+                    className="
+                      text-cyan-400
+                    "
+                  />
 
-              </div>
+                  <h2
+                    className="
+                      text-3xl
+                      font-bold
+                    "
+                  >
+                    Vision Results
+                  </h2>
 
-            </div>
-
-
-            <div
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-6
-              "
-            >
-
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-3
-                  mb-5
-                "
-              >
-
-                <Brain
-                  className="
-                    text-cyan-400
-                  "
-                  size={24}
-                />
-
-                <h2
-                  className="
-                    text-2xl
-                    font-bold
-                    text-white
-                  "
-                >
-                  Attention Status
-                </h2>
-
-              </div>
+                </div>
 
 
-              <div
-                className={`
-                  inline-flex
-                  px-5
-                  py-3
-                  rounded-2xl
-                  font-bold
+                <div className="space-y-5">
 
-                  ${
-                    attention === "Focused"
+                  <div
+                    className="
+                      p-5
+                      rounded-2xl
+                      bg-black/30
+                    "
+                  >
 
-                      ? `
-                        bg-green-400
-                        text-black
-                      `
+                    <p
+                      className="
+                        text-zinc-400
+                        mb-2
+                      "
+                    >
+                      Eye Contact
+                    </p>
 
-                      : `
-                        bg-orange-400
-                        text-black
-                      `
-                  }
-                `}
-              >
+                    <h2
+                      className="
+                        text-5xl
+                        font-black
+                        text-cyan-400
+                      "
+                    >
+                      {
+                        results.eye_contact
+                      }%
+                    </h2>
 
-                {attention}
-
-              </div>
-
-            </div>
-
-
-            <div
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-6
-              "
-            >
-
-              <h2
-                className="
-                  text-2xl
-                  font-bold
-                  text-white
-                  mb-5
-                "
-              >
-                AI Feedback
-              </h2>
+                  </div>
 
 
-              <p
-                className="
-                  text-gray-300
-                  leading-8
-                "
-              >
+                  <div
+                    className="
+                      p-5
+                      rounded-2xl
+                      bg-black/30
+                    "
+                  >
 
-                Maintain consistent eye contact and avoid looking away frequently during technical explanations. Strong facial engagement improves perceived confidence during interviews.
+                    <p
+                      className="
+                        text-zinc-400
+                        mb-2
+                      "
+                    >
+                      Attention Score
+                    </p>
 
-              </p>
+                    <h2
+                      className="
+                        text-5xl
+                        font-black
+                        text-green-400
+                      "
+                    >
+                      {
+                        results.attention_score
+                      }%
+                    </h2>
 
-            </div>
+                  </div>
 
-          </div>
+
+                  <div
+                    className="
+                      p-5
+                      rounded-2xl
+                      bg-black/30
+                    "
+                  >
+
+                    <p
+                      className="
+                        text-zinc-300
+                        leading-relaxed
+                      "
+                    >
+                      {
+                        results.feedback
+                      }
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </Card>
+            )
+          }
 
         </div>
 

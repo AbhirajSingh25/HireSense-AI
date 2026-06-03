@@ -1,3 +1,5 @@
+# backend/app/main.py
+
 from fastapi import (
     FastAPI,
     Depends,
@@ -8,9 +10,7 @@ from fastapi.middleware.cors import (
     CORSMiddleware,
 )
 
-from sqlalchemy.orm import (
-    Session,
-)
+from sqlalchemy.orm import Session
 
 from passlib.context import (
     CryptContext,
@@ -26,12 +26,11 @@ from datetime import (
     datetime,
     timedelta,
 )
+
 from pydantic import BaseModel
 
-
 import os
-import json
-
+from app.routes.ai import router as ai_router
 from .database import (
     Base,
     engine,
@@ -44,7 +43,6 @@ from .models import (
 )
 
 from .schemas import (
-
     SignupRequest,
     LoginRequest,
     QuestionRequest,
@@ -58,9 +56,7 @@ from .services.interview_ai import (
     evaluate_interview_answer,
 )
 
-
 load_dotenv()
-
 
 GROQ_API_KEY = os.getenv(
     "GROQ_API_KEY"
@@ -72,54 +68,57 @@ SECRET_KEY = os.getenv(
 
 ALGORITHM = "HS256"
 
-
 groq_client = Groq(
     api_key=GROQ_API_KEY
 )
-
 
 pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
 
-
 app = FastAPI()
-
-
+app.include_router(ai_router)
 app.add_middleware(
-
     CORSMiddleware,
-
     allow_origins=["*"],
-
     allow_credentials=True,
-
     allow_methods=["*"],
-
     allow_headers=["*"],
 )
 
-from .models import InterviewSession
-
-
-InterviewSession.__table__.drop(
-    engine,
-    checkfirst=True
-)
 Base.metadata.create_all(
     bind=engine
 )
 
 
-@app.get("/")
-def root():
+class InterviewRequest(BaseModel):
 
-    return {
+    transcript: str
 
-        "message":
-            "HireSense AI Backend Running"
-    }
+
+class DynamicQuestionRequest(
+    BaseModel
+):
+
+    role: str
+
+    level: str
+
+    transcript: str
+
+
+class BehaviorAnalysisRequest(
+    BaseModel
+):
+
+    confidence: int
+
+    eye_contact: int
+
+    communication: int
+
+    transcript: str
 
 
 def create_token(data: dict):
@@ -134,89 +133,32 @@ def create_token(data: dict):
     )
 
     return jwt.encode(
-
         payload,
-
         SECRET_KEY,
-
         algorithm=ALGORITHM
     )
-class InterviewRequest(BaseModel):
-
-    transcript: str
-@app.post("/ai-interview-feedback")
-
-def ai_interview_feedback(
-
-    data: InterviewRequest
-):
-
-    try:
-
-        client = Groq(
-
-            api_key=os.getenv(
-                "GROQ_API_KEY"
-            )
-        )
 
 
-        prompt = f"""
+@app.get("/")
+def root():
 
-        Analyze this interview transcript.
-
-        Give:
-        1. Communication score
-        2. Confidence score
-        3. Technical score
-        4. Short AI feedback
-        5. Improvement suggestions
-
-        Transcript:
-        {data.transcript}
-
-        """
+    return {
+        "message":
+        "HireSense AI Backend Running"
+    }
 
 
-        completion = client.chat.completions.create(
+@app.get("/health")
+def health():
 
-            model="llama3-70b-8192",
+    return {
+        "status": "ok"
+    }
 
-            messages=[
-
-                {
-                    "role": "user",
-
-                    "content": prompt
-                }
-            ]
-        )
-
-
-        return {
-
-            "success": True,
-
-            "feedback":
-
-            completion.choices[0]
-            .message.content
-        }
-
-    except Exception as e:
-
-        return {
-
-            "success": False,
-
-            "error": str(e)
-        }
 
 @app.post("/auth/signup")
 def signup(
-
     data: SignupRequest,
-
     db: Session = Depends(get_db)
 ):
 
@@ -234,30 +176,21 @@ def signup(
     if existing_user:
 
         raise HTTPException(
-
             status_code=400,
-
             detail="Email already exists"
         )
 
-
     hashed_password = (
-
         pwd_context.hash(
             data.password
         )
     )
 
-
     user = User(
-
         username=data.username,
-
         email=data.email,
-
         password=hashed_password,
     )
-
 
     db.add(user)
 
@@ -265,17 +198,14 @@ def signup(
 
     db.refresh(user)
 
-
     token = create_token({
-
         "user_id": user.id
     })
-
 
     return {
 
         "message":
-            "Signup successful",
+        "Signup successful",
 
         "token": token,
 
@@ -284,19 +214,17 @@ def signup(
             "id": user.id,
 
             "username":
-                user.username,
+            user.username,
 
             "email":
-                user.email,
+            user.email,
         }
     }
 
 
 @app.post("/auth/login")
 def login(
-
     data: LoginRequest,
-
     db: Session = Depends(get_db)
 ):
 
@@ -314,19 +242,13 @@ def login(
     if not user:
 
         raise HTTPException(
-
             status_code=401,
-
             detail="Invalid email"
         )
 
-
     valid_password = (
-
         pwd_context.verify(
-
             data.password,
-
             user.password
         )
     )
@@ -334,23 +256,18 @@ def login(
     if not valid_password:
 
         raise HTTPException(
-
             status_code=401,
-
             detail="Invalid password"
         )
 
-
     token = create_token({
-
         "user_id": user.id
     })
-
 
     return {
 
         "message":
-            "Login successful",
+        "Login successful",
 
         "token": token,
 
@@ -359,10 +276,10 @@ def login(
             "id": user.id,
 
             "username":
-                user.username,
+            user.username,
 
             "email":
-                user.email,
+            user.email,
         }
     }
 
@@ -386,9 +303,7 @@ Requirements:
 Return only questions.
 """
 
-
     completion = (
-
         groq_client.chat
         .completions.create(
 
@@ -401,7 +316,7 @@ Return only questions.
                     "role": "system",
 
                     "content":
-                        "You are an expert technical interviewer."
+                    "You are an expert technical interviewer."
                 },
 
                 {
@@ -415,14 +330,11 @@ Return only questions.
         )
     )
 
-
     content = (
-
         completion
         .choices[0]
         .message.content
     )
-
 
     questions = [
 
@@ -433,100 +345,220 @@ Return only questions.
         if q.strip()
     ]
 
-
     return {
         "questions": questions
     }
 
 
-@app.post("/evaluate-answer")
-async def evaluate_answer_route(
-    data: AnswerRequest
+@app.post("/dynamic-question")
+def dynamic_question(
+    data: DynamicQuestionRequest
 ):
 
-    evaluation = evaluate_interview_answer(
+    try:
 
-        data.question,
+        prompt = f"""
 
-        data.answer,
-    )
+        You are an elite AI interviewer.
 
-    return evaluation
+        Candidate Role:
+        {data.role}
 
+        Candidate Level:
+        {data.level}
 
-@app.post("/generate-followup")
-async def generate_followup(
-    data: AnswerRequest
-):
+        Previous Transcript:
+        {data.transcript}
 
-    history_text = "\n".join(
+        Generate ONE intelligent,
+        contextual follow-up interview question.
 
-        [
-            f"{msg['role']}: {msg['content']}"
+        Return ONLY the question.
+        """
 
-            for msg in data.history
-        ]
-    )
+        completion = (
+            groq_client.chat
+            .completions.create(
 
+                model=
+                "llama-3.3-70b-versatile",
 
-    prompt = f"""
+                messages=[
 
-You are a senior technical interviewer.
+                    {
+                        "role": "user",
 
-Conversation History:
-{history_text}
+                        "content": prompt
+                    }
+                ],
 
-Current Question:
-{data.question}
-
-Candidate Answer:
-{data.answer}
-
-Generate ONE intelligent follow-up question.
-"""
-
-
-    completion = (
-
-        groq_client.chat
-        .completions.create(
-
-            model=
-            "llama-3.3-70b-versatile",
-
-            messages=[
-
-                {
-                    "role": "system",
-
-                    "content":
-                        "You are an expert AI interviewer."
-                },
-
-                {
-                    "role": "user",
-
-                    "content": prompt
-                }
-            ],
-
-            temperature=0.8,
+                temperature=0.8,
+            )
         )
-    )
+
+        question = (
+            completion
+            .choices[0]
+            .message.content
+            .strip()
+        )
+
+        return {
+
+            "success": True,
+
+            "question": question
+        }
+
+    except Exception as e:
+
+        return {
+
+            "success": False,
+
+            "error": str(e)
+        }
 
 
-    followup = (
+@app.post("/ai-interview-feedback")
+def ai_interview_feedback(
+    data: InterviewRequest
+):
 
-        completion
-        .choices[0]
-        .message.content
-        .strip()
-    )
+    try:
+
+        prompt = f"""
+
+        Analyze this interview transcript.
+
+        Give:
+        1. Communication score
+        2. Confidence score
+        3. Technical score
+        4. AI feedback
+        5. Improvement suggestions
+
+        Transcript:
+        {data.transcript}
+        """
+
+        completion = (
+            groq_client.chat
+            .completions.create(
+
+                model=
+                "llama-3.3-70b-versatile",
+
+                messages=[
+
+                    {
+                        "role": "user",
+
+                        "content": prompt
+                    }
+                ]
+            )
+        )
+
+        return {
+
+            "success": True,
+
+            "feedback":
+
+            completion
+            .choices[0]
+            .message.content
+        }
+
+    except Exception as e:
+
+        return {
+
+            "success": False,
+
+            "error": str(e)
+        }
 
 
-    return {
-        "question": followup
-    }
+@app.post("/behavior-analysis")
+def behavior_analysis(
+    data: BehaviorAnalysisRequest
+):
+
+    try:
+
+        prompt = f"""
+
+        You are an elite recruiter AI.
+
+        Candidate Metrics:
+
+        Confidence:
+        {data.confidence}
+
+        Eye Contact:
+        {data.eye_contact}
+
+        Communication:
+        {data.communication}
+
+        Transcript:
+        {data.transcript}
+
+        Analyze:
+        - confidence
+        - leadership
+        - clarity
+        - engagement
+        - professionalism
+
+        Return:
+        1 short recruiter insight.
+        """
+
+        completion = (
+            groq_client.chat
+            .completions.create(
+
+                model=
+                "llama-3.3-70b-versatile",
+
+                messages=[
+
+                    {
+                        "role": "user",
+
+                        "content": prompt
+                    }
+                ],
+
+                temperature=0.7,
+            )
+        )
+
+        insight = (
+            completion
+            .choices[0]
+            .message.content
+            .strip()
+        )
+
+        return {
+
+            "success": True,
+
+            "insight": insight
+        }
+
+    except Exception as e:
+
+        return {
+
+            "success": False,
+
+            "error": str(e)
+        }
 
 
 @app.post("/speech-analysis")
@@ -552,12 +584,10 @@ async def speech_analysis(
             "speaking_speed": 0,
 
             "feedback":
-                "No transcript provided."
+            "No transcript provided."
         }
 
-
     words = transcript.split()
-
 
     filler_words_list = [
 
@@ -569,84 +599,44 @@ async def speech_analysis(
         "you know",
         "sort of",
         "kind of",
-        "hmm",
-        "okay",
     ]
 
-
     filler_count = sum(
-
         transcript.lower().count(word)
-
         for word in filler_words_list
     )
-
 
     confidence = max(
         50,
         95 - filler_count * 4
     )
 
-
     clarity = min(
         95,
         60 + len(words) // 2
     )
-
 
     speaking_speed = min(
         180,
         len(words) * 2
     )
 
-
-    feedback = []
-
-
-    if filler_count > 3:
-
-        feedback.append(
-            "Reduce filler words."
-        )
-
-
-    if len(words) < 20:
-
-        feedback.append(
-            "Try giving more detailed answers."
-        )
-
-
-    if clarity > 80:
-
-        feedback.append(
-            "Strong communication clarity."
-        )
-
-
-    if not feedback:
-
-        feedback.append(
-            "Good speaking performance."
-        )
-
-
     return {
 
         "confidence":
-            confidence,
+        confidence,
 
         "clarity":
-            clarity,
+        clarity,
 
         "filler_words":
-            filler_count,
+        filler_count,
 
         "speaking_speed":
-            speaking_speed,
+        speaking_speed,
 
         "feedback":
-            " ".join(feedback),
+        "Speech analyzed successfully."
     }
 
 
@@ -655,60 +645,28 @@ async def vision_analysis(
     data: dict
 ):
 
-    face_detected = True
-
-    eye_contact = 84
-
-    attention_score = 88
-
-    confidence_score = 81
-
     return {
 
         "face_detected":
-            face_detected,
+        True,
 
         "eye_contact":
-            eye_contact,
+        84,
 
         "attention_score":
-            attention_score,
+        88,
 
         "confidence_score":
-            confidence_score,
+        81,
 
         "feedback":
-            "Good eye contact and attention maintained."
-    }
-
-
-@app.post("/live-interview-analysis")
-async def live_interview_analysis(
-
-    data: SpeechRequest
-):
-
-    return {
-
-        "confidence_score": 87,
-
-        "communication_score": 90,
-
-        "words_per_minute": 118,
-
-        "attention_status":
-            "Focused",
-
-        "feedback":
-            "Strong communication and technical articulation detected.",
+        "Good eye contact maintained."
     }
 
 
 @app.post("/save-interview")
 def save_interview(
-
     data: InterviewSessionRequest,
-
     db: Session = Depends(get_db)
 ):
 
@@ -721,27 +679,26 @@ def save_interview(
         transcript=data.transcript,
 
         confidence_score=
-            data.confidence_score,
+        data.confidence_score,
 
         communication_score=
-            data.communication_score,
+        data.communication_score,
 
         words_per_minute=
-            data.words_per_minute,
+        data.words_per_minute,
 
         eye_contact_score=
-            data.eye_contact_score,
+        data.eye_contact_score,
 
         technical_score=
-            data.technical_score,
+        data.technical_score,
 
         attention_status=
-            data.attention_status,
+        data.attention_status,
 
         ai_feedback=
-            data.ai_feedback,
+        data.ai_feedback,
     )
-
 
     db.add(session)
 
@@ -749,19 +706,15 @@ def save_interview(
 
     db.refresh(session)
 
-
     return {
-
         "message":
-            "Interview saved successfully"
+        "Interview saved successfully"
     }
 
 
 @app.get("/history/{user_id}")
 def get_history(
-
     user_id: int,
-
     db: Session = Depends(get_db)
 ):
 
@@ -804,9 +757,7 @@ def leaderboard(
 
 @app.get("/dashboard/{user_id}")
 def dashboard(
-
     user_id: int,
-
     db: Session = Depends(get_db)
 ):
 
@@ -822,211 +773,42 @@ def dashboard(
         .all()
     )
 
-
     total = len(sessions)
-
 
     avg_confidence = 0
 
     avg_communication = 0
-
 
     if total > 0:
 
         avg_confidence = round(
 
             sum(
-
                 s.confidence_score
-
                 for s in sessions
-
             ) / total,
 
             2
         )
-
 
         avg_communication = round(
 
             sum(
-
                 s.communication_score
-
                 for s in sessions
-
             ) / total,
 
             2
         )
 
-
     return {
 
         "total_interviews":
-            total,
+        total,
 
         "average_confidence":
-            avg_confidence,
+        avg_confidence,
 
         "average_communication":
-            avg_communication,
-    }
-
-
-@app.post("/final-report")
-def final_report():
-
-    return {
-
-        "confidence_score": 87,
-
-        "communication_score": 90,
-
-        "words_per_minute": 115,
-
-        "eye_contact_score": 92,
-
-        "attention_status":
-            "Focused",
-    }
-
-
-@app.post("/generate-report")
-async def generate_report(
-    data: dict
-):
-
-    return {
-
-        "overall_score": 87,
-
-        "technical_score": 85,
-
-        "communication_score": 90,
-
-        "confidence_score": 84,
-
-        "summary":
-            "Strong overall interview performance with good communication and technical understanding.",
-
-        "strengths": [
-
-            "Clear communication",
-
-            "Good technical articulation",
-
-            "Professional response structure",
-        ],
-
-        "weaknesses": [
-
-            "Needs deeper system design explanations",
-        ],
-
-        "recommendations": [
-
-            "Practice concise technical explanations",
-
-            "Improve advanced problem-solving depth",
-
-            "Reduce filler words",
-        ]
-    }
-
-
-@app.post("/ai/start-interview")
-async def start_interview(data: dict):
-
-    role = data.get("role")
-
-    level = data.get("level")
-
-    question = generate_question(
-        role,
-        level,
-    )
-
-    return {
-        "question": question
-    }
-
-
-@app.post("/ai/next-question")
-async def next_question(data: dict):
-
-    role = data.get("role")
-
-    level = data.get("level")
-
-    previous_question = data.get(
-        "previous_question"
-    )
-
-    previous_answer = data.get(
-        "previous_answer"
-    )
-
-    question = generate_question(
-
-        role,
-        level,
-
-        previous_answer,
-        previous_question,
-    )
-
-    return {
-        "question": question
-    }
-
-
-@app.post("/ai/evaluate")
-async def ai_evaluate(data: dict):
-
-    question = data.get(
-        "question"
-    )
-
-    answer = data.get(
-        "answer"
-    )
-
-    evaluation = evaluate_interview_answer(
-        question,
-        answer,
-    )
-
-    return {
-        "evaluation": evaluation
-    }
-@app.get("/recruiter-analytics")
-def recruiter_analytics():
-
-    return {
-
-        "top_candidates": [
-
-            {
-                "name": "John",
-                "score": 94,
-            },
-
-            {
-                "name": "Sarah",
-                "score": 92,
-            },
-        ],
-
-        "average_confidence": 86,
-
-        "average_communication": 89,
-
-        "total_interviews": 124,
-    }
-@app.get("/health")
-def health():
-
-    return {
-        "status": "ok"
+        avg_communication,
     }

@@ -1,46 +1,34 @@
+// frontend/src/routes/ProtectedRoute.tsx
+
 import {
   Navigate,
 } from "react-router-dom";
-
-import type {
-  ReactElement
-} from "react";
 
 import {
   useAuth,
 } from "../context/AuthContext";
 
 
-interface ProtectedRouteProps {
+interface Props {
 
-  children: ReactElement;
+  children: React.ReactNode;
 }
 
 
 function ProtectedRoute({
 
   children,
+}: Props) {
 
-}: ProtectedRouteProps) {
+  const auth =
+    useAuth();
 
-  const {
-    isAuthenticated,
-  } = useAuth();
-
-
-  if (
-    !isAuthenticated
-  ) {
+  if (!auth.user) {
 
     return (
-
-      <Navigate
-        to="/login"
-        replace
-      />
+      <Navigate to="/login" />
     );
   }
-
 
   return children;
 }

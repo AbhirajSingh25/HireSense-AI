@@ -5,53 +5,94 @@ import {
   useState,
 } from "react";
 
+interface User {
+
+  id: number;
+
+  email: string;
+
+  username: string;
+}
+
+interface AuthContextType {
+
+  user: User | null;
+
+  token: string | null;
+
+  login: (
+    user: User,
+    token: string
+  ) => void;
+
+  logout: () => void;
+}
 
 const AuthContext =
-  createContext<any>(null);
+  createContext<AuthContextType>(
+    {} as AuthContextType
+  );
 
 
 export function AuthProvider({
+
   children,
 }: any) {
 
   const [
     user,
     setUser,
-  ] = useState<any>(null);
+  ] = useState<User | null>(
+    null
+  );
 
   const [
-    loading,
-    setLoading,
-  ] = useState(true);
+    token,
+    setToken,
+  ] = useState<string | null>(
+    null
+  );
 
 
   useEffect(() => {
 
-    const storedUser =
+    const savedUser =
       localStorage.getItem(
         "user"
       );
 
-    if (storedUser) {
+    const savedToken =
+      localStorage.getItem(
+        "token"
+      );
+
+    if (
+      savedUser &&
+      savedToken
+    ) {
 
       setUser(
-        JSON.parse(storedUser)
+        JSON.parse(
+          savedUser
+        )
+      );
+
+      setToken(
+        savedToken
       );
     }
-
-    setLoading(false);
 
   }, []);
 
 
   function login(
-    userData: any,
+    user: User,
     token: string
   ) {
 
     localStorage.setItem(
       "user",
-      JSON.stringify(userData)
+      JSON.stringify(user)
     );
 
     localStorage.setItem(
@@ -59,7 +100,9 @@ export function AuthProvider({
       token
     );
 
-    setUser(userData);
+    setUser(user);
+
+    setToken(token);
   }
 
 
@@ -75,21 +118,18 @@ export function AuthProvider({
 
     setUser(null);
 
-    window.location.href =
-      "/login";
+    setToken(null);
   }
 
 
   return (
 
     <AuthContext.Provider
-
       value={{
-
         user,
+        token,
         login,
         logout,
-        loading,
       }}
     >
 
@@ -98,7 +138,6 @@ export function AuthProvider({
     </AuthContext.Provider>
   );
 }
-
 
 export function useAuth() {
 

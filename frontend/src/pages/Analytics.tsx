@@ -1,508 +1,374 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
 import MainLayout from "../components/MainLayout";
 
-import {
-  getInterviewSessions,
-} from "../services/api";
+import Card from "../components/ui/Card";
+
+import AnalyticsCard from "../components/ui/AnalyticsCard";
+
+import PerformanceChart from "../components/ui/PerformanceChart";
 
 import {
-
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  BarChart,
-  Bar,
-
-} from "recharts";
+  Brain,
+  Trophy,
+  Clock,
+  Target,
+} from "lucide-react";
 
 
 function Analytics() {
-
-  const [
-    sessions,
-    setSessions,
-  ] = useState<any[]>([]);
-
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
-
-
-  useEffect(() => {
-
-    fetchAnalytics();
-
-  }, []);
-
-
-  async function fetchAnalytics() {
-
-    try {
-
-      const user = JSON.parse(
-
-        localStorage.getItem(
-          "user"
-        ) || "{}"
-      );
-
-
-      const data =
-
-        await getInterviewSessions(
-          user.id
-        );
-
-
-      setSessions(
-        Array.isArray(data)
-          ? data
-          : []
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-    } finally {
-
-      setLoading(false);
-    }
-  }
-
-
-  const chartData =
-    sessions.map((
-      item,
-      index
-    ) => ({
-
-      name:
-        `Interview ${index + 1}`,
-
-      confidence:
-        item.confidence_score,
-
-      communication:
-        item.communication_score,
-
-      eyeContact:
-        item.eye_contact_score,
-
-      wpm:
-        item.words_per_minute,
-    }));
-
-
-  const averageConfidence =
-
-    sessions.length
-
-      ? Math.round(
-
-          sessions.reduce(
-
-            (
-              acc,
-              curr
-            ) =>
-
-              acc +
-              curr.confidence_score,
-
-            0
-          ) / sessions.length
-        )
-
-      : 0;
-
-
-  const averageCommunication =
-
-    sessions.length
-
-      ? Math.round(
-
-          sessions.reduce(
-
-            (
-              acc,
-              curr
-            ) =>
-
-              acc +
-              curr.communication_score,
-
-            0
-          ) / sessions.length
-        )
-
-      : 0;
-
 
   return (
 
     <MainLayout>
 
+      <div className="mb-10">
+
+        <h1
+          className="
+            text-6xl
+            font-black
+            mb-4
+          "
+        >
+          AI Analytics
+        </h1>
+
+        <p
+          className="
+            text-zinc-400
+            text-xl
+          "
+        >
+          Realtime interview intelligence dashboard
+        </p>
+
+      </div>
+
+
       <div
         className="
-          max-w-7xl
-          mx-auto
+          grid
+          xl:grid-cols-4
+          md:grid-cols-2
+          gap-6
+          mb-8
         "
       >
 
-        <div
+        <AnalyticsCard
+          title="Total Interviews"
+          value={128}
+          color="text-cyan-400"
+        />
+
+        <AnalyticsCard
+          title="Average Score"
+          value={91}
+          suffix="%"
+          color="text-green-400"
+        />
+
+        <AnalyticsCard
+          title="AI Confidence"
+          value={87}
+          suffix="%"
+          color="text-purple-400"
+        />
+
+        <AnalyticsCard
+          title="Hiring Potential"
+          value={94}
+          suffix="%"
+          color="text-orange-400"
+        />
+
+      </div>
+
+
+      <div
+        className="
+          grid
+          xl:grid-cols-3
+          gap-8
+        "
+      >
+
+        <Card
           className="
-            mb-10
+            xl:col-span-2
+            p-8
           "
         >
 
-          <h1
+          <div
             className="
-              text-4xl
-              font-black
-              text-white
-              mb-3
+              flex
+              items-center
+              gap-3
+              mb-8
             "
           >
-            AI Analytics Dashboard
-          </h1>
 
-          <p
-            className="
-              text-gray-400
-            "
-          >
-            Performance insights and interview intelligence
-          </p>
+            <Brain
+              className="
+                text-cyan-400
+              "
+            />
 
-        </div>
+            <h2
+              className="
+                text-3xl
+                font-bold
+              "
+            >
+              Performance Trends
+            </h2>
+
+          </div>
+
+          <PerformanceChart />
+
+        </Card>
 
 
-        {loading ? (
+        <Card className="p-8">
 
           <div
             className="
-              text-gray-400
+              flex
+              items-center
+              gap-3
+              mb-8
             "
           >
-            Loading analytics...
+
+            <Target
+              className="
+                text-cyan-400
+              "
+            />
+
+            <h2
+              className="
+                text-3xl
+                font-bold
+              "
+            >
+              Recruiter Insights
+            </h2>
+
           </div>
 
-        ) : (
 
-          <>
+          <div className="space-y-5">
 
-            <div
-              className="
-                grid
-                md:grid-cols-3
-                gap-6
-                mb-10
-              "
-            >
+            {[
+              {
+                title:
+                  "Communication",
 
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
+                score: "92%",
+              },
 
-                <p
-                  className="
-                    text-gray-400
-                    mb-3
-                  "
-                >
-                  Interviews
-                </p>
+              {
+                title:
+                  "Technical Depth",
 
-                <h2
-                  className="
-                    text-5xl
-                    font-black
-                    text-cyan-400
-                  "
-                >
-                  {
-                    sessions.length
-                  }
-                </h2>
+                score: "88%",
+              },
 
-              </div>
+              {
+                title:
+                  "Leadership",
 
+                score: "84%",
+              },
+
+              {
+                title:
+                  "Confidence",
+
+                score: "95%",
+              },
+            ].map((item) => (
 
               <div
+                key={item.title}
                 className="
-                  bg-white/5
+                  p-5
+                  rounded-2xl
+                  bg-black/30
                   border
-                  border-white/10
-                  rounded-3xl
-                  p-6
+                  border-white/5
                 "
               >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-3
-                  "
-                >
-                  Avg Confidence
-                </p>
-
-                <h2
-                  className="
-                    text-5xl
-                    font-black
-                    text-green-400
-                  "
-                >
-                  {
-                    averageConfidence
-                  }%
-                </h2>
-
-              </div>
-
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <p
-                  className="
-                    text-gray-400
-                    mb-3
-                  "
-                >
-                  Avg Communication
-                </p>
-
-                <h2
-                  className="
-                    text-5xl
-                    font-black
-                    text-orange-400
-                  "
-                >
-                  {
-                    averageCommunication
-                  }%
-                </h2>
-
-              </div>
-
-            </div>
-
-
-            <div
-              className="
-                grid
-                lg:grid-cols-2
-                gap-8
-              "
-            >
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
-
-                <h2
-                  className="
-                    text-2xl
-                    font-bold
-                    mb-6
-                  "
-                >
-                  Confidence Trend
-                </h2>
 
                 <div
                   className="
-                    h-87.5
+                    flex
+                    items-center
+                    justify-between
                   "
                 >
 
-                  <ResponsiveContainer
-                    width="100%"
-                    height="100%"
+                  <span
+                    className="
+                      text-lg
+                    "
                   >
+                    {item.title}
+                  </span>
 
-                    <LineChart
-                      data={chartData}
-                    >
-
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                      />
-
-                      <XAxis dataKey="name" />
-
-                      <YAxis />
-
-                      <Tooltip />
-
-                      <Line
-                        type="monotone"
-                        dataKey="confidence"
-                        stroke="#22d3ee"
-                        strokeWidth={3}
-                      />
-
-                    </LineChart>
-
-                  </ResponsiveContainer>
+                  <span
+                    className="
+                      text-cyan-400
+                      font-bold
+                    "
+                  >
+                    {item.score}
+                  </span>
 
                 </div>
 
               </div>
+            ))}
+
+          </div>
+
+        </Card>
+
+      </div>
 
 
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-6
-                "
-              >
+      <div
+        className="
+          grid
+          xl:grid-cols-3
+          gap-8
+          mt-8
+        "
+      >
 
-                <h2
-                  className="
-                    text-2xl
-                    font-bold
-                    mb-6
-                  "
-                >
-                  Communication Metrics
-                </h2>
+        <Card className="p-8">
 
-                <div
-                  className="
-                    h-87.5
-                  "
-                >
+          <div
+            className="
+              flex
+              items-center
+              gap-3
+              mb-6
+            "
+          >
 
-                  <ResponsiveContainer
-                    width="100%"
-                    height="100%"
-                  >
-
-                    <BarChart
-                      data={chartData}
-                    >
-
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                      />
-
-                      <XAxis dataKey="name" />
-
-                      <YAxis />
-
-                      <Tooltip />
-
-                      <Bar
-                        dataKey="communication"
-                        fill="#4ade80"
-                      />
-
-                    </BarChart>
-
-                  </ResponsiveContainer>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            <div
+            <Clock
               className="
-                mt-8
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-6
+                text-cyan-400
+              "
+            />
+
+            <h2
+              className="
+                text-2xl
+                font-bold
               "
             >
+              Interview Time
+            </h2>
 
-              <h2
-                className="
-                  text-2xl
-                  font-bold
-                  mb-6
-                "
-              >
-                AI Insights
-              </h2>
+          </div>
+
+          <h1
+            className="
+              text-6xl
+              font-black
+              text-cyan-400
+            "
+          >
+            42h
+          </h1>
+
+        </Card>
 
 
-              <div
-                className="
-                  space-y-5
-                  text-gray-300
-                  leading-8
-                "
-              >
+        <Card className="p-8">
 
-                <p>
-                  • Confidence levels are
-                  improving across sessions.
-                </p>
+          <div
+            className="
+              flex
+              items-center
+              gap-3
+              mb-6
+            "
+          >
 
-                <p>
-                  • Communication clarity
-                  remains consistently strong.
-                </p>
+            <Trophy
+              className="
+                text-yellow-400
+              "
+            />
 
-                <p>
-                  • AI detected improving
-                  interview stability and
-                  reduced hesitation.
-                </p>
+            <h2
+              className="
+                text-2xl
+                font-bold
+              "
+            >
+              Global Rank
+            </h2>
 
-                <p>
-                  • Candidate shows strong
-                  technical articulation
-                  potential.
-                </p>
+          </div>
 
-              </div>
+          <h1
+            className="
+              text-6xl
+              font-black
+              text-yellow-400
+            "
+          >
+            #12
+          </h1>
 
-            </div>
+        </Card>
 
-          </>
-        )}
+
+        <Card className="p-8">
+
+          <div
+            className="
+              flex
+              items-center
+              gap-3
+              mb-6
+            "
+          >
+
+            <Brain
+              className="
+                text-purple-400
+              "
+            />
+
+            <h2
+              className="
+                text-2xl
+                font-bold
+              "
+            >
+              AI Accuracy
+            </h2>
+
+          </div>
+
+          <h1
+            className="
+              text-6xl
+              font-black
+              text-purple-400
+            "
+          >
+            98%
+          </h1>
+
+        </Card>
 
       </div>
 

@@ -1,21 +1,23 @@
+// frontend/src/pages/MockInterview.tsx
+
 import {
   useState,
 } from "react";
 
 import MainLayout from "../components/MainLayout";
 
-import {
+import Card from "../components/ui/Card";
 
-  startInterview,
-  getNextQuestion,
-  evaluateAnswer,
-
-} from "../services/api";
+import Button from "../components/ui/Button";
 
 import {
   Brain,
-  Send,
+  Sparkles,
 } from "lucide-react";
+
+import {
+  generateQuestions,
+} from "../services/api";
 
 
 function MockInterview() {
@@ -35,29 +37,14 @@ function MockInterview() {
   );
 
   const [
-    currentQuestion,
-    setCurrentQuestion,
-  ] = useState("");
-
-  const [
-    answer,
-    setAnswer,
-  ] = useState("");
-
-  const [
-    feedback,
-    setFeedback,
-  ] = useState("");
-
-  const [
     loading,
     setLoading,
   ] = useState(false);
 
   const [
-    started,
-    setStarted,
-  ] = useState(false);
+    questions,
+    setQuestions,
+  ] = useState<string[]>([]);
 
 
   async function handleStart() {
@@ -66,78 +53,23 @@ function MockInterview() {
 
       setLoading(true);
 
-      const data =
-        await startInterview(
-          role,
-          level
+      const response =
+
+        await generateQuestions(
+          role
         );
 
-      setCurrentQuestion(
-        data.question
+      setQuestions(
+        response.questions || []
       );
-
-      setStarted(true);
 
     } catch (error) {
 
       console.error(error);
 
-    } finally {
-
-      setLoading(false);
-    }
-  }
-
-
-  async function handleSubmit() {
-
-    if (!answer) return;
-
-    try {
-
-      setLoading(true);
-
-      const evaluation =
-
-        await evaluateAnswer(
-
-          currentQuestion,
-          answer
-        );
-
-
-      setFeedback(
-        evaluation.evaluation
+      alert(
+        "Failed to start interview"
       );
-
-
-      const nextQuestion =
-
-        await getNextQuestion(
-
-          role,
-          level,
-
-          currentQuestion,
-
-          answer
-        );
-
-
-      setTimeout(() => {
-
-        setCurrentQuestion(
-
-          nextQuestion.question
-        );
-
-        setAnswer("");
-
-      }, 1500);
-
-    } catch (error) {
-
-      console.error(error);
 
     } finally {
 
@@ -150,321 +82,235 @@ function MockInterview() {
 
     <MainLayout>
 
-      <div
+      <div className="mb-10">
+
+        <h1
+          className="
+            text-6xl
+            font-black
+            leading-none
+            mb-4
+          "
+        >
+          AI Mock
+          <br />
+          Interview
+        </h1>
+
+        <p
+          className="
+            text-zinc-400
+            text-xl
+          "
+        >
+          Adaptive AI-powered interview simulation
+        </p>
+
+      </div>
+
+
+      <Card
         className="
-          max-w-5xl
-          mx-auto
+          p-10
+          max-w-4xl
         "
       >
 
         <div
           className="
+            grid
+            md:grid-cols-2
+            gap-8
             mb-10
           "
         >
 
-          <h1
-            className="
-              text-5xl
-              font-black
-              text-white
-              mb-3
-            "
-          >
-            AI Mock Interview
-          </h1>
+          <div>
 
-          <p
-            className="
-              text-gray-400
-              text-lg
-            "
-          >
-            Adaptive AI-powered interview simulation
-          </p>
+            <label
+              className="
+                block
+                text-zinc-400
+                mb-4
+              "
+            >
+              Job Role
+            </label>
+
+            <input
+              value={role}
+              onChange={(e) =>
+                setRole(
+                  e.target.value
+                )
+              }
+              className="
+                w-full
+                p-5
+                rounded-3xl
+                bg-[#0f172a]
+                border
+                border-cyan-500/20
+                outline-none
+                text-white
+              "
+            />
+
+          </div>
+
+
+          <div>
+
+            <label
+              className="
+                block
+                text-zinc-400
+                mb-4
+              "
+            >
+              Experience Level
+            </label>
+
+            <select
+              value={level}
+              onChange={(e) =>
+                setLevel(
+                  e.target.value
+                )
+              }
+              className="
+                w-full
+                p-5
+                rounded-3xl
+                bg-[#0f172a]
+                border
+                border-cyan-500/20
+                outline-none
+                text-white
+              "
+            >
+
+              <option>
+                Beginner
+              </option>
+
+              <option>
+                Intermediate
+              </option>
+
+              <option>
+                Advanced
+              </option>
+
+            </select>
+
+          </div>
 
         </div>
 
 
-        {!started ? (
+        <Button
+          onClick={handleStart}
+        >
 
-          <div
-            className="
-              bg-white/5
-              border
-              border-white/10
-              rounded-3xl
-              p-8
-            "
-          >
+          <Brain size={20} />
 
-            <div
-              className="
-                grid
-                md:grid-cols-2
-                gap-6
-                mb-8
-              "
-            >
+          {
+            loading
 
-              <div>
+              ? "Starting..."
 
-                <label
-                  className="
-                    block
-                    text-gray-400
-                    mb-3
-                  "
-                >
-                  Job Role
-                </label>
+              : "Start Interview"
+          }
 
-                <input
-                  value={role}
-                  onChange={(e) =>
-                    setRole(
-                      e.target.value
-                    )
-                  }
-                  className="
-                    w-full
-                    bg-[#111827]
-                    border
-                    border-white/10
-                    rounded-2xl
-                    p-5
-                    text-white
-                  "
-                />
+        </Button>
 
-              </div>
+      </Card>
 
 
-              <div>
+      {
+        questions.length > 0 && (
 
-                <label
-                  className="
-                    block
-                    text-gray-400
-                    mb-3
-                  "
-                >
-                  Experience Level
-                </label>
+          <div className="mt-10">
 
-                <select
-                  value={level}
-                  onChange={(e) =>
-                    setLevel(
-                      e.target.value
-                    )
-                  }
-                  className="
-                    w-full
-                    bg-[#111827]
-                    border
-                    border-white/10
-                    rounded-2xl
-                    p-5
-                    text-white
-                  "
-                >
-
-                  <option>
-                    Beginner
-                  </option>
-
-                  <option>
-                    Intermediate
-                  </option>
-
-                  <option>
-                    Advanced
-                  </option>
-
-                </select>
-
-              </div>
-
-            </div>
-
-
-            <button
-              onClick={handleStart}
-              disabled={loading}
-              className="
-                bg-cyan-400
-                hover:bg-cyan-300
-                text-black
-                font-bold
-                py-5
-                px-8
-                rounded-2xl
-                flex
-                items-center
-                gap-3
-              "
-            >
-
-              <Brain size={22} />
-
-              {
-                loading
-
-                  ? "Starting..."
-
-                  : "Start AI Interview"
-              }
-
-            </button>
-
-          </div>
-
-        ) : (
-
-          <div
-            className="
-              space-y-6
-            "
-          >
-
-            <div
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-8
-              "
-            >
-
-              <p
-                className="
-                  text-cyan-400
-                  text-sm
-                  mb-4
-                "
-              >
-                AI INTERVIEWER
-              </p>
-
-              <h2
-                className="
-                  text-2xl
-                  leading-10
-                "
-              >
-                {currentQuestion}
-              </h2>
-
-            </div>
-
-
-            <div
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-3xl
-                p-8
-              "
-            >
-
-              <textarea
-                value={answer}
-                onChange={(e) =>
-                  setAnswer(
-                    e.target.value
-                  )
-                }
-                rows={8}
-                placeholder="Write your answer here..."
-                className="
-                  w-full
-                  bg-[#111827]
-                  border
-                  border-white/10
-                  rounded-2xl
-                  p-5
-                  text-white
-                  resize-none
-                  outline-none
-                "
-              />
-
-
-              <button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="
-                  mt-6
-                  bg-cyan-400
-                  hover:bg-cyan-300
-                  text-black
-                  font-bold
-                  py-4
-                  px-7
-                  rounded-2xl
-                  flex
-                  items-center
-                  gap-3
-                "
-              >
-
-                <Send size={18} />
-
-                {
-                  loading
-
-                    ? "Analyzing..."
-
-                    : "Submit Answer"
-                }
-
-              </button>
-
-            </div>
-
-
-            {feedback && (
+            <Card className="p-10">
 
               <div
                 className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-3xl
-                  p-8
+                  flex
+                  items-center
+                  gap-3
+                  mb-8
                 "
               >
 
-                <p
+                <Sparkles
                   className="
-                    text-green-400
-                    text-sm
-                    mb-4
+                    text-cyan-400
                   "
-                >
-                  AI FEEDBACK
-                </p>
+                />
 
-                <div
+                <h2
                   className="
-                    text-gray-300
-                    leading-8
-                    whitespace-pre-wrap
+                    text-4xl
+                    font-black
                   "
                 >
-                  {feedback}
-                </div>
+                  AI Questions
+                </h2>
 
               </div>
-            )}
+
+
+              <div className="space-y-5">
+
+                {questions.map(
+                  (question, index) => (
+
+                    <div
+                      key={index}
+                      className="
+                        p-6
+                        rounded-3xl
+                        bg-black/30
+                        border
+                        border-white/5
+                      "
+                    >
+
+                      <p
+                        className="
+                          text-lg
+                          text-zinc-200
+                          leading-relaxed
+                        "
+                      >
+                        <span
+                          className="
+                            text-cyan-400
+                            font-bold
+                          "
+                        >
+                          Q{index + 1}.
+                        </span>
+
+                        {" "}
+
+                        {question}
+
+                      </p>
+
+                    </div>
+                  )
+                )}
+
+              </div>
+
+            </Card>
 
           </div>
-        )}
-
-      </div>
+        )
+      }
 
     </MainLayout>
   );

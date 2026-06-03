@@ -17,11 +17,18 @@ async function request(
     {
       headers: {
 
-        "Content-Type":
-          "application/json",
+  "Content-Type":
+    "application/json",
 
-        ...options.headers,
-      },
+  Authorization:
+    `Bearer ${
+      localStorage.getItem(
+        "token"
+      ) || ""
+    }`,
+
+  ...options.headers,
+},
 
       ...options,
     }
@@ -423,6 +430,64 @@ export async function generateFinalReport(
       method: "POST",
 
       body: JSON.stringify(data),
+    }
+  );
+}
+export async function
+generateDynamicQuestion(
+
+  role: string,
+
+  level: string,
+
+  transcript: string
+) {
+
+  return request(
+
+    "/dynamic-question",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        role,
+        level,
+        transcript,
+      }),
+    }
+  );
+}
+export async function
+analyzeBehavior(
+
+  confidence: number,
+
+  eye_contact: number,
+
+  communication: number,
+
+  transcript: string
+) {
+
+  return request(
+
+    "/behavior-analysis",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        confidence,
+
+        eye_contact,
+
+        communication,
+
+        transcript,
+      }),
     }
   );
 }
