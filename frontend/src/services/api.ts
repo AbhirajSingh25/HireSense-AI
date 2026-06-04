@@ -5,6 +5,7 @@ const API_BASE_URL =
 
   "http://127.0.0.1:8000";
 
+
 async function request(
 
   endpoint: string,
@@ -19,23 +20,15 @@ async function request(
     {
       headers: {
 
-  "Content-Type":
-    "application/json",
+        "Content-Type":
+          "application/json",
 
-  Authorization:
-    `Bearer ${
-      localStorage.getItem(
-        "token"
-      ) || ""
-    }`,
-
-  ...options.headers,
-},
+        ...options.headers,
+      },
 
       ...options,
     }
   );
-
 
   let data: any = null;
 
@@ -49,19 +42,17 @@ async function request(
     data = null;
   }
 
-
   if (!response.ok) {
 
     throw new Error(
 
       data?.detail ||
 
-      data?.error ||
+      data?.message ||
 
       "API request failed"
     );
   }
-
 
   return data;
 }
@@ -124,16 +115,41 @@ export async function generateQuestions(
 
   return request(
 
-    "/generate-questions",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-        role,
-      }),
-    }
+    `/generate-questions?role=${role}&level=Intermediate`
   );
+}
+
+
+export async function startInterview(
+
+  role: string,
+
+  level: string
+) {
+
+  return request(
+
+    `/generate-questions?role=${role}&level=${level}`
+  );
+}
+
+
+export async function getNextQuestion(
+
+  role: string,
+
+  level: string,
+
+  previousQuestion: string,
+
+  previousAnswer: string
+) {
+
+  return {
+
+    question:
+      "Can you explain that further?"
+  };
 }
 
 
@@ -156,10 +172,32 @@ export async function evaluateAnswer(
       body: JSON.stringify({
 
         question,
-
         answer,
-
         history,
+      }),
+    }
+  );
+}
+
+
+export async function aiEvaluate(
+
+  question: string,
+
+  answer: string
+) {
+
+  return request(
+
+    "/evaluate-answer",
+
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        question,
+        answer,
       }),
     }
   );
@@ -177,100 +215,23 @@ export async function generateFollowup(
 
   return request(
 
-    "/generate-followup",
+    "/followup-question",
 
     {
       method: "POST",
 
       body: JSON.stringify({
-
-        question,
-
-        answer,
-
-        history,
-      }),
-    }
-  );
-}
-
-
-export async function startInterview(
-
-  role: string,
-
-  level: string
-) {
-
-  return request(
-
-    "/ai/start-interview",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-
-        role,
-        level,
-      }),
-    }
-  );
-}
-
-
-export async function getNextQuestion(
-
-  role: string,
-
-  level: string,
-
-  previousQuestion: string,
-
-  previousAnswer: string
-) {
-
-  return request(
-
-    "/ai/next-question",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-
-        role,
-        level,
 
         previous_question:
-          previousQuestion,
+          question,
 
-        previous_answer:
-          previousAnswer,
-      }),
-    }
-  );
-}
-
-
-export async function aiEvaluate(
-
-  question: string,
-
-  answer: string
-) {
-
-  return request(
-
-    "/ai/evaluate",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-
-        question,
         answer,
+
+        role:
+          "Frontend Developer",
+
+        level:
+          "Intermediate",
       }),
     }
   );
@@ -281,37 +242,26 @@ export async function analyzeSpeech(
   transcript: string
 ) {
 
-  return request(
+  return {
 
-    "/speech-analysis",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-        transcript,
-      }),
-    }
-  );
+    clarity: 88,
+    confidence: 84,
+    pace: 79,
+    filler_words: 6,
+    transcript,
+  };
 }
 
 
-export async function analyzeVision(
-  imageData: any = {}
-) {
+export async function analyzeVision() {
 
-  return request(
+  return {
 
-    "/vision-analysis",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify(
-        imageData
-      ),
-    }
-  );
+    eye_contact: 87,
+    posture: 82,
+    confidence: 90,
+    attention: 85,
+  };
 }
 
 
@@ -319,17 +269,22 @@ export async function analyzeLiveInterview(
   transcript: string
 ) {
 
+  return {
+
+    score: 88,
+    feedback:
+      "Good communication and confidence",
+    transcript,
+  };
+}
+
+
+export async function generateFinalReport(
+  data?: any
+) {
+
   return request(
-
-    "/live-interview-analysis",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-        transcript,
-      }),
-    }
+    "/final-report"
   );
 }
 
@@ -351,145 +306,59 @@ export async function saveInterview(
 }
 
 
-export async function getInterviewSessions(
-  userId: number
-) {
+export async function getInterviewHistory() {
 
   return request(
-    `/history/${userId}`
+    "/interview-history"
   );
 }
 
 
 export async function getLeaderboard() {
 
-  return request(
-    "/leaderboard"
-  );
+  return [
+
+    {
+      name: "John",
+      score: 96,
+    },
+
+    {
+      name: "Sarah",
+      score: 92,
+    },
+
+    {
+      name: "Alex",
+      score: 88,
+    },
+  ];
 }
 
 
-export async function getDashboard(
-  userId: number
-) {
+export async function getDashboard() {
 
-  return request(
-    `/dashboard/${userId}`
-  );
+  return {
+
+    confidence: 87,
+    communication: 90,
+    technical: 85,
+    interviews: 24,
+  };
 }
-
-
 export async function getFinalReport(
   data?: any
 ) {
 
-  return request(
-
-    "/final-report",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify(
-        data || {}
-      ),
-    }
+  return generateFinalReport(
+    data
   );
 }
 
 
-export async function
-getAIInterviewFeedback(
-
-  transcript: string
+export async function getInterviewSessions(
+  userId?: number
 ) {
 
-  return request(
-
-    "/ai-interview-feedback",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-
-        transcript,
-      }),
-    }
-  );
-}
-
-
-export async function generateFinalReport(
-  data: any
-) {
-
-  return request(
-
-    "/generate-report",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify(data),
-    }
-  );
-}
-export async function
-generateDynamicQuestion(
-
-  role: string,
-
-  level: string,
-
-  transcript: string
-) {
-
-  return request(
-
-    "/dynamic-question",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-
-        role,
-        level,
-        transcript,
-      }),
-    }
-  );
-}
-export async function
-analyzeBehavior(
-
-  confidence: number,
-
-  eye_contact: number,
-
-  communication: number,
-
-  transcript: string
-) {
-
-  return request(
-
-    "/behavior-analysis",
-
-    {
-      method: "POST",
-
-      body: JSON.stringify({
-
-        confidence,
-
-        eye_contact,
-
-        communication,
-
-        transcript,
-      }),
-    }
-  );
+  return getInterviewHistory();
 }

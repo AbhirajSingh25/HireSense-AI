@@ -4,6 +4,7 @@ import {
 
 import {
   useNavigate,
+  Link,
 } from "react-router-dom";
 
 import toast from "react-hot-toast";
@@ -18,24 +19,20 @@ function Signup() {
   const navigate =
     useNavigate();
 
-
   const [
     username,
     setUsername,
   ] = useState("");
-
 
   const [
     email,
     setEmail,
   ] = useState("");
 
-
   const [
     password,
     setPassword,
   ] = useState("");
-
 
   const [
     loading,
@@ -43,91 +40,41 @@ function Signup() {
   ] = useState(false);
 
 
-  async function handleSignup() {
+  async function handleSignup(
+    e: any
+  ) {
+
+    e.preventDefault();
 
     try {
 
       setLoading(true);
 
-
       const response =
-
         await signup(
-
           username,
-
           email,
-
           password
         );
 
+      console.log(
+        response
+      );
 
-      if (
-        response?.token &&
-        response?.user
-      ) {
+      toast.success(
+        "Account created successfully"
+      );
 
-        localStorage.setItem(
-
-          "token",
-
-          response.token
-        );
-
-
-        localStorage.setItem(
-
-          "user",
-
-          JSON.stringify(
-            response.user
-          )
-        );
-
-
-        toast.success(
-          "Signup successful"
-        );
-
-
-        navigate(
-          "/dashboard"
-        );
-
-      } else {
-
-        toast.error(
-          "Signup failed"
-        );
-      }
+      navigate("/login");
 
     } catch (error: any) {
 
       console.error(error);
 
-      try {
-
-        const parsed =
-          JSON.parse(
-            error.message
-          );
-
-        toast.error(
-
-          parsed.detail ||
-
-          "Signup failed"
-        );
-
-      } catch {
-
-        toast.error(
-
-          error.message ||
-
-          "Signup failed"
-        );
-      }
+      toast.error(
+        error.message ||
+        "Signup failed"
+      );
 
     } finally {
 
@@ -149,7 +96,8 @@ function Signup() {
       "
     >
 
-      <div
+      <form
+        onSubmit={handleSignup}
         className="
           w-full
           max-w-xl
@@ -158,7 +106,6 @@ function Signup() {
           border-white/10
           rounded-3xl
           p-10
-          backdrop-blur-xl
         "
       >
 
@@ -173,10 +120,9 @@ function Signup() {
           Create Account
         </h1>
 
-
         <p
           className="
-            text-gray-400
+            text-zinc-400
             mb-10
           "
         >
@@ -187,19 +133,15 @@ function Signup() {
         <div className="space-y-6">
 
           <input
-
             type="text"
-
             placeholder="Username"
-
             value={username}
-
             onChange={(e) =>
               setUsername(
                 e.target.value
               )
             }
-
+            required
             className="
               w-full
               p-5
@@ -208,26 +150,20 @@ function Signup() {
               border
               border-white/10
               text-white
-              outline-none
-              focus:border-cyan-400
             "
           />
 
 
           <input
-
             type="email"
-
             placeholder="Email"
-
             value={email}
-
             onChange={(e) =>
               setEmail(
                 e.target.value
               )
             }
-
+            required
             className="
               w-full
               p-5
@@ -236,67 +172,47 @@ function Signup() {
               border
               border-white/10
               text-white
-              outline-none
-              focus:border-cyan-400
             "
           />
 
 
           <input
-
             type="password"
-
             placeholder="Password"
-
             value={password}
-
             onChange={(e) =>
               setPassword(
                 e.target.value
               )
             }
-
+            required
             className="
               w-full
               p-5
               rounded-2xl
-              bg-black
-              border
-              border-white/10
-              text-white
-              outline-none
-              focus:border-cyan-400
+              bg-[#dfe3ec]
+              text-black
             "
           />
 
 
           <button
-
-            onClick={
-              handleSignup
-            }
-
+            type="submit"
             disabled={loading}
-
             className="
               w-full
               bg-cyan-400
               hover:bg-cyan-300
-              disabled:opacity-50
               text-black
               font-bold
               py-5
               rounded-2xl
-              transition-all
-              duration-300
             "
           >
 
             {
               loading
-
-                ? "Creating Account..."
-
+                ? "Creating..."
                 : "Create Account"
             }
 
@@ -304,7 +220,31 @@ function Signup() {
 
         </div>
 
-      </div>
+
+        <p
+          className="
+            text-zinc-400
+            mt-8
+            text-center
+          "
+        >
+
+          Already have an account?
+
+          {" "}
+
+          <Link
+            to="/login"
+            className="
+              text-cyan-400
+            "
+          >
+            Login
+          </Link>
+
+        </p>
+
+      </form>
 
     </div>
   );

@@ -5,8 +5,7 @@ from datetime import datetime
 from fastapi import (
     FastAPI,
     Depends,
-    UploadFile,
-    File
+    HTTPException
 )
 
 from fastapi.middleware.cors import (
@@ -21,26 +20,9 @@ from database.database import (
     get_db
 )
 
-from database.interview_model import (
+from database.models import (
+    User,
     InterviewSession
-)
-
-from services.ai_service import (
-
-    generate_interview_questions,
-
-    evaluate_answer,
-
-    generate_final_report,
-
-    generate_followup_question
-)
-
-from services.resume_service import (
-
-    extract_resume_text,
-
-    analyze_resume_text
 )
 
 
@@ -56,14 +38,7 @@ app.add_middleware(
 
     CORSMiddleware,
 
-    allow_origins=[
-
-        "http://localhost:5173",
-
-        "https://hire-sense-ai-gamma.vercel.app",
-
-        "https://hire-sense-ciyne6slw-abhirajsingh25s-projects.vercel.app",
-    ],
+    allow_origins=["*"],
 
     allow_credentials=True,
 
@@ -77,9 +52,100 @@ app.add_middleware(
 def home():
 
     return {
-
         "message":
             "HireSense AI Backend Running"
+    }
+
+
+@app.post("/auth/signup")
+def signup(
+
+    data: dict,
+
+    db: Session = Depends(get_db)
+):
+
+    existing_user = db.query(User).filter(
+        User.email == data["email"]
+    ).first()
+
+    if existing_user:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Email already exists"
+        )
+
+    user = User(
+
+        username=data["username"],
+
+        email=data["email"],
+
+        password=data["password"]
+    )
+
+    db.add(user)
+
+    db.commit()
+
+    db.refresh(user)
+
+    return {
+
+        "message":
+            "Signup successful",
+
+        "user_id":
+            user.id
+    }
+
+
+@app.post("/auth/login")
+def login(
+
+    data: dict,
+
+    db: Session = Depends(get_db)
+):
+
+    user = db.query(User).filter(
+        User.email == data["email"]
+    ).first()
+
+    if not user:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Invalid email"
+        )
+
+    if user.password != data["password"]:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid password"
+        )
+
+    return {
+
+        "message":
+            "Login successful",
+
+        "token":
+            "demo-token",
+
+        "user": {
+
+            "id":
+                user.id,
+
+            "username":
+                user.username,
+
+            "email":
+                user.email
+        }
     }
 
 
@@ -88,41 +154,53 @@ def generate_questions(
 
     role: str,
 
-    level: str,
-
-    resume_analysis: str = ""
+    level: str
 ):
 
-    questions = generate_interview_questions(
+    return {
 
-        role,
+        "questions": [
 
-        level,
+            f"Tell me about yourself as a {role}",
 
-        resume_analysis
-    )
+            "What are React hooks?",
 
-    return questions
+            "Explain JavaScript closures",
+
+            "How does API integration work?",
+
+            "Describe a challenging project"
+        ]
+    }
 
 
 @app.post("/evaluate-answer")
-def evaluate(
+def evaluate_answer(
     data: dict
 ):
 
-    result = evaluate_answer(
-        data["answer"]
-    )
+    return {
 
-    return result
+        "score": 85,
+
+        "feedback":
+            "Good answer with decent clarity"
+    }
 
 
 @app.get("/final-report")
 def final_report():
 
-    report = generate_final_report()
+    return {
 
-    return report
+        "overall_score": 88,
+
+        "communication": 90,
+
+        "technical": 85,
+
+        "confidence": 87
+    }
 
 
 @app.post("/followup-question")
@@ -130,20 +208,10 @@ def followup_question(
     data: dict
 ):
 
-    question = generate_followup_question(
-
-        data["previous_question"],
-
-        data["answer"],
-
-        data["role"],
-
-        data["level"]
-    )
-
     return {
 
-        "question": question
+        "question":
+            "Can you explain that in more detail?"
     }
 
 
@@ -204,76 +272,4 @@ def interview_history(
         InterviewSession
     ).all()
 
-    results = []
-
-    for session in sessions:
-
-        results.append({
-
-            "id":
-                session.id,
-
-            "role":
-                session.role,
-
-            "level":
-                session.level,
-
-            "questions":
-                json.loads(
-                    session.questions
-                ),
-
-            "answers":
-                json.loads(
-                    session.answers
-                ),
-
-            "evaluations":
-                json.loads(
-                    session.evaluations
-                ),
-
-            "created_at":
-                session.created_at,
-
-            "final_report":
-                json.loads(
-                    session.final_report
-                )
-        })
-
-    return results
-
-
-@app.post("/analyze-resume")
-async def analyze_resume(
-    file: UploadFile = File(...)
-):
-
-    try:
-
-        extracted_text = extract_resume_text(
-            file
-        )
-
-        analysis = analyze_resume_text(
-            extracted_text
-        )
-
-        return {
-
-            "resume_text":
-                extracted_text,
-
-            "analysis":
-                analysis
-        }
-
-    except Exception as error:
-
-        return {
-
-            "error":
-                str(error)
-        }
+    return sessions
