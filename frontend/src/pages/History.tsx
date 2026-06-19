@@ -8,7 +8,7 @@ import MainLayout from "../components/MainLayout";
 import Card from "../components/ui/Card";
 
 import {
-  getInterviewHistory,
+  getInterviewSessions,
 } from "../services/api";
 
 
@@ -32,7 +32,7 @@ function History() {
     try {
 
       const data =
-        await getInterviewHistory();
+  await getInterviewSessions();
 
       setInterviews(data);
 

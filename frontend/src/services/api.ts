@@ -188,11 +188,12 @@ export async function saveInterview(
     }
   );
 }
-export async function getInterviewSessions() {
+export async function getInterviewHistory() {
+  return request("/interview-history");
+}
 
-  return request(
-    "/interview-history"
-  );
+export async function getInterviewSessions() {
+  return request("/interview-history");
 }
 export async function analyzeSpeech(
   formData: FormData
