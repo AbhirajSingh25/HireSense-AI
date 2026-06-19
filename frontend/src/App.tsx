@@ -4,7 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-
+import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -129,7 +129,14 @@ function App() {
         />
 
 
-
+<Route
+  path="/resume-analyzer"
+  element={
+    <ProtectedRoute>
+      <ResumeAnalyzer />
+    </ProtectedRoute>
+  }
+/>
         {/* LIVE INTERVIEW */}
 
         <Route
