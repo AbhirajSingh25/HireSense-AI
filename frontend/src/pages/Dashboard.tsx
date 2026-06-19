@@ -21,6 +21,7 @@ import {
   Sparkles,
   Target,
   Flame,
+  FileText,
   Clock,
   Activity,
   ShieldCheck,
@@ -664,6 +665,12 @@ function Dashboard() {
                   title: "Analytics",
                   icon: BarChart3,
                   action: () => navigate("/analytics"),
+                },
+
+                {
+                  title: "Resume Analyzer",
+                  icon: FileText,
+                  action: () => navigate("/resume-analyzer"),
                 },
 
                 {

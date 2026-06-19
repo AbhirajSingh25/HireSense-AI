@@ -324,29 +324,179 @@ function ResumeAnalyzer() {
               </div>
 
 
-              <div
-                className="
-                  whitespace-pre-wrap
-                  text-zinc-300
-                  leading-9
-                  text-lg
-                "
-              >
+              <div className="space-y-8">
 
-                {
-                  typeof result ===
-                  "string"
+  {/* ATS SCORE */}
 
-                    ? result
+  <div
+    className="
+      p-8
+      rounded-3xl
+      bg-cyan-500/10
+      border
+      border-cyan-500/20
+    "
+  >
 
-                    : JSON.stringify(
-                        result,
-                        null,
-                        2
-                      )
-                }
+    <p className="text-zinc-400 mb-3">
+      ATS SCORE
+    </p>
 
-              </div>
+    <h1
+      className="
+        text-7xl
+        font-black
+        text-cyan-400
+      "
+    >
+      {result.ats_score}%
+    </h1>
+
+  </div>
+
+
+
+  {/* SKILLS */}
+
+  <div>
+
+    <h3
+      className="
+        text-2xl
+        font-bold
+        mb-4
+      "
+    >
+      Skills Found
+    </h3>
+
+    <div
+      className="
+        flex
+        flex-wrap
+        gap-3
+      "
+    >
+
+      {result.skills?.map(
+        (skill: string) => (
+
+          <span
+            key={skill}
+            className="
+              px-4
+              py-2
+              rounded-xl
+              bg-green-500/10
+              border
+              border-green-500/20
+              text-green-400
+            "
+          >
+            {skill}
+          </span>
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+
+
+  {/* MISSING */}
+
+  <div>
+
+    <h3
+      className="
+        text-2xl
+        font-bold
+        mb-4
+      "
+    >
+      Missing Skills
+    </h3>
+
+    <div
+      className="
+        flex
+        flex-wrap
+        gap-3
+      "
+    >
+
+      {result.missing_skills?.map(
+        (skill: string) => (
+
+          <span
+            key={skill}
+            className="
+              px-4
+              py-2
+              rounded-xl
+              bg-red-500/10
+              border
+              border-red-500/20
+              text-red-400
+            "
+          >
+            {skill}
+          </span>
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+
+
+  {/* SUGGESTIONS */}
+
+  <div>
+
+    <h3
+      className="
+        text-2xl
+        font-bold
+        mb-4
+      "
+    >
+      AI Suggestions
+    </h3>
+
+    <div className="space-y-3">
+
+      {result.suggestions?.map(
+        (
+          suggestion: string,
+          index: number
+        ) => (
+
+          <div
+            key={index}
+            className="
+              p-4
+              rounded-2xl
+              bg-white/5
+              border
+              border-white/10
+            "
+          >
+            {suggestion}
+          </div>
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+</div>
 
             </div>
           )

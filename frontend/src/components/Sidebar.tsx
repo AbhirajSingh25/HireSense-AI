@@ -24,7 +24,11 @@ const navItems = [
     path: "/dashboard",
     icon: LayoutDashboard,
   },
-
+{
+  label: "Resume Analyzer",
+  path: "/resume-analyzer",
+  icon: FileText,
+},
   {
     label: "Live Interview",
     path: "/live-interview",
