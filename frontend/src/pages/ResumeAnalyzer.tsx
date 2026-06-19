@@ -467,7 +467,38 @@ function ResumeAnalyzer() {
     >
       AI Suggestions
     </h3>
+<div
+  className="
+    mt-10
+    p-8
+    rounded-3xl
+    bg-white/5
+    border
+    border-white/10
+  "
+>
 
+  <h2
+    className="
+      text-3xl
+      font-black
+      mb-5
+    "
+  >
+    AI Recruiter Review
+  </h2>
+
+  <div
+    className="
+      whitespace-pre-wrap
+      leading-8
+      text-zinc-300
+    "
+  >
+    {result.ai_review}
+  </div>
+
+</div>
     <div className="space-y-3">
 
       {result.suggestions?.map(

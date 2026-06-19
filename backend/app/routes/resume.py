@@ -1,9 +1,15 @@
 from fastapi import APIRouter, UploadFile, File
+from groq import Groq
+from app.config import GROQ_API_KEY
 import fitz
 
 router = APIRouter(
     prefix="/resume",
     tags=["Resume"]
+)
+
+client = Groq(
+    api_key=GROQ_API_KEY
 )
 
 COMMON_SKILLS = [
@@ -20,6 +26,8 @@ COMMON_SKILLS = [
     "machine learning",
     "fastapi",
 ]
+
+
 @router.post("/analyze")
 async def analyze_resume(
     file: UploadFile = File(...)
@@ -40,7 +48,6 @@ async def analyze_resume(
     lower_text = text.lower()
 
     found_skills = []
-
     missing_skills = []
 
     for skill in COMMON_SKILLS:
@@ -52,8 +59,55 @@ async def analyze_resume(
             missing_skills.append(skill)
 
     ats_score = int(
-        (len(found_skills) /
-         len(COMMON_SKILLS)) * 100
+        (
+            len(found_skills)
+            / len(COMMON_SKILLS)
+        ) * 100
+    )
+
+    completion = client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+
+            {
+                "role": "system",
+
+                "content": """
+You are an expert technical recruiter.
+
+Analyze this resume and provide:
+
+1. ATS Score (0-100)
+
+2. Strengths
+
+3. Weaknesses
+
+4. Missing Skills
+
+5. Recruiter Verdict
+
+6. Interview Readiness Score
+
+Keep the response structured and professional.
+"""
+            },
+
+            {
+                "role": "user",
+                "content": text[:6000]
+            }
+
+        ]
+    )
+
+    ai_review = (
+        completion
+        .choices[0]
+        .message
+        .content
     )
 
     return {
@@ -64,29 +118,7 @@ async def analyze_resume(
 
         "missing_skills": missing_skills,
 
-        "strengths": [
+        "ai_review": ai_review,
 
-            "Technical keywords detected",
-
-            "Resume successfully parsed",
-
-            "Skills identified"
-        ],
-
-        "weaknesses": [
-
-            "Missing important keywords"
-        ],
-
-        "suggestions": [
-
-            "Add measurable achievements",
-
-            "Add missing technical skills",
-
-            "Use ATS-friendly formatting"
-        ],
-
-        "resume_text":
-            text[:3000]
+        "resume_text": text[:3000]
     }
