@@ -188,14 +188,55 @@ export async function saveInterview(
     }
   );
 }
-
-
-export async function getInterviewHistory() {
+export async function getInterviewSessions() {
 
   return request(
     "/interview-history"
   );
 }
+export async function analyzeSpeech(
+  formData: FormData
+) {
+
+  const response = await fetch(
+    `${API_BASE_URL}/speech/analyze`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Speech analysis failed"
+    );
+  }
+
+  return response.json();
+}
+export async function analyzeVision(
+  formData: FormData
+) {
+
+  const response = await fetch(
+    `${API_BASE_URL}/vision/analyze`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "Vision analysis failed"
+    );
+  }
+
+  return response.json();
+}
+
+
+
 
 
 export async function getLeaderboard() {
