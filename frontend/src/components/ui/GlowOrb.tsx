@@ -3,35 +3,51 @@ function GlowOrb() {
   return (
 
     <>
-      <div
-        className="
-          fixed
-          top-[-200px]
-          right-[-100px]
-          w-[500px]
-          h-[500px]
-          rounded-full
-          bg-cyan-500/10
-          blur-[120px]
-          pointer-events-none
-          z-0
-        "
-      />
 
       <div
         className="
           fixed
-          bottom-[-200px]
-          left-[-100px]
-          w-[400px]
-          h-[400px]
+          top-[-200px]
+          right-[-150px]
+          w-[700px]
+          h-[700px]
+          bg-red-600/10
           rounded-full
-          bg-blue-500/10
-          blur-[120px]
+          blur-[180px]
           pointer-events-none
-          z-0
         "
       />
+
+
+      <div
+        className="
+          fixed
+          bottom-[-300px]
+          left-[-200px]
+          w-[800px]
+          h-[800px]
+          bg-cyan-500/5
+          rounded-full
+          blur-[220px]
+          pointer-events-none
+        "
+      />
+
+
+      <div
+        className="
+          fixed
+          top-[40%]
+          left-[30%]
+          w-[500px]
+          h-[500px]
+          bg-red-500/5
+          rounded-full
+          blur-[180px]
+          pointer-events-none
+        "
+      />
+
     </>
   );
 }

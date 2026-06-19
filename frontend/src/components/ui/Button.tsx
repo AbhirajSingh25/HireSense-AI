@@ -1,56 +1,48 @@
-import {
-  motion,
-} from "framer-motion";
+import { ButtonHTMLAttributes } from "react";
 
-interface Props {
+type Props =
+  ButtonHTMLAttributes<HTMLButtonElement> & {
 
-  children: React.ReactNode;
+    children: React.ReactNode;
 
-  onClick?: () => void;
-
-  className?: string;
-}
+    className?: string;
+  };
 
 function Button({
 
   children,
 
-  onClick,
-
   className = "",
+
+  ...props
+
 }: Props) {
 
   return (
 
-    <motion.button
-
-      whileHover={{
-        scale: 1.03,
-      }}
-
-      whileTap={{
-        scale: 0.98,
-      }}
-
-      onClick={onClick}
-
+    <button
+      {...props}
       className={`
         relative
         overflow-hidden
-        px-7
-        py-4
-        rounded-2xl
-        bg-cyan-500
-        text-black
-        font-bold
         flex
         items-center
         justify-center
         gap-3
-        shadow-[0_0_30px_rgba(34,211,238,0.35)]
+        px-8
+        py-4
+        rounded-2xl
+        bg-red-600
+        hover:bg-red-500
+        text-white
+        font-black
         transition-all
         duration-300
-        hover:shadow-[0_0_50px_rgba(34,211,238,0.5)]
+        hover:scale-[1.02]
+        active:scale-[0.98]
+        shadow-[0_0_40px_rgba(255,0,0,0.25)]
+        disabled:opacity-50
+        disabled:cursor-not-allowed
         ${className}
       `}
     >
@@ -60,11 +52,9 @@ function Button({
           absolute
           inset-0
           bg-gradient-to-r
-          from-white/20
+          from-white/10
+          via-transparent
           to-transparent
-          opacity-0
-          hover:opacity-100
-          transition-all
         "
       />
 
@@ -74,7 +64,7 @@ function Button({
 
       </span>
 
-    </motion.button>
+    </button>
   );
 }
 

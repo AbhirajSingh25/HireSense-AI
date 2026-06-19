@@ -1,187 +1,227 @@
-// frontend/src/components/ui/Sidebar.tsx
+import {
+  NavLink,
+} from "react-router-dom";
 
 import {
   LayoutDashboard,
   Brain,
-  Video,
-  Mic,
   BarChart3,
   Trophy,
-  History,
-  FileText,
+  Settings,
+  Sparkles,
+  Mic,
+  Users,
   LogOut,
 } from "lucide-react";
-
-import {
-  NavLink,
-} from "react-router-dom";
 
 import {
   useAuth,
 } from "../../context/AuthContext";
 
 
-const items = [
-  {
-    name: "Dashboard",
-    icon: LayoutDashboard,
-    path: "/dashboard",
-  },
-  {
-    name: "Mock Interview",
-    icon: Brain,
-    path: "/mock-interview",
-  },
-  {
-    name: "Live Interview",
-    icon: Video,
-    path: "/live-interview",
-  },
-  {
-    name: "Speech Analysis",
-    icon: Mic,
-    path: "/speech-analysis",
-  },
-  {
-    name: "Analytics",
-    icon: BarChart3,
-    path: "/analytics",
-  },
-  {
-    name: "Reports",
-    icon: FileText,
-    path: "/reports",
-  },
-  {
-    name: "History",
-    icon: History,
-    path: "/history",
-  },
-  {
-    name: "Leaderboard",
-    icon: Trophy,
-    path: "/leaderboard",
-  },
-];
-
-
 function Sidebar() {
 
-  const auth =
-    useAuth();
+  const {
+    logout,
+  } = useAuth();
+
+
+  const links = [
+
+    {
+      name: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/dashboard",
+    },
+
+    {
+      name: "Live Interview",
+      icon: Brain,
+      path: "/live-interview",
+    },
+
+    {
+      name: "Practice",
+      icon: Mic,
+      path: "/practice",
+    },
+
+    {
+      name: "Analytics",
+      icon: BarChart3,
+      path: "/analytics",
+    },
+
+    {
+      name: "Leaderboard",
+      icon: Trophy,
+      path: "/leaderboard",
+    },
+
+    {
+      name: "Recruiter",
+      icon: Users,
+      path: "/recruiter",
+    },
+
+    {
+      name: "AI Copilot",
+      icon: Sparkles,
+      path: "/copilot",
+    },
+
+    {
+      name: "Settings",
+      icon: Settings,
+      path: "/settings",
+    },
+  ];
 
 
   return (
 
     <aside
       className="
-        w-full
-        lg:w-[300px]
-        lg:h-screen
-        bg-[#050816]
-        border-r
-        border-cyan-500/10
-        flex
+        hidden
+        lg:flex
         flex-col
         justify-between
-        p-6
+        w-[300px]
+        min-h-screen
+        border-r
+        border-white/5
+        bg-[#050505]
+        px-6
+        py-8
         sticky
         top-0
       "
     >
 
+      {/* TOP */}
+
       <div>
 
-        <div className="mb-12">
+        {/* LOGO */}
 
-          <h1
+        <div
+          className="
+            flex
+            items-center
+            gap-4
+            mb-12
+          "
+        >
+
+          <div
             className="
-              text-4xl
-              font-black
-              tracking-tight
+              w-16
+              h-16
+              rounded-3xl
+              bg-gradient-to-br
+              from-red-500
+              to-red-900
+              flex
+              items-center
+              justify-center
+              shadow-[0_0_40px_rgba(255,0,0,0.35)]
             "
           >
 
-            HireSense
+            <Brain
+              size={30}
+            />
 
-            <span
+          </div>
+
+
+          <div>
+
+            <h1
               className="
-                text-cyan-400
+                text-3xl
+                font-black
+                text-white
               "
             >
-              AI
-            </span>
+              HireSense
+            </h1>
 
-          </h1>
+            <p
+              className="
+                text-zinc-500
+                text-sm
+              "
+            >
+              AI Interview OS
+            </p>
 
-          <p
-            className="
-              text-zinc-500
-              mt-2
-            "
-          >
-            AI Interview Platform
-          </p>
+          </div>
 
         </div>
 
 
+
+        {/* NAVIGATION */}
+
         <div className="space-y-3">
 
-          {items.map((item) => {
+          {links.map((link) => {
 
             const Icon =
-              item.icon;
+              link.icon;
 
             return (
 
               <NavLink
-                key={item.name}
-                to={item.path}
-                className={({ isActive }) =>
+                key={link.name}
+                to={link.path}
 
+                className={({
+                  isActive,
+                }) =>
                   `
-                  flex
-                  items-center
-                  gap-4
-                  px-5
-                  py-4
-                  rounded-2xl
-                  transition-all
-                  duration-300
-                  border
+                    flex
+                    items-center
+                    gap-4
+                    px-5
+                    py-4
+                    rounded-2xl
+                    transition-all
+                    duration-300
+                    border
 
-                  ${
+                    ${
+                      isActive
 
-                    isActive
+                        ? `
+                          bg-red-500/10
+                          border-red-500/20
+                          text-white
+                          shadow-[0_0_30px_rgba(255,0,0,0.12)]
+                        `
 
-                    ? `
-                      bg-cyan-500/10
-                      border-cyan-500/30
-                      text-cyan-400
-                      shadow-[0_0_30px_rgba(34,211,238,0.15)]
-                    `
-
-                    : `
-                      border-transparent
-                      text-zinc-400
-                      hover:bg-white/5
-                      hover:text-white
-                    `
-                  }
+                        : `
+                          border-transparent
+                          text-zinc-500
+                          hover:bg-white/[0.03]
+                          hover:text-white
+                        `
+                    }
                   `
                 }
               >
 
-                <Icon size={22} />
+                <Icon
+                  size={22}
+                />
 
                 <span
                   className="
-                    text-lg
-                    font-medium
+                    font-semibold
                   "
                 >
-                  {item.name}
+                  {link.name}
                 </span>
 
               </NavLink>
@@ -193,37 +233,45 @@ function Sidebar() {
       </div>
 
 
-      <button
-        onClick={() => {
 
-          auth.logout();
+      {/* BOTTOM */}
 
-          window.location.href =
-            "/login";
-        }}
+      <div>
 
-        className="
-          flex
-          items-center
-          justify-center
-          gap-3
-          w-full
-          py-4
-          rounded-2xl
-          bg-red-500/10
-          border
-          border-red-500/20
-          text-red-400
-          hover:bg-red-500/20
-          transition-all
-        "
-      >
+        <button
+          onClick={logout}
 
-        <LogOut size={20} />
+          className="
+            w-full
+            flex
+            items-center
+            gap-4
+            px-5
+            py-4
+            rounded-2xl
+            text-zinc-500
+            hover:text-red-400
+            hover:bg-red-500/10
+            transition-all
+            duration-300
+          "
+        >
 
-        Logout
+          <LogOut
+            size={22}
+          />
 
-      </button>
+          <span
+            className="
+              font-semibold
+            "
+          >
+            Logout
+          </span>
+
+        </button>
+
+      </div>
 
     </aside>
   );

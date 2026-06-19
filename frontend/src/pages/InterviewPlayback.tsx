@@ -30,7 +30,7 @@ function InterviewPlayback() {
     try {
 
       const data =
-        await getFinalReport({});
+        await getFinalReport();
 
       setReport(data);
 

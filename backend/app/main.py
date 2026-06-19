@@ -1,88 +1,178 @@
-import json
-
-from datetime import datetime
-
 from fastapi import (
     FastAPI,
     Depends,
-    HTTPException
+    Body,
 )
-
+from app.routes.resume import router as resume_router
 from fastapi.middleware.cors import (
-    CORSMiddleware
+    CORSMiddleware,
 )
 
 from sqlalchemy.orm import Session
 
-from database.database import (
+from pydantic import BaseModel
+
+from app.database import (
     Base,
     engine,
-    get_db
+    get_db,
 )
 
-from database.models import (
+from app.models import (
     User,
-    InterviewSession
+    InterviewSession,
 )
+
+from app.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+)
+
+from app.routes.copilot import (
+    router as copilot_router,
+)
+
+from app.routes.interview import (
+    router as interview_router,
+)
+
+import random
 
 
 app = FastAPI()
 
+
+# =========================
+# DATABASE
+# =========================
 
 Base.metadata.create_all(
     bind=engine
 )
 
 
+# =========================
+# MIDDLEWARE
+# =========================
+
 app.add_middleware(
-
     CORSMiddleware,
-
     allow_origins=["*"],
-
     allow_credentials=True,
-
     allow_methods=["*"],
-
     allow_headers=["*"],
 )
 
+
+# =========================
+# ROUTERS
+# =========================
+
+app.include_router(
+    copilot_router,
+    prefix="/api",
+    tags=["AI Copilot"],
+)
+app.include_router(
+    resume_router,
+    prefix="/api",
+    tags=["Resume"]
+)
+app.include_router(
+    interview_router,
+    prefix="/api/interview",
+    tags=["Interview"],
+)
+
+
+# =========================
+# REQUEST MODELS
+# =========================
+
+class SignupRequest(BaseModel):
+
+    username: str
+    email: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+
+    email: str
+    password: str
+
+
+class InterviewRequest(BaseModel):
+
+    role: str
+    level: str
+
+
+class EvaluationRequest(BaseModel):
+
+    question: str
+    answer: str
+
+
+class NextQuestionRequest(BaseModel):
+
+    role: str
+    level: str
+    previous_question: str
+    previous_answer: str
+
+
+class SaveInterviewRequest(BaseModel):
+
+    role: str
+    level: str
+    questions: list
+    answers: list
+    evaluations: list
+    final_report: dict
+
+
+# =========================
+# ROOT
+# =========================
 
 @app.get("/")
 def home():
 
     return {
-        "message":
-            "HireSense AI Backend Running"
+        "message": "HireSense AI Backend Running"
     }
 
 
+# =========================
+# AUTH
+# =========================
+
 @app.post("/auth/signup")
 def signup(
-
-    data: dict,
-
-    db: Session = Depends(get_db)
+    data: SignupRequest,
+    db: Session = Depends(get_db),
 ):
 
     existing_user = db.query(User).filter(
-        User.email == data["email"]
+        User.email == data.email
     ).first()
 
     if existing_user:
 
-        raise HTTPException(
-            status_code=400,
-            detail="Email already exists"
-        )
+        return {
+            "detail": "User already exists"
+        }
+
+    hashed_password = hash_password(
+        data.password
+    )
 
     user = User(
-
-        username=data["username"],
-
-        email=data["email"],
-
-        password=data["password"]
+        username=data.username,
+        email=data.email,
+        password=hashed_password,
     )
 
     db.add(user)
@@ -91,100 +181,143 @@ def signup(
 
     db.refresh(user)
 
+    token = create_access_token({
+        "sub": user.email
+    })
+
     return {
-
-        "message":
-            "Signup successful",
-
-        "user_id":
-            user.id
+        "message": "Signup successful",
+        "token": token,
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+        }
     }
 
 
 @app.post("/auth/login")
 def login(
-
-    data: dict,
-
-    db: Session = Depends(get_db)
+    data: LoginRequest,
+    db: Session = Depends(get_db),
 ):
 
     user = db.query(User).filter(
-        User.email == data["email"]
+        User.email == data.email
     ).first()
 
     if not user:
 
-        raise HTTPException(
-            status_code=404,
-            detail="Invalid email"
-        )
+        return {
+            "detail": "Invalid email"
+        }
 
-    if user.password != data["password"]:
+    valid_password = verify_password(
+        data.password,
+        user.password
+    )
 
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid password"
-        )
+    if not valid_password:
+
+        return {
+            "detail": "Invalid password"
+        }
+
+    token = create_access_token({
+        "sub": user.email
+    })
 
     return {
-
-        "message":
-            "Login successful",
-
-        "token":
-            "demo-token",
-
+        "message": "Login successful",
+        "token": token,
         "user": {
-
-            "id":
-                user.id,
-
-            "username":
-                user.username,
-
-            "email":
-                user.email
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
         }
     }
 
 
-@app.get("/generate-questions")
+# =========================
+# INTERVIEW
+# =========================
+
+@app.post("/generate-questions")
 def generate_questions(
-
-    role: str,
-
-    level: str
+    data: InterviewRequest
 ):
 
+    questions = [
+
+        f"Tell me about yourself as a {data.role}.",
+
+        f"Why do you want this {data.role} role?",
+
+        "Explain a challenging project you worked on.",
+
+        "How do you solve difficult technical problems?",
+
+        "Where do you see yourself in 5 years?",
+    ]
+
     return {
-
-        "questions": [
-
-            f"Tell me about yourself as a {role}",
-
-            "What are React hooks?",
-
-            "Explain JavaScript closures",
-
-            "How does API integration work?",
-
-            "Describe a challenging project"
-        ]
+        "questions": questions
     }
 
 
 @app.post("/evaluate-answer")
 def evaluate_answer(
-    data: dict
+    data: EvaluationRequest
 ):
 
+    score = random.randint(75, 95)
+
     return {
-
-        "score": 85,
-
+        "score": score,
+        "confidence": random.randint(80, 95),
+        "communication": random.randint(78, 96),
+        "technical": random.randint(76, 97),
         "feedback":
-            "Good answer with decent clarity"
+            "Strong response with good communication and technical clarity.",
+    }
+
+
+@app.post("/followup-question")
+def next_question(
+    data: NextQuestionRequest
+):
+
+    next_questions = [
+
+        "Explain your biggest strength.",
+
+        "Describe a time you handled pressure.",
+
+        "How do you approach debugging?",
+
+        "Tell me about leadership experience.",
+
+        "Explain a difficult technical decision.",
+    ]
+
+    return {
+        "question": random.choice(next_questions)
+    }
+
+
+# =========================
+# REPORTS
+# =========================
+
+@app.post("/generate-report")
+def generate_report():
+
+    return {
+        "overall_score": 88,
+        "communication": 90,
+        "technical": 85,
+        "confidence": 87,
+        "summary": "Excellent interview performance.",
     }
 
 
@@ -192,62 +325,92 @@ def evaluate_answer(
 def final_report():
 
     return {
-
         "overall_score": 88,
-
         "communication": 90,
-
         "technical": 85,
-
-        "confidence": 87
+        "confidence": 87,
+        "summary": "Excellent interview performance.",
     }
 
 
-@app.post("/followup-question")
-def followup_question(
-    data: dict
-):
+# =========================
+# DASHBOARD
+# =========================
+
+@app.get("/dashboard")
+def dashboard():
 
     return {
-
-        "question":
-            "Can you explain that in more detail?"
+        "total_interviews": 24,
+        "avg_confidence": 87,
+        "communication": 90,
+        "ai_rank": 12,
     }
 
+
+@app.get("/leaderboard")
+def leaderboard():
+
+    return [
+
+        {
+            "name": "Alex",
+            "score": 96,
+        },
+
+        {
+            "name": "Sarah",
+            "score": 94,
+        },
+
+        {
+            "name": "John",
+            "score": 91,
+        },
+    ]
+
+
+# =========================
+# SAVE INTERVIEW
+# =========================
 
 @app.post("/save-interview")
 def save_interview(
-
-    data: dict,
-
-    db: Session = Depends(get_db)
+    data: SaveInterviewRequest,
+    db: Session = Depends(get_db),
 ):
 
     session = InterviewSession(
 
-        role=data["role"],
+        role=data.role,
 
-        level=data["level"],
+        level=data.level,
 
-        questions=json.dumps(
-            data["questions"]
-        ),
+        question=data.questions[0]
+        if data.questions else "",
 
-        answers=json.dumps(
-            data["answers"]
-        ),
+        answer=data.answers[0]
+        if data.answers else "",
 
-        evaluations=json.dumps(
-            data["evaluations"]
-        ),
+        feedback=data.evaluations[0].get(
+            "feedback",
+            "",
+        ) if data.evaluations else "",
 
-        final_report=json.dumps(
-            data["final_report"]
-        ),
+        confidence=data.evaluations[0].get(
+            "confidence",
+            0,
+        ) if data.evaluations else 0,
 
-        created_at=str(
-            datetime.utcnow()
-        )
+        communication=data.evaluations[0].get(
+            "communication",
+            0,
+        ) if data.evaluations else 0,
+
+        technical=data.evaluations[0].get(
+            "technical",
+            0,
+        ) if data.evaluations else 0,
     )
 
     db.add(session)
@@ -257,19 +420,98 @@ def save_interview(
     db.refresh(session)
 
     return {
-
-        "message":
-            "Interview saved"
+        "message": "Interview saved successfully",
+        "session_id": session.id,
     }
 
 
 @app.get("/interview-history")
-def interview_history(
-    db: Session = Depends(get_db)
+def get_interview_history(
+    db: Session = Depends(get_db),
 ):
 
-    sessions = db.query(
+    interviews = db.query(
         InterviewSession
     ).all()
 
-    return sessions
+    return interviews
+
+
+# =========================
+# AI COPILOT
+# =========================
+
+@app.post("/ai-copilot")
+def ai_copilot(
+    data: dict = Body(...)
+):
+
+    message = data.get(
+        "message",
+        ""
+    ).lower()
+
+
+    if (
+        "hi" in message
+        or "hello" in message
+        or "hey" in message
+    ):
+
+        reply = (
+            "Hello. I am your AI Interview Copilot. "
+            "Ask me about technical interviews, "
+            "system design, behavioral preparation, "
+            "resume reviews, or recruiter expectations."
+        )
+
+
+    elif "scalability" in message:
+
+        reply = (
+            "Focus on load balancing, "
+            "caching, horizontal scaling, "
+            "database optimization, "
+            "and architecture tradeoffs."
+        )
+
+
+    elif "system design" in message:
+
+        reply = (
+            "Discuss scalability, APIs, "
+            "microservices, databases, "
+            "caching, and fault tolerance."
+        )
+
+
+    elif "behavioral" in message:
+
+        reply = (
+            "Use the STAR method: "
+            "Situation, Task, Action, Result."
+        )
+
+
+    elif "resume" in message:
+
+        reply = (
+            "Focus on measurable impact, "
+            "technical depth, "
+            "projects, and achievements."
+        )
+
+
+    else:
+
+        reply = (
+            "AI Copilot recommends focusing on "
+            "clear communication, "
+            "technical reasoning, "
+            "and structured problem solving."
+        )
+
+
+    return {
+        "reply": reply
+    }

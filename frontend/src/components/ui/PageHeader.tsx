@@ -1,38 +1,85 @@
-interface Props {
+type Props = {
+
+  badge?: string;
+
   title: string;
-  subtitle?: string;
-}
+
+  description?: string;
+};
+
 
 function PageHeader({
+
+  badge,
+
   title,
-  subtitle,
+
+  description,
+
 }: Props) {
 
   return (
 
-    <div className="mb-10">
+    <div
+      className="
+        mb-12
+      "
+    >
+
+      {badge && (
+
+        <div
+          className="
+            inline-flex
+            items-center
+            px-5
+            py-2
+            rounded-full
+            border
+            border-red-500/20
+            bg-red-500/5
+            text-red-400
+            text-xs
+            tracking-[0.35em]
+            uppercase
+            mb-6
+          "
+        >
+
+          {badge}
+
+        </div>
+
+      )}
+
 
       <h1
         className="
-          text-6xl
+          text-5xl
+          md:text-6xl
           font-black
-          text-white
-          leading-tight
+          leading-none
+          mb-6
         "
       >
         {title}
       </h1>
 
-      {subtitle && (
+
+      {description && (
 
         <p
           className="
             text-zinc-500
             text-lg
-            mt-3
+            md:text-xl
+            max-w-4xl
+            leading-relaxed
           "
         >
-          {subtitle}
+
+          {description}
+
         </p>
 
       )}

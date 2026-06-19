@@ -2,16 +2,20 @@ import {
   LucideIcon,
 } from "lucide-react";
 
-interface Props {
+
+type Props = {
 
   title: string;
 
   value: string;
 
-  icon: LucideIcon;
+  subtitle: string;
 
-  change?: string;
-}
+  growth: string;
+
+  icon: LucideIcon;
+};
+
 
 function StatCard({
 
@@ -19,39 +23,41 @@ function StatCard({
 
   value,
 
+  subtitle,
+
+  growth,
+
   icon: Icon,
 
-  change,
 }: Props) {
 
   return (
 
     <div
       className="
-        relative
-        overflow-hidden
         rounded-[32px]
         border
         border-white/5
         bg-gradient-to-b
-        from-[#111827]
-        to-[#0b1120]
+        from-[#0f0f0f]
+        to-[#070707]
         p-7
-        transition-all
-        duration-300
-        hover:border-cyan-500/30
-        hover:shadow-[0_0_40px_rgba(34,211,238,0.15)]
+        relative
+        overflow-hidden
       "
     >
+
+      {/* GLOW */}
 
       <div
         className="
           absolute
-          top-0
-          right-0
-          w-40
-          h-40
-          bg-cyan-500/10
+          top-[-80px]
+          right-[-80px]
+          w-[180px]
+          h-[180px]
+          rounded-full
+          bg-red-500/[0.06]
           blur-3xl
         "
       />
@@ -66,73 +72,89 @@ function StatCard({
 
         <div
           className="
-            w-16
-            h-16
-            rounded-2xl
-            bg-cyan-500/10
-            border
-            border-cyan-500/20
             flex
             items-center
-            justify-center
-            mb-6
+            justify-between
+            mb-8
           "
         >
 
-          <Icon
-            size={30}
+          <div>
+
+            <p
+              className="
+                text-zinc-500
+                mb-3
+              "
+            >
+              {title}
+            </p>
+
+            <h2
+              className="
+                text-5xl
+                font-black
+                leading-none
+              "
+            >
+              {value}
+            </h2>
+
+          </div>
+
+
+          <div
             className="
-              text-cyan-400
+              w-16
+              h-16
+              rounded-2xl
+              bg-red-500/10
+              border
+              border-red-500/20
+              flex
+              items-center
+              justify-center
             "
-          />
+          >
+
+            <Icon
+              className="
+                text-red-400
+              "
+              size={30}
+            />
+
+          </div>
 
         </div>
 
 
-        <p
+        <div
           className="
-            text-zinc-400
-            mb-3
-            text-lg
+            flex
+            items-center
+            justify-between
           "
         >
-          {title}
-        </p>
 
+          <p
+            className="
+              text-zinc-500
+            "
+          >
+            {subtitle}
+          </p>
 
-        <h2
-          className="
-            text-5xl
-            font-black
-            mb-4
-          "
-        >
-          {value}
-        </h2>
+          <div
+            className="
+              text-green-400
+              font-bold
+            "
+          >
+            {growth}
+          </div>
 
-
-        {
-          change && (
-
-            <div
-              className="
-                inline-flex
-                items-center
-                rounded-full
-                bg-cyan-500/10
-                border
-                border-cyan-500/20
-                px-4
-                py-2
-                text-sm
-                font-semibold
-                text-cyan-400
-              "
-            >
-              {change}
-            </div>
-          )
-        }
+        </div>
 
       </div>
 

@@ -30,7 +30,7 @@ function Certificate() {
     try {
 
       const data =
-        await getFinalReport({});
+        await getFinalReport();
 
       setReport(data);
 

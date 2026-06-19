@@ -1,35 +1,19 @@
 import {
   NavLink,
+  useNavigate,
 } from "react-router-dom";
 
 import {
-
   LayoutDashboard,
-
   Mic,
-
   BarChart3,
-
   FileText,
-
-  History,
-
-  FileSearch,
-
-  Users,
-
   Trophy,
-
-  Award,
-
+  Users,
   Brain,
-
   PlayCircle,
-
-  ShieldCheck,
-
   Settings,
-
+  LogOut,
 } from "lucide-react";
 
 
@@ -42,9 +26,15 @@ const navItems = [
   },
 
   {
-    label: "Mock Interview",
-    path: "/mock",
+    label: "Live Interview",
+    path: "/live-interview",
     icon: Mic,
+  },
+
+  {
+    label: "Practice",
+    path: "/practice",
+    icon: PlayCircle,
   },
 
   {
@@ -60,15 +50,9 @@ const navItems = [
   },
 
   {
-    label: "History",
-    path: "/history",
-    icon: History,
-  },
-
-  {
-    label: "Resume AI",
-    path: "/resume-analyzer",
-    icon: FileSearch,
+    label: "Leaderboard",
+    path: "/leaderboard",
+    icon: Trophy,
   },
 
   {
@@ -78,38 +62,14 @@ const navItems = [
   },
 
   {
-    label: "Recruiter AI",
-    path: "/recruiter-insights",
+    label: "AI Copilot",
+    path: "/copilot",
     icon: Brain,
   },
 
   {
-    label: "Playback",
-    path: "/playback",
-    icon: PlayCircle,
-  },
-
-  {
-    label: "Leaderboard",
-    path: "/leaderboard",
-    icon: Trophy,
-  },
-
-  {
-    label: "Achievements",
-    path: "/achievements",
-    icon: Award,
-  },
-
-  {
-    label: "Certificate",
-    path: "/certificate",
-    icon: ShieldCheck,
-  },
-
-  {
-    label: "Admin",
-    path: "/admin",
+    label: "Settings",
+    path: "/settings",
     icon: Settings,
   },
 ];
@@ -117,159 +77,234 @@ const navItems = [
 
 function Sidebar() {
 
+  const navigate =
+    useNavigate();
+
+
+  function handleLogout() {
+
+    localStorage.removeItem(
+      "token"
+    );
+
+    localStorage.removeItem(
+      "user"
+    );
+
+    navigate("/login");
+  }
+
+
   return (
 
     <aside
-      className="
-        fixed
-        left-0
-        top-0
-        z-50
-        w-24
-        h-screen
-        bg-[#050816]
-        border-r
-        border-cyan-500/10
-        flex
-        flex-col
-        items-center
-        py-6
-        overflow-y-auto
-        scrollbar-thin
-        scrollbar-thumb-cyan-500/30
-      "
-    >
+  className="
+    w-[250px]
+    min-h-screen
+    bg-[#050505]
+    border-r
+    border-white/5
+    flex
+    flex-col
+    sticky
+    top-0
+  "
+>
 
-      <div
-        className="
-          w-14
-          h-14
-          rounded-3xl
-          bg-cyan-500/10
-          border
-          border-cyan-400/20
-          flex
-          items-center
-          justify-center
-          text-cyan-400
-          text-3xl
-          font-bold
-          mb-8
-          shrink-0
-        "
-      >
-        H
-      </div>
+      {/* TOP */}
+
+      <div className="flex-1">
+
+        {/* LOGO */}
+
+        <div
+          className="
+            px-5
+            py-6
+            border-b
+            border-white/5
+          "
+        >
+
+          <div
+            className="
+              flex
+              items-center
+              gap-4
+            "
+          >
+
+            <div
+              className="
+                w-14
+                h-14
+                rounded-3xl
+                bg-gradient-to-br
+                from-red-500
+                to-red-900
+                flex
+                items-center
+                justify-center
+                text-white
+                font-black
+                text-2xl
+                shadow-[0_0_30px_rgba(255,0,0,0.35)]
+              "
+            >
+              H
+            </div>
 
 
-      <nav
-        className="
-          flex
-          flex-col
-          items-center
-          gap-4
-          pb-8
-        "
-      >
 
-        {navItems.map(
-          (item) => {
+            <div>
 
-            const Icon =
-              item.icon;
-
-            return (
-
-              <div
-                key={item.path}
+              <h1
                 className="
-                  relative
-                  group
-                  shrink-0
+                  text-2xl
+                  font-black
+                  text-white
+                  leading-none
                 "
               >
+                HireSense
+              </h1>
+
+              <p
+                className="
+                  text-zinc-500
+                  mt-1
+                "
+              >
+                AI Interview OS
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        {/* NAVIGATION */}
+
+        <div
+          className="
+            flex-1
+            px-4
+            py-6
+          "
+        >
+
+          <nav className="space-y-2">
+
+            {navItems.map((item) => {
+
+              const Icon =
+                item.icon;
+
+              return (
 
                 <NavLink
+                  key={item.path}
+
                   to={item.path}
+
                   className={({
 
                     isActive,
 
                   }) => `
 
-                    w-14
-                    h-14
-                    rounded-2xl
                     flex
                     items-center
-                    justify-center
+                    gap-3
+                    px-4
+                    h-12
+                    rounded-2xl
                     transition-all
                     duration-300
+                    font-semibold
 
                     ${
-
                       isActive
 
                         ? `
-
-                          bg-cyan-400
-                          text-black
-                          shadow-[0_0_30px_rgba(34,211,238,0.45)]
-
+                          bg-red-500/10
+                          border
+                          border-red-500/20
+                          text-white
                         `
 
                         : `
-
-                          bg-white/5
-                          text-zinc-400
-                          hover:bg-cyan-500/10
-                          hover:text-cyan-300
-
+                          text-zinc-500
+                          hover:bg-white/5
+                          hover:text-white
                         `
                     }
                   `}
                 >
 
-                  <Icon
-                    size={22}
-                  />
+                  <Icon size={20} />
+
+                  <span>
+                    {item.label}
+                  </span>
 
                 </NavLink>
 
+              );
+            })}
 
-                <div
-                  className="
-                    absolute
-                    left-20
-                    top-1/2
-                    -translate-y-1/2
-                    whitespace-nowrap
-                    px-3
-                    py-2
-                    rounded-xl
-                    bg-zinc-900
-                    border
-                    border-cyan-400/20
-                    text-sm
-                    text-white
-                    opacity-0
-                    pointer-events-none
-                    group-hover:opacity-100
-                    transition-all
-                    duration-200
-                  "
-                >
+          </nav>
 
-                  {item.label}
+        </div>
 
-                </div>
+      </div>
 
-              </div>
-            );
-          }
-        )}
 
-      </nav>
+
+      {/* LOGOUT */}
+
+      <div
+        className="
+          p-4
+          border-t
+          border-white/5
+        "
+      >
+
+        <button
+          onClick={handleLogout}
+
+          className="
+            w-full
+            h-12
+            rounded-2xl
+            bg-white/5
+            hover:bg-red-500/10
+            border
+            border-white/10
+            hover:border-red-500/20
+            transition-all
+            duration-300
+            flex
+            items-center
+            gap-4
+            px-5
+            text-zinc-400
+            hover:text-white
+            font-semibold
+          "
+        >
+
+          <LogOut size={20} />
+
+          Logout
+
+        </button>
+
+      </div>
 
     </aside>
   );

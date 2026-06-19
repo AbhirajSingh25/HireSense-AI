@@ -1,17 +1,142 @@
 import MainLayout from "../components/MainLayout";
 
+import PageContainer from "../components/ui/PageContainer";
+import PageHeader from "../components/ui/PageHeader";
 import Card from "../components/ui/Card";
-
-import AnalyticsCard from "../components/ui/AnalyticsCard";
-
-import PerformanceChart from "../components/ui/PerformanceChart";
 
 import {
   Brain,
+  TrendingUp,
+  Activity,
+  ShieldCheck,
+  BarChart3,
+  Sparkles,
+  Mic,
   Trophy,
-  Clock,
-  Target,
 } from "lucide-react";
+
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  LineChart,
+  Line,
+} from "recharts";
+
+
+const performanceData = [
+
+  {
+    day: "Mon",
+    score: 72,
+  },
+
+  {
+    day: "Tue",
+    score: 78,
+  },
+
+  {
+    day: "Wed",
+    score: 81,
+  },
+
+  {
+    day: "Thu",
+    score: 84,
+  },
+
+  {
+    day: "Fri",
+    score: 88,
+  },
+
+  {
+    day: "Sat",
+    score: 91,
+  },
+
+  {
+    day: "Sun",
+    score: 94,
+  },
+];
+
+
+const radarData = [
+
+  {
+    subject: "Technical",
+    A: 94,
+  },
+
+  {
+    subject: "Communication",
+    A: 88,
+  },
+
+  {
+    subject: "Leadership",
+    A: 82,
+  },
+
+  {
+    subject: "Confidence",
+    A: 91,
+  },
+
+  {
+    subject: "Problem Solving",
+    A: 93,
+  },
+
+  {
+    subject: "Behavioral",
+    A: 86,
+  },
+];
+
+
+const growthData = [
+
+  {
+    month: "Jan",
+    growth: 40,
+  },
+
+  {
+    month: "Feb",
+    growth: 52,
+  },
+
+  {
+    month: "Mar",
+    growth: 61,
+  },
+
+  {
+    month: "Apr",
+    growth: 73,
+  },
+
+  {
+    month: "May",
+    growth: 85,
+  },
+
+  {
+    month: "Jun",
+    growth: 94,
+  },
+];
 
 
 function Analytics() {
@@ -20,357 +145,591 @@ function Analytics() {
 
     <MainLayout>
 
-      <div className="mb-10">
+      <PageContainer>
 
-        <h1
-          className="
-            text-6xl
-            font-black
-            mb-4
+        <PageHeader
+          badge="AI ANALYTICS ENGINE"
+          title="Performance Intelligence"
+          description="
+            Analyze communication,
+            recruiter compatibility,
+            technical growth,
+            behavioral intelligence,
+            and AI-driven hiring performance.
           "
-        >
-          AI Analytics
-        </h1>
+        />
 
-        <p
+
+
+        {/* STATS */}
+
+        <div
           className="
-            text-zinc-400
-            text-xl
-          "
-        >
-          Realtime interview intelligence dashboard
-        </p>
-
-      </div>
-
-
-      <div
-        className="
-          grid
-          xl:grid-cols-4
-          md:grid-cols-2
-          gap-6
-          mb-8
-        "
-      >
-
-        <AnalyticsCard
-          title="Total Interviews"
-          value={128}
-          color="text-cyan-400"
-        />
-
-        <AnalyticsCard
-          title="Average Score"
-          value={91}
-          suffix="%"
-          color="text-green-400"
-        />
-
-        <AnalyticsCard
-          title="AI Confidence"
-          value={87}
-          suffix="%"
-          color="text-purple-400"
-        />
-
-        <AnalyticsCard
-          title="Hiring Potential"
-          value={94}
-          suffix="%"
-          color="text-orange-400"
-        />
-
-      </div>
-
-
-      <div
-        className="
-          grid
-          xl:grid-cols-3
-          gap-8
-        "
-      >
-
-        <Card
-          className="
-            xl:col-span-2
-            p-8
+            grid
+            grid-cols-1
+            md:grid-cols-2
+            xl:grid-cols-4
+            gap-5
+            mb-6
           "
         >
 
-          <div
-            className="
-              flex
-              items-center
-              gap-3
-              mb-8
-            "
-          >
+          <Card className="p-6">
 
             <Brain
               className="
-                text-cyan-400
+                text-red-400
+                mb-5
               "
+              size={30}
             />
 
             <h2
               className="
-                text-3xl
-                font-bold
+                text-4xl
+                font-black
+                mb-2
               "
             >
-              Performance Trends
+              94%
             </h2>
 
-          </div>
+            <p className="text-zinc-500">
+              AI Recruiter Match
+            </p>
 
-          <PerformanceChart />
-
-        </Card>
+          </Card>
 
 
-        <Card className="p-8">
+
+          <Card className="p-6">
+
+            <TrendingUp
+              className="
+                text-green-400
+                mb-5
+              "
+              size={30}
+            />
+
+            <h2
+              className="
+                text-4xl
+                font-black
+                mb-2
+              "
+            >
+              +18%
+            </h2>
+
+            <p className="text-zinc-500">
+              Weekly Growth
+            </p>
+
+          </Card>
+
+
+
+          <Card className="p-6">
+
+            <Mic
+              className="
+                text-cyan-400
+                mb-5
+              "
+              size={30}
+            />
+
+            <h2
+              className="
+                text-4xl
+                font-black
+                mb-2
+              "
+            >
+              88%
+            </h2>
+
+            <p className="text-zinc-500">
+              Communication Score
+            </p>
+
+          </Card>
+
+
+
+          <Card className="p-6">
+
+            <ShieldCheck
+              className="
+                text-yellow-400
+                mb-5
+              "
+              size={30}
+            />
+
+            <h2
+              className="
+                text-4xl
+                font-black
+                mb-2
+              "
+            >
+              Elite
+            </h2>
+
+            <p className="text-zinc-500">
+              Candidate Tier
+            </p>
+
+          </Card>
+
+        </div>
+
+
+
+        {/* CHARTS */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            xl:grid-cols-12
+            gap-6
+            mb-6
+          "
+        >
+
+          {/* AREA CHART */}
 
           <div
             className="
-              flex
-              items-center
-              gap-3
-              mb-8
+              xl:col-span-8
             "
           >
 
-            <Target
-              className="
-                text-cyan-400
-              "
-            />
-
-            <h2
-              className="
-                text-3xl
-                font-bold
-              "
-            >
-              Recruiter Insights
-            </h2>
-
-          </div>
-
-
-          <div className="space-y-5">
-
-            {[
-              {
-                title:
-                  "Communication",
-
-                score: "92%",
-              },
-
-              {
-                title:
-                  "Technical Depth",
-
-                score: "88%",
-              },
-
-              {
-                title:
-                  "Leadership",
-
-                score: "84%",
-              },
-
-              {
-                title:
-                  "Confidence",
-
-                score: "95%",
-              },
-            ].map((item) => (
+            <Card className="p-6">
 
               <div
-                key={item.title}
                 className="
-                  p-5
-                  rounded-2xl
-                  bg-black/30
-                  border
-                  border-white/5
+                  flex
+                  items-center
+                  justify-between
+                  mb-5
                 "
               >
 
-                <div
-                  className="
-                    flex
-                    items-center
-                    justify-between
-                  "
-                >
+                <div>
 
-                  <span
+                  <p
                     className="
-                      text-lg
+                      text-red-400
+                      uppercase
+                      tracking-[0.25em]
+                      text-xs
+                      mb-2
                     "
                   >
-                    {item.title}
-                  </span>
+                    PERFORMANCE TRACKING
+                  </p>
 
-                  <span
+                  <h2
                     className="
-                      text-cyan-400
-                      font-bold
+                      text-2xl
+                      font-black
                     "
                   >
-                    {item.score}
-                  </span>
+                    Weekly AI Progress
+                  </h2>
 
                 </div>
 
+                <Activity
+                  className="
+                    text-red-400
+                  "
+                />
+
               </div>
-            ))}
+
+
+
+              <div className="h-[320px]">
+
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
+
+                  <AreaChart data={performanceData}>
+
+                    <defs>
+
+                      <linearGradient
+                        id="colorScore"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+
+                        <stop
+                          offset="5%"
+                          stopColor="#ef4444"
+                          stopOpacity={0.8}
+                        />
+
+                        <stop
+                          offset="95%"
+                          stopColor="#ef4444"
+                          stopOpacity={0}
+                        />
+
+                      </linearGradient>
+
+                    </defs>
+
+                    <XAxis dataKey="day" />
+
+                    <YAxis />
+
+                    <Tooltip />
+
+                    <Area
+                      type="monotone"
+                      dataKey="score"
+                      stroke="#ef4444"
+                      fillOpacity={1}
+                      fill="url(#colorScore)"
+                    />
+
+                  </AreaChart>
+
+                </ResponsiveContainer>
+
+              </div>
+
+            </Card>
 
           </div>
 
-        </Card>
-
-      </div>
 
 
-      <div
-        className="
-          grid
-          xl:grid-cols-3
-          gap-8
-          mt-8
-        "
-      >
-
-        <Card className="p-8">
+          {/* RADAR */}
 
           <div
             className="
-              flex
-              items-center
-              gap-3
-              mb-6
+              xl:col-span-4
             "
           >
 
-            <Clock
-              className="
-                text-cyan-400
-              "
-            />
+            <Card className="p-6">
 
-            <h2
-              className="
-                text-2xl
-                font-bold
-              "
-            >
-              Interview Time
-            </h2>
+              <div className="mb-5">
+
+                <p
+                  className="
+                    text-cyan-400
+                    uppercase
+                    tracking-[0.25em]
+                    text-xs
+                    mb-2
+                  "
+                >
+                  AI SKILL MATRIX
+                </p>
+
+                <h2
+                  className="
+                    text-2xl
+                    font-black
+                  "
+                >
+                  Recruiter Radar
+                </h2>
+
+              </div>
+
+
+
+              <div className="h-[320px]">
+
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
+
+                  <RadarChart data={radarData}>
+
+                    <PolarGrid />
+
+                    <PolarAngleAxis
+                      dataKey="subject"
+                    />
+
+                    <PolarRadiusAxis />
+
+                    <Radar
+                      dataKey="A"
+                      stroke="#06b6d4"
+                      fill="#06b6d4"
+                      fillOpacity={0.6}
+                    />
+
+                  </RadarChart>
+
+                </ResponsiveContainer>
+
+              </div>
+
+            </Card>
 
           </div>
 
-          <h1
-            className="
-              text-6xl
-              font-black
-              text-cyan-400
-            "
-          >
-            42h
-          </h1>
-
-        </Card>
+        </div>
 
 
-        <Card className="p-8">
+
+        {/* BOTTOM */}
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            xl:grid-cols-12
+            gap-6
+          "
+        >
+
+          {/* GROWTH */}
 
           <div
             className="
-              flex
-              items-center
-              gap-3
-              mb-6
+              xl:col-span-8
             "
           >
 
-            <Trophy
-              className="
-                text-yellow-400
-              "
-            />
+            <Card className="p-6">
 
-            <h2
-              className="
-                text-2xl
-                font-bold
-              "
-            >
-              Global Rank
-            </h2>
+              <div
+                className="
+                  flex
+                  items-center
+                  justify-between
+                  mb-5
+                "
+              >
+
+                <div>
+
+                  <p
+                    className="
+                      text-green-400
+                      uppercase
+                      tracking-[0.25em]
+                      text-xs
+                      mb-2
+                    "
+                  >
+                    GROWTH ANALYTICS
+                  </p>
+
+                  <h2
+                    className="
+                      text-2xl
+                      font-black
+                    "
+                  >
+                    Interview Improvement Curve
+                  </h2>
+
+                </div>
+
+                <TrendingUp
+                  className="
+                    text-green-400
+                  "
+                />
+
+              </div>
+
+
+
+              <div className="h-[320px]">
+
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                >
+
+                  <LineChart data={growthData}>
+
+                    <XAxis dataKey="month" />
+
+                    <YAxis />
+
+                    <Tooltip />
+
+                    <Line
+                      type="monotone"
+                      dataKey="growth"
+                      stroke="#22c55e"
+                      strokeWidth={4}
+                    />
+
+                  </LineChart>
+
+                </ResponsiveContainer>
+
+              </div>
+
+            </Card>
 
           </div>
 
-          <h1
-            className="
-              text-6xl
-              font-black
-              text-yellow-400
-            "
-          >
-            #12
-          </h1>
-
-        </Card>
 
 
-        <Card className="p-8">
+          {/* AI INSIGHTS */}
 
           <div
             className="
-              flex
-              items-center
-              gap-3
-              mb-6
+              xl:col-span-4
             "
           >
 
-            <Brain
-              className="
-                text-purple-400
-              "
-            />
+            <Card className="p-6">
 
-            <h2
-              className="
-                text-2xl
-                font-bold
-              "
-            >
-              AI Accuracy
-            </h2>
+              <div className="mb-5">
+
+                <p
+                  className="
+                    text-yellow-400
+                    uppercase
+                    tracking-[0.25em]
+                    text-xs
+                    mb-2
+                  "
+                >
+                  AI INSIGHTS
+                </p>
+
+                <h2
+                  className="
+                    text-2xl
+                    font-black
+                  "
+                >
+                  Recruiter Signals
+                </h2>
+
+              </div>
+
+
+
+              <div className="space-y-4">
+
+                {[
+                  {
+                    title:
+                      "Technical Growth",
+                    description:
+                      "Strong architecture reasoning improvements detected.",
+                    icon: Brain,
+                    color: "text-red-400",
+                  },
+
+                  {
+                    title:
+                      "Communication Stability",
+                    description:
+                      "Speech pacing improved under pressure simulations.",
+                    icon: Mic,
+                    color: "text-cyan-400",
+                  },
+
+                  {
+                    title:
+                      "Recruiter Compatibility",
+                    description:
+                      "Behavioral patterns align with elite candidates.",
+                    icon: Trophy,
+                    color: "text-yellow-400",
+                  },
+
+                  {
+                    title:
+                      "AI Recommendation",
+                    description:
+                      "Recommended for advanced recruiter evaluations.",
+                    icon: Sparkles,
+                    color: "text-green-400",
+                  },
+                ].map((item) => {
+
+                  const Icon = item.icon;
+
+                  return (
+
+                    <div
+                      key={item.title}
+
+                      className="
+                        p-4
+                        rounded-2xl
+                        bg-[#0b0b0b]
+                        border
+                        border-white/5
+                      "
+                    >
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          mb-3
+                        "
+                      >
+
+                        <Icon
+                          className={item.color}
+                          size={18}
+                        />
+
+                        <h3
+                          className="
+                            font-bold
+                          "
+                        >
+                          {item.title}
+                        </h3>
+
+                      </div>
+
+                      <p
+                        className="
+                          text-zinc-500
+                          text-sm
+                          leading-relaxed
+                        "
+                      >
+                        {item.description}
+                      </p>
+
+                    </div>
+
+                  );
+                })}
+
+              </div>
+
+            </Card>
 
           </div>
 
-          <h1
-            className="
-              text-6xl
-              font-black
-              text-purple-400
-            "
-          >
-            98%
-          </h1>
+        </div>
 
-        </Card>
-
-      </div>
+      </PageContainer>
 
     </MainLayout>
   );

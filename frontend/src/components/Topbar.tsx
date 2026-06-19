@@ -1,74 +1,47 @@
 import {
-  useNavigate,
-} from "react-router-dom";
 
-import {
-  getUser,
-  logoutUser,
-} from "../store/authStore";
+  Bell,
 
+  Search,
 
-function Topbar() {
+  Sparkles,
 
-  const navigate =
-    useNavigate();
-
-  const user =
-    getUser();
+} from "lucide-react";
 
 
-  function handleLogout() {
-
-    logoutUser();
-
-    navigate(
-      "/login"
-    );
-  }
-
+function TopBar() {
 
   return (
 
     <div
       className="
-        fixed
-        top-0
-        left-24
-        right-0
-        h-24
-        bg-[#050816]/90
-        backdrop-blur-xl
-        border-b
-        border-cyan-500/10
         flex
         items-center
         justify-between
-        px-10
-        z-40
+        mb-10
       "
     >
 
       <div>
 
-        <h1
+        <p
           className="
-            text-2xl
-            font-bold
-            text-white
+            text-zinc-500
+            text-lg
           "
         >
-          HireSense AI
-        </h1>
+          Welcome back
+        </p>
 
-        <div
+        <h2
           className="
-            text-zinc-400
-            text-sm
+            text-4xl
+            font-black
             mt-1
           "
         >
-          AI Recruitment Intelligence Platform
-        </div>
+          AI Interview Platform
+        </h2>
 
       </div>
 
@@ -77,138 +50,105 @@ function Topbar() {
         className="
           flex
           items-center
-          gap-6
+          gap-5
         "
       >
 
         <div
           className="
-            flex
-            items-center
-            gap-3
-            bg-green-500/10
-            border
-            border-green-500/20
-            px-4
-            py-2
-            rounded-2xl
+            relative
+            w-[340px]
           "
         >
 
-          <div
+          <Search
             className="
-              w-3
-              h-3
-              rounded-full
-              bg-green-400
+              absolute
+              left-5
+              top-1/2
+              -translate-y-1/2
+              text-zinc-500
+              w-5
+              h-5
             "
           />
 
-          <div
-            className="
-              text-green-300
-              text-sm
-              font-medium
+          <input
+            placeholder="
+              Search interviews...
             "
-          >
-            AI Systems Active
-          </div>
+            className="
+              w-full
+              bg-[#0a0a0a]
+              border
+              border-white/10
+              rounded-2xl
+              py-4
+              pl-14
+              pr-5
+              outline-none
+              text-white
+              focus:border-red-500/30
+              transition-all
+            "
+          />
 
         </div>
 
 
-        <div
+        <button
           className="
+            w-14
+            h-14
+            rounded-2xl
+            bg-[#0a0a0a]
+            border
+            border-white/10
             flex
             items-center
-            gap-4
+            justify-center
+            relative
           "
         >
 
-          <div
-            className="
-              text-right
-            "
-          >
-
-            <div
-              className="
-                text-white
-                font-semibold
-              "
-            >
-
-              {
-                user?.name ||
-                "Candidate"
-              }
-
-            </div>
-
-            <div
-              className="
-                text-zinc-400
-                text-sm
-              "
-            >
-
-              {
-                user?.email ||
-                "user@hiresense.ai"
-              }
-
-            </div>
-
-          </div>
-
+          <Bell className="w-5 h-5" />
 
           <div
             className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-cyan-400
-              flex
-              items-center
-              justify-center
-              text-black
-              font-bold
-              text-lg
+              absolute
+              top-3
+              right-3
+              w-2
+              h-2
+              rounded-full
+              bg-red-500
             "
-          >
+          />
 
-            {
-              user?.name
-                ?.charAt(0)
-                ?.toUpperCase()
-              || "U"
-            }
-
-          </div>
+        </button>
 
 
-          <button
-            onClick={
-              handleLogout
-            }
-            className="
-              bg-red-500/10
-              hover:bg-red-500/20
-              border
-              border-red-500/20
-              text-red-300
-              px-5
-              py-3
-              rounded-2xl
-              transition-all
-            "
-          >
+        <button
+          className="
+            flex
+            items-center
+            gap-3
+            px-6
+            h-14
+            rounded-2xl
+            bg-red-600
+            hover:bg-red-500
+            transition-all
+            shadow-[0_0_40px_rgba(255,0,0,0.25)]
+            font-bold
+          "
+        >
 
-            Logout
+          <Sparkles size={18} />
 
-          </button>
+          Upgrade AI
 
-        </div>
+        </button>
 
       </div>
 
@@ -216,4 +156,4 @@ function Topbar() {
   );
 }
 
-export default Topbar;
+export default TopBar;

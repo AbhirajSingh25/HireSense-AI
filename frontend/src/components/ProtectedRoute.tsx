@@ -6,23 +6,24 @@ import {
   useAuth,
 } from "../context/AuthContext";
 
-interface Props {
-
-  children: React.ReactNode;
-}
-
 function ProtectedRoute({
 
   children,
-}: Props) {
+}: {
+  children: React.ReactNode;
+}) {
 
-  const auth =
-    useAuth();
+  const {
+    isAuthenticated,
+  } = useAuth();
 
-  if (!auth.user) {
+  if (!isAuthenticated) {
 
     return (
-      <Navigate to="/login" />
+      <Navigate
+        to="/login"
+        replace
+      />
     );
   }
 

@@ -1,138 +1,126 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import MainLayout from "../components/MainLayout";
 
 import Card from "../components/ui/Card";
 
-import ActivityItem from "../components/ui/ActivityItem";
-
 import {
-  History as HistoryIcon,
-} from "lucide-react";
+  getInterviewHistory,
+} from "../services/api";
 
 
 function History() {
 
-  const interviews = [
+  const [
+    interviews,
+    setInterviews,
+  ] = useState<any[]>([]);
 
-    {
-      role:
-        "Frontend Developer",
 
-      score:
-        "92%",
+  useEffect(() => {
 
-      date:
-        "2 hours ago",
-    },
+    loadHistory();
 
-    {
-      role:
-        "React Engineer",
+  }, []);
 
-      score:
-        "88%",
 
-      date:
-        "Yesterday",
-    },
+  async function loadHistory() {
 
-    {
-      role:
-        "AI Engineer",
+    try {
 
-      score:
-        "95%",
+      const data =
+        await getInterviewHistory();
 
-      date:
-        "2 days ago",
-    },
+      setInterviews(data);
 
-    {
-      role:
-        "Backend Developer",
+    } catch (error) {
 
-      score:
-        "84%",
-
-      date:
-        "Last week",
-    },
-  ];
+      console.error(error);
+    }
+  }
 
 
   return (
 
     <MainLayout>
 
-      <div className="mb-10">
+      <div className="max-w-7xl mx-auto">
 
         <h1
           className="
             text-6xl
             font-black
-            mb-4
+            mb-10
           "
         >
           Interview History
         </h1>
 
-        <p
-          className="
-            text-zinc-400
-            text-xl
-          "
-        >
-          Track all your AI interview sessions
-        </p>
+
+        <div className="space-y-6">
+
+          {interviews.map((item, index) => (
+
+            <Card
+              key={index}
+              className="p-8"
+            >
+
+              <div className="flex justify-between">
+
+                <div>
+
+                  <h2
+                    className="
+                      text-3xl
+                      font-bold
+                      mb-3
+                    "
+                  >
+                    {item.role}
+                  </h2>
+
+                  <p className="text-zinc-500">
+                    {item.level}
+                  </p>
+
+                </div>
+
+
+                <div className="text-right">
+
+                  <p
+                    className="
+                      text-4xl
+                      font-black
+                      text-red-400
+                    "
+                  >
+                    {
+
+                      item.final_report
+                        ?.confidence || 0
+
+                    }%
+                  </p>
+
+                  <p className="text-zinc-500">
+                    Confidence
+                  </p>
+
+                </div>
+
+              </div>
+
+            </Card>
+          ))}
+
+        </div>
 
       </div>
-
-
-      <Card className="p-8">
-
-        <div
-          className="
-            flex
-            items-center
-            gap-3
-            mb-8
-          "
-        >
-
-          <HistoryIcon
-            className="
-              text-cyan-400
-            "
-          />
-
-          <h2
-            className="
-              text-3xl
-              font-bold
-            "
-          >
-            Recent Interviews
-          </h2>
-
-        </div>
-
-
-        <div className="space-y-5">
-
-          {interviews.map(
-            (item, index) => (
-
-              <ActivityItem
-                key={index}
-                role={item.role}
-                score={item.score}
-                date={item.date}
-              />
-            )
-          )}
-
-        </div>
-
-      </Card>
 
     </MainLayout>
   );

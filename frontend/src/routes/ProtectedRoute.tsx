@@ -1,5 +1,3 @@
-// frontend/src/routes/ProtectedRoute.tsx
-
 import {
   Navigate,
 } from "react-router-dom";
@@ -8,25 +6,25 @@ import {
   useAuth,
 } from "../context/AuthContext";
 
-
-interface Props {
-
+type Props = {
   children: React.ReactNode;
-}
-
+};
 
 function ProtectedRoute({
-
   children,
 }: Props) {
 
-  const auth =
-    useAuth();
+  const {
+    isAuthenticated,
+  } = useAuth();
 
-  if (!auth.user) {
+  if (!isAuthenticated) {
 
     return (
-      <Navigate to="/login" />
+      <Navigate
+        to="/login"
+        replace
+      />
     );
   }
 

@@ -5,20 +5,18 @@ import {
   useState,
 } from "react";
 
-interface User {
+type User = {
 
-  id: number;
+  email?: string;
+};
 
-  email: string;
-
-  username: string;
-}
-
-interface AuthContextType {
+type AuthContextType = {
 
   user: User | null;
 
   token: string | null;
+
+  isAuthenticated: boolean;
 
   login: (
     user: User,
@@ -26,94 +24,81 @@ interface AuthContextType {
   ) => void;
 
   logout: () => void;
-}
+};
 
 const AuthContext =
   createContext<AuthContextType>(
     {} as AuthContextType
   );
 
-
 export function AuthProvider({
 
   children,
-}: any) {
+}: {
+  children: React.ReactNode;
+}) {
 
-  const [
-    user,
-    setUser,
-  ] = useState<User | null>(
-    null
-  );
+  const [user, setUser] =
+    useState<User | null>(null);
 
-  const [
-    token,
-    setToken,
-  ] = useState<string | null>(
-    null
-  );
+  const [token, setToken] =
+    useState<string | null>(null);
 
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
 
-    const savedUser =
-      localStorage.getItem(
-        "user"
-      );
-
     const savedToken =
-      localStorage.getItem(
-        "token"
-      );
+      localStorage.getItem("token");
 
-    if (
-      savedUser &&
-      savedToken
-    ) {
+    const savedUser =
+      localStorage.getItem("user");
+
+    if (savedToken) {
+
+      setToken(savedToken);
+    }
+
+    if (savedUser) {
 
       setUser(
-        JSON.parse(
-          savedUser
-        )
-      );
-
-      setToken(
-        savedToken
+        JSON.parse(savedUser)
       );
     }
 
+    setLoading(false);
+
   }, []);
 
-
   function login(
-    user: User,
-    token: string
+    userData: User,
+    authToken: string
   ) {
 
     localStorage.setItem(
-      "user",
-      JSON.stringify(user)
+      "token",
+      authToken
     );
 
     localStorage.setItem(
-      "token",
-      token
+      "user",
+      JSON.stringify(userData)
     );
 
-    setUser(user);
+    setUser(userData);
 
-    setToken(token);
+    setToken(authToken);
   }
-
 
   function logout() {
 
     localStorage.removeItem(
-      "user"
+      "token"
     );
 
     localStorage.removeItem(
-      "token"
+      "user"
     );
 
     setUser(null);
@@ -121,14 +106,25 @@ export function AuthProvider({
     setToken(null);
   }
 
+  if (loading) {
+
+    return null;
+  }
 
   return (
 
     <AuthContext.Provider
       value={{
+
         user,
+
         token,
+
+        isAuthenticated:
+          !!token,
+
         login,
+
         logout,
       }}
     >

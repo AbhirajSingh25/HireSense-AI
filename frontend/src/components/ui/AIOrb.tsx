@@ -1,7 +1,3 @@
-import {
-  motion,
-} from "framer-motion";
-
 function AIOrb() {
 
   return (
@@ -9,54 +5,22 @@ function AIOrb() {
     <div
       className="
         relative
+        w-[320px]
+        h-[320px]
         flex
         items-center
         justify-center
       "
     >
 
-      <motion.div
-
-        animate={{
-          scale: [1, 1.15, 1],
-          opacity: [0.5, 1, 0.5],
-        }}
-
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-        }}
-
+      <div
         className="
           absolute
-          w-72
-          h-72
+          inset-0
           rounded-full
-          bg-cyan-500/20
-          blur-3xl
-        "
-      />
-
-
-      <motion.div
-
-        animate={{
-          rotate: 360,
-        }}
-
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-
-        className="
-          w-48
-          h-48
-          rounded-full
-          border-[6px]
-          border-cyan-500/30
-          border-t-cyan-400
+          bg-red-500/20
+          blur-[100px]
+          animate-pulse
         "
       />
 
@@ -64,10 +28,76 @@ function AIOrb() {
       <div
         className="
           absolute
-          text-6xl
+          w-full
+          h-full
+          rounded-full
+          border
+          border-red-500/20
+          animate-spin
+        "
+        style={{
+          animationDuration: "12s",
+        }}
+      />
+
+
+      <div
+        className="
+          absolute
+          w-[260px]
+          h-[260px]
+          rounded-full
+          border
+          border-cyan-400/20
+          animate-spin
+        "
+        style={{
+          animationDuration: "8s",
+          animationDirection: "reverse",
+        }}
+      />
+
+
+      <div
+        className="
+          relative
+          w-[180px]
+          h-[180px]
+          rounded-full
+          bg-gradient-to-br
+          from-red-500
+          via-red-600
+          to-red-900
+          shadow-[0_0_80px_rgba(255,0,0,0.5)]
+          flex
+          items-center
+          justify-center
         "
       >
-        🤖
+
+        <div
+          className="
+            absolute
+            inset-4
+            rounded-full
+            border
+            border-white/20
+          "
+        />
+
+
+        <div
+          className="
+            w-24
+            h-24
+            rounded-full
+            bg-black/30
+            backdrop-blur-xl
+            border
+            border-white/20
+          "
+        />
+
       </div>
 
     </div>

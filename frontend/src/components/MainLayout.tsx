@@ -1,65 +1,51 @@
-// frontend/src/components/MainLayout.tsx
-
-import Sidebar from "./ui/Sidebar";
-
-import TopBar from "./ui/TopBar";
-
-import GlowOrb from "./ui/GlowOrb";
-
-import PageTransition from "./PageTransition";
-
-
-interface Props {
-
-  children: React.ReactNode;
-}
+import Sidebar from "./Sidebar";
 
 
 function MainLayout({
-
   children,
-}: Props) {
+}: {
+  children: React.ReactNode;
+}) {
 
   return (
 
     <div
       className="
         min-h-screen
-        bg-[#030712]
+        bg-black
         text-white
         flex
-        flex-col
-        lg:flex-row
-        relative
-        overflow-hidden
       "
     >
 
-      <GlowOrb />
-
+      {/* SIDEBAR */}
 
       <Sidebar />
 
 
+
+      {/* MAIN CONTENT */}
+
       <main
         className="
           flex-1
-          p-5
-          lg:p-10
-          overflow-y-auto
-          relative
-          z-10
+          min-w-0
+          bg-black
         "
       >
 
-        <TopBar />
-
-
-        <PageTransition>
+        <div
+          className="
+            px-5
+            md:px-7
+            xl:px-8
+            py-5
+          "
+        >
 
           {children}
 
-        </PageTransition>
+        </div>
 
       </main>
 

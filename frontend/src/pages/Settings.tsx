@@ -1,406 +1,671 @@
-import {
-  useState,
-} from "react";
-
 import MainLayout from "../components/MainLayout";
 
-import AnimatedPage from "../components/AnimatedPage";
+import PageHeader from "../components/ui/PageHeader";
+import Card from "../components/ui/Card";
 
-import PageLayout from "../components/PageLayout";
+import {
+  User,
+  ShieldCheck,
+  Bell,
+  Brain,
+  Moon,
+  Sparkles,
+  Lock,
+  Eye,
+} from "lucide-react";
 
-import PremiumCard from "../components/PremiumCard";
-
-import SettingToggle from "../components/SettingToggle";
-
-import PremiumButton from "../components/PremiumButton";
 
 function Settings() {
 
-  const savedSettings =
-    JSON.parse(
-      localStorage.getItem(
-        "hiresense-settings"
-      ) || "{}"
-    );
-
-  const [
-    name,
-    setName,
-  ] = useState(
-    savedSettings.name || ""
-  );
-
-  const [
-    role,
-    setRole,
-  ] = useState(
-    savedSettings.role ||
-    "Software Engineer"
-  );
-
-  const [
-    difficulty,
-    setDifficulty,
-  ] = useState(
-    savedSettings.difficulty ||
-    "Intermediate"
-  );
-
-  const [
-    aiVoice,
-    setAiVoice,
-  ] = useState(true);
-
-  const [
-    notifications,
-    setNotifications,
-  ] = useState(true);
-
-  const [
-    analytics,
-    setAnalytics,
-  ] = useState(true);
-
-  const saveSettings =
-    () => {
-
-      const settings = {
-        name,
-        role,
-        difficulty,
-      };
-
-      localStorage.setItem(
-        "hiresense-settings",
-        JSON.stringify(settings)
-      );
-
-      alert(
-        "Settings saved successfully."
-      );
-    };
-
   return (
+
     <MainLayout>
 
-      <AnimatedPage>
+      <div
+        className="
+          w-full
+          max-w-[1600px]
+          mx-auto
+          pb-24
+        "
+      >
 
-        <PageLayout
-          title="Settings"
-          subtitle="Manage AI interview preferences and workspace personalization"
+        <PageHeader
+          badge="SYSTEM SETTINGS"
+          title="Platform Preferences"
+          description="
+            Configure AI preferences,
+            recruiter visibility,
+            notification systems,
+            privacy controls,
+            and interview intelligence settings.
+          "
+        />
+
+
+
+        <div
+          className="
+            grid
+            grid-cols-1
+            xl:grid-cols-12
+            gap-6
+          "
         >
 
-          <div className="grid xl:grid-cols-3 gap-8">
+          {/* LEFT */}
 
-            <div className="xl:col-span-2 space-y-8">
+          <div
+            className="
+              xl:col-span-8
+              space-y-6
+            "
+          >
 
-              <PremiumCard className="p-8">
+            {/* PROFILE */}
 
-                <h2 className="text-2xl font-bold text-white">
+            <Card
+              className="
+                p-8
+              "
+            >
 
-                  Profile Preferences
+              <div className="mb-10">
 
+                <p
+                  className="
+                    text-red-400
+                    uppercase
+                    tracking-[0.3em]
+                    text-xs
+                    mb-3
+                  "
+                >
+                  PROFILE SETTINGS
+                </p>
+
+                <h2
+                  className="
+                    text-4xl
+                    font-black
+                  "
+                >
+                  Personal Information
                 </h2>
 
-                <div className="grid md:grid-cols-2 gap-6 mt-8">
+              </div>
 
-                  <div>
 
-                    <label className="text-gray-400 text-sm">
 
-                      Full Name
+              <div
+                className="
+                  grid
+                  grid-cols-1
+                  md:grid-cols-2
+                  gap-6
+                "
+              >
 
-                    </label>
+                <div>
 
-                    <input
-                      value={name}
-                      onChange={(e) =>
-                        setName(
-                          e.target.value
-                        )
-                      }
-                      placeholder="Enter your name"
-                      className="w-full mt-3 px-5 py-4 rounded-2xl bg-white/5 border border-white/10 outline-none text-white"
-                    />
-
-                  </div>
-
-                  <div>
-
-                    <label className="text-gray-400 text-sm">
-
-                      Target Role
-
-                    </label>
-
-                    <select
-                      value={role}
-                      onChange={(e) =>
-                        setRole(
-                          e.target.value
-                        )
-                      }
-                      className="w-full mt-3 px-5 py-4 rounded-2xl bg-[#0b1120] border border-white/10 outline-none text-white"
-                    >
-
-                      <option>
-                        Software Engineer
-                      </option>
-
-                      <option>
-                        Frontend Developer
-                      </option>
-
-                      <option>
-                        Backend Developer
-                      </option>
-
-                      <option>
-                        Data Analyst
-                      </option>
-
-                      <option>
-                        AI Engineer
-                      </option>
-
-                    </select>
-
-                  </div>
-
-                </div>
-
-                <div className="mt-6">
-
-                  <label className="text-gray-400 text-sm">
-
-                    Interview Difficulty
-
+                  <label
+                    className="
+                      block
+                      text-zinc-400
+                      mb-3
+                    "
+                  >
+                    Full Name
                   </label>
 
-                  <select
-                    value={difficulty}
-                    onChange={(e) =>
-                      setDifficulty(
-                        e.target.value
-                      )
-                    }
-                    className="w-full mt-3 px-5 py-4 rounded-2xl bg-[#0b1120] border border-white/10 outline-none text-white"
-                  >
+                  <input
+                    defaultValue="Abhiraj Singh"
 
-                    <option>
-                      Beginner
-                    </option>
-
-                    <option>
-                      Intermediate
-                    </option>
-
-                    <option>
-                      Advanced
-                    </option>
-
-                  </select>
+                    className="
+                      w-full
+                      h-16
+                      rounded-2xl
+                      bg-[#0b0b0b]
+                      border
+                      border-white/10
+                      px-5
+                      text-white
+                      outline-none
+                    "
+                  />
 
                 </div>
 
-                <div className="mt-8">
 
-                  <div
-                    onClick={saveSettings}
+
+                <div>
+
+                  <label
+                    className="
+                      block
+                      text-zinc-400
+                      mb-3
+                    "
                   >
+                    Email Address
+                  </label>
 
-                    <PremiumButton className="w-full sm:w-auto">
+                  <input
+                    defaultValue="abhirajsingh2141@gmail.com"
 
-                      Save Preferences
-
-                    </PremiumButton>
-
-                  </div>
+                    className="
+                      w-full
+                      h-16
+                      rounded-2xl
+                      bg-[#0b0b0b]
+                      border
+                      border-white/10
+                      px-5
+                      text-white
+                      outline-none
+                    "
+                  />
 
                 </div>
 
-              </PremiumCard>
 
-            </div>
 
-            <div className="space-y-8">
+                <div>
 
-              <PremiumCard className="p-8">
+                  <label
+                    className="
+                      block
+                      text-zinc-400
+                      mb-3
+                    "
+                  >
+                    Target Role
+                  </label>
 
-                <h2 className="text-2xl font-bold text-white">
+                  <input
+                    defaultValue="AI Software Engineer"
 
-                  AI Features
+                    className="
+                      w-full
+                      h-16
+                      rounded-2xl
+                      bg-[#0b0b0b]
+                      border
+                      border-white/10
+                      px-5
+                      text-white
+                      outline-none
+                    "
+                  />
 
+                </div>
+
+
+
+                <div>
+
+                  <label
+                    className="
+                      block
+                      text-zinc-400
+                      mb-3
+                    "
+                  >
+                    Experience Level
+                  </label>
+
+                  <input
+                    defaultValue="Fresher / Entry Level"
+
+                    className="
+                      w-full
+                      h-16
+                      rounded-2xl
+                      bg-[#0b0b0b]
+                      border
+                      border-white/10
+                      px-5
+                      text-white
+                      outline-none
+                    "
+                  />
+
+                </div>
+
+              </div>
+
+
+
+              <button
+                className="
+                  mt-8
+                  h-14
+                  px-8
+                  rounded-2xl
+                  bg-red-500
+                  hover:bg-red-400
+                  transition-all
+                  duration-300
+                  font-bold
+                "
+              >
+                Save Changes
+              </button>
+
+            </Card>
+
+
+
+            {/* AI SETTINGS */}
+
+            <Card
+              className="
+                p-8
+              "
+            >
+
+              <div className="mb-10">
+
+                <p
+                  className="
+                    text-cyan-400
+                    uppercase
+                    tracking-[0.3em]
+                    text-xs
+                    mb-3
+                  "
+                >
+                  AI SETTINGS
+                </p>
+
+                <h2
+                  className="
+                    text-4xl
+                    font-black
+                  "
+                >
+                  Intelligence Preferences
                 </h2>
 
-                <div className="space-y-6 mt-8">
+              </div>
 
-                  <div className="flex items-center justify-between gap-4">
 
-                    <div>
 
-                      <h3 className="text-white font-semibold">
+              <div className="space-y-6">
 
-                        AI Voice Analysis
+                {[
+                  {
+                    title:
+                      "Enable AI Voice Analysis",
 
-                      </h3>
+                    subtitle:
+                      "Analyze communication clarity and speech patterns",
+                  },
 
-                      <p className="text-gray-400 text-sm mt-2">
+                  {
+                    title:
+                      "Behavioral Intelligence",
 
-                        Analyze tone and communication
+                    subtitle:
+                      "Track confidence and recruiter communication signals",
+                  },
 
-                      </p>
+                  {
+                    title:
+                      "Real-Time Feedback",
 
-                    </div>
+                    subtitle:
+                      "Receive live AI coaching during interviews",
+                  },
 
-                    <SettingToggle
-                      enabled={aiVoice}
-                      onClick={() =>
-                        setAiVoice(
-                          !aiVoice
-                        )
-                      }
-                    />
+                  {
+                    title:
+                      "Advanced Recruiter Insights",
 
-                  </div>
+                    subtitle:
+                      "Unlock deeper recruiter-grade analytics",
+                  },
+                ].map((item) => (
 
-                  <div className="flex items-center justify-between gap-4">
+                  <div
+                    key={item.title}
 
-                    <div>
-
-                      <h3 className="text-white font-semibold">
-
-                        Notifications
-
-                      </h3>
-
-                      <p className="text-gray-400 text-sm mt-2">
-
-                        Receive interview reminders
-
-                      </p>
-
-                    </div>
-
-                    <SettingToggle
-                      enabled={notifications}
-                      onClick={() =>
-                        setNotifications(
-                          !notifications
-                        )
-                      }
-                    />
-
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4">
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      gap-6
+                      p-5
+                      rounded-3xl
+                      bg-[#0b0b0b]
+                      border
+                      border-white/5
+                    "
+                  >
 
                     <div>
 
-                      <h3 className="text-white font-semibold">
-
-                        AI Analytics
-
+                      <h3
+                        className="
+                          text-xl
+                          font-bold
+                          mb-2
+                        "
+                      >
+                        {item.title}
                       </h3>
 
-                      <p className="text-gray-400 text-sm mt-2">
-
-                        Enable advanced AI insights
-
+                      <p className="text-zinc-500">
+                        {item.subtitle}
                       </p>
 
                     </div>
 
-                    <SettingToggle
-                      enabled={analytics}
-                      onClick={() =>
-                        setAnalytics(
-                          !analytics
-                        )
-                      }
-                    />
+
+
+                    <button
+                      className="
+                        w-16
+                        h-9
+                        rounded-full
+                        bg-red-500
+                        relative
+                        shrink-0
+                      "
+                    >
+
+                      <div
+                        className="
+                          absolute
+                          top-1
+                          right-1
+                          w-7
+                          h-7
+                          rounded-full
+                          bg-white
+                        "
+                      />
+
+                    </button>
 
                   </div>
 
-                </div>
+                ))}
 
-              </PremiumCard>
+              </div>
 
-              <PremiumCard className="p-8 overflow-hidden">
-
-                <div className="absolute top-0 right-0 w-52 h-52 rounded-full bg-cyan-500/10 blur-3xl" />
-
-                <div className="relative z-10">
-
-                  <h2 className="text-2xl font-bold text-white">
-
-                    Workspace Status
-
-                  </h2>
-
-                  <div className="space-y-5 mt-8">
-
-                    <div className="rounded-2xl bg-white/5 border border-white/5 p-5">
-
-                      <p className="text-gray-400 text-sm">
-
-                        AI System
-
-                      </p>
-
-                      <h3 className="text-green-400 font-semibold text-lg mt-3">
-
-                        Operational
-
-                      </h3>
-
-                    </div>
-
-                    <div className="rounded-2xl bg-white/5 border border-white/5 p-5">
-
-                      <p className="text-gray-400 text-sm">
-
-                        Recruiter Analysis
-
-                      </p>
-
-                      <h3 className="text-cyan-300 font-semibold text-lg mt-3">
-
-                        Active
-
-                      </h3>
-
-                    </div>
-
-                    <div className="rounded-2xl bg-white/5 border border-white/5 p-5">
-
-                      <p className="text-gray-400 text-sm">
-
-                        Workspace Mode
-
-                      </p>
-
-                      <h3 className="text-purple-300 font-semibold text-lg mt-3">
-
-                        Premium Experience
-
-                      </h3>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </PremiumCard>
-
-            </div>
+            </Card>
 
           </div>
 
-        </PageLayout>
 
-      </AnimatedPage>
+
+          {/* RIGHT */}
+
+          <div
+            className="
+              xl:col-span-4
+              space-y-6
+            "
+          >
+
+            {/* SECURITY */}
+
+            <Card
+              className="
+                p-8
+              "
+            >
+
+              <div className="mb-8">
+
+                <p
+                  className="
+                    text-green-400
+                    uppercase
+                    tracking-[0.3em]
+                    text-xs
+                    mb-2
+                  "
+                >
+                  SECURITY
+                </p>
+
+                <h2
+                  className="
+                    text-3xl
+                    font-black
+                  "
+                >
+                  Privacy Controls
+                </h2>
+
+              </div>
+
+
+
+              <div className="space-y-5">
+
+                {[
+                  {
+                    icon: Lock,
+                    title: "2FA Authentication",
+                    color: "text-green-400",
+                  },
+
+                  {
+                    icon: Eye,
+                    title: "Recruiter Visibility",
+                    color: "text-cyan-400",
+                  },
+
+                  {
+                    icon: ShieldCheck,
+                    title: "Secure AI Sessions",
+                    color: "text-red-400",
+                  },
+                ].map((item) => {
+
+                  const Icon = item.icon;
+
+                  return (
+
+                    <div
+                      key={item.title}
+
+                      className="
+                        p-5
+                        rounded-3xl
+                        bg-[#0b0b0b]
+                        border
+                        border-white/5
+                        flex
+                        items-center
+                        justify-between
+                      "
+                    >
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-4
+                        "
+                      >
+
+                        <Icon
+                          className={item.color}
+                        />
+
+                        <span>
+                          {item.title}
+                        </span>
+
+                      </div>
+
+                      <div
+                        className="
+                          w-3
+                          h-3
+                          rounded-full
+                          bg-green-400
+                        "
+                      />
+
+                    </div>
+
+                  );
+                })}
+
+              </div>
+
+            </Card>
+
+
+
+            {/* PREFERENCES */}
+
+            <Card
+              className="
+                p-8
+              "
+            >
+
+              <div className="mb-8">
+
+                <p
+                  className="
+                    text-yellow-400
+                    uppercase
+                    tracking-[0.3em]
+                    text-xs
+                    mb-2
+                  "
+                >
+                  PREFERENCES
+                </p>
+
+                <h2
+                  className="
+                    text-3xl
+                    font-black
+                  "
+                >
+                  System Controls
+                </h2>
+
+              </div>
+
+
+
+              <div className="space-y-5">
+
+                {[
+                  {
+                    icon: Bell,
+                    title: "Notifications",
+                  },
+
+                  {
+                    icon: Moon,
+                    title: "Dark Mode",
+                  },
+
+                  {
+                    icon: Brain,
+                    title: "AI Optimization",
+                  },
+
+                  {
+                    icon: Sparkles,
+                    title: "Experimental Features",
+                  },
+
+                  {
+                    icon: User,
+                    title: "Profile Visibility",
+                  },
+                ].map((item) => {
+
+                  const Icon = item.icon;
+
+                  return (
+
+                    <div
+                      key={item.title}
+
+                      className="
+                        p-5
+                        rounded-3xl
+                        bg-[#0b0b0b]
+                        border
+                        border-white/5
+                        flex
+                        items-center
+                        justify-between
+                      "
+                    >
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-4
+                        "
+                      >
+
+                        <Icon
+                          className="
+                            text-red-400
+                          "
+                        />
+
+                        <span>
+                          {item.title}
+                        </span>
+
+                      </div>
+
+
+
+                      <button
+                        className="
+                          w-14
+                          h-8
+                          rounded-full
+                          bg-red-500
+                          relative
+                        "
+                      >
+
+                        <div
+                          className="
+                            absolute
+                            top-1
+                            right-1
+                            w-6
+                            h-6
+                            rounded-full
+                            bg-white
+                          "
+                        />
+
+                      </button>
+
+                    </div>
+
+                  );
+                })}
+
+              </div>
+
+            </Card>
+
+          </div>
+
+        </div>
+
+      </div>
 
     </MainLayout>
   );

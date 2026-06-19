@@ -1,5 +1,3 @@
-// frontend/src/App.tsx
-
 import {
   BrowserRouter,
   Routes,
@@ -7,30 +5,72 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-
-import Dashboard from "./pages/Dashboard";
-
-import MockInterview from "./pages/MockInterview";
-
 import LiveInterview from "./pages/LiveInterview";
-
-import SpeechAnalysis from "./pages/SpeechAnalysis";
-
 import Analytics from "./pages/Analytics";
-
-import History from "./pages/History";
-
 import Reports from "./pages/Reports";
-
 import Leaderboard from "./pages/Leaderboard";
+import RecruiterDashboard from "./pages/RecruiterDashboard";
+import Settings from "./pages/Settings";
+import PracticeMode from "./pages/PracticeMode";
+import AICopilot from "./pages/AICopilot";
 
-import RecruiterInsights from "./pages/RecruiterInsights";
+import {
+  useAuth,
+} from "./context/AuthContext";
 
-import VisionAnalysis from "./pages/VisionAnalysis";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+
+function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+
+  const {
+    isAuthenticated,
+  } = useAuth();
+
+  if (!isAuthenticated) {
+
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+
+
+function PublicRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+
+  const {
+    isAuthenticated,
+  } = useAuth();
+
+  if (isAuthenticated) {
+
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
 
 
 function App() {
@@ -41,24 +81,43 @@ function App() {
 
       <Routes>
 
+        {/* ROOT */}
+
         <Route
           path="/"
           element={
-            <Navigate to="/login" />
+            <Navigate
+              to="/dashboard"
+              replace
+            />
           }
         />
 
 
+
+        {/* AUTH */}
+
         <Route
           path="/login"
-          element={<Login />}
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
         />
 
         <Route
           path="/signup"
-          element={<Signup />}
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
         />
 
+
+
+        {/* DASHBOARD */}
 
         <Route
           path="/dashboard"
@@ -70,15 +129,8 @@ function App() {
         />
 
 
-        <Route
-          path="/mock-interview"
-          element={
-            <ProtectedRoute>
-              <MockInterview />
-            </ProtectedRoute>
-          }
-        />
 
+        {/* LIVE INTERVIEW */}
 
         <Route
           path="/live-interview"
@@ -90,15 +142,21 @@ function App() {
         />
 
 
+
+        {/* PRACTICE */}
+
         <Route
-          path="/speech-analysis"
+          path="/practice"
           element={
             <ProtectedRoute>
-              <SpeechAnalysis />
+              <PracticeMode />
             </ProtectedRoute>
           }
         />
 
+
+
+        {/* ANALYTICS */}
 
         <Route
           path="/analytics"
@@ -110,15 +168,8 @@ function App() {
         />
 
 
-        <Route
-          path="/history"
-          element={
-            <ProtectedRoute>
-              <History />
-            </ProtectedRoute>
-          }
-        />
 
+        {/* REPORTS */}
 
         <Route
           path="/reports"
@@ -130,6 +181,22 @@ function App() {
         />
 
 
+
+        {/* AI COPILOT */}
+
+        <Route
+          path="/copilot"
+          element={
+            <ProtectedRoute>
+              <AICopilot />
+            </ProtectedRoute>
+          }
+        />
+
+
+
+        {/* LEADERBOARD */}
+
         <Route
           path="/leaderboard"
           element={
@@ -140,30 +207,42 @@ function App() {
         />
 
 
+
+        {/* RECRUITER */}
+
         <Route
-          path="/recruiter-insights"
+          path="/recruiter"
           element={
             <ProtectedRoute>
-              <RecruiterInsights />
+              <RecruiterDashboard />
             </ProtectedRoute>
           }
         />
 
 
+
+        {/* SETTINGS */}
+
         <Route
-          path="/vision-analysis"
+          path="/settings"
           element={
             <ProtectedRoute>
-              <VisionAnalysis />
+              <Settings />
             </ProtectedRoute>
           }
         />
 
+
+
+        {/* FALLBACK */}
 
         <Route
           path="*"
           element={
-            <Navigate to="/login" />
+            <Navigate
+              to="/dashboard"
+              replace
+            />
           }
         />
 
@@ -174,3 +253,4 @@ function App() {
 }
 
 export default App;
+

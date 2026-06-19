@@ -1,113 +1,63 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
 import MainLayout from "../components/MainLayout";
 
-import {
-  getLeaderboard,
-} from "../services/api";
+import PageHeader from "../components/ui/PageHeader";
+import Card from "../components/ui/Card";
 
 import {
-
   Trophy,
-  Medal,
   Crown,
-
+  Medal,
+  Brain,
+  TrendingUp,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 
 
 function Leaderboard() {
 
-  const [
-    leaders,
-    setLeaders,
-  ] = useState<any[]>([]);
+  const users = [
 
+    {
+      rank: 1,
+      name: "Sarah Chen",
+      score: 98,
+      role: "AI Engineer",
+      badge: "Elite",
+    },
 
-  useEffect(() => {
+    {
+      rank: 2,
+      name: "Michael Lee",
+      score: 95,
+      role: "Frontend Engineer",
+      badge: "Expert",
+    },
 
-    loadLeaderboard();
+    {
+      rank: 3,
+      name: "Alex Johnson",
+      score: 93,
+      role: "Backend Developer",
+      badge: "Advanced",
+    },
 
-  }, []);
+    {
+      rank: 4,
+      name: "Abhiraj Singh",
+      score: 92,
+      role: "Software Engineer",
+      badge: "High Potential",
+    },
 
-
-  async function loadLeaderboard() {
-
-    try {
-
-      const data =
-        await getLeaderboard();
-
-      setLeaders(data);
-
-    } catch (error) {
-
-      console.error(error);
-    }
-  }
-
-
-  function getRankIcon(
-    rank: number
-  ) {
-
-    if (rank === 1) {
-
-      return (
-        <Crown
-          className="
-            text-yellow-400
-          "
-          size={24}
-        />
-      );
-    }
-
-    if (rank === 2) {
-
-      return (
-        <Medal
-          className="
-            text-gray-300
-          "
-          size={24}
-        />
-      );
-    }
-
-    if (rank === 3) {
-
-      return (
-        <Medal
-          className="
-            text-orange-400
-          "
-          size={24}
-        />
-      );
-    }
-
-    return (
-
-      <div
-        className="
-          w-8
-          h-8
-          rounded-full
-          bg-white/10
-          flex
-          items-center
-          justify-center
-          text-sm
-          font-bold
-        "
-      >
-        {rank}
-      </div>
-    );
-  }
+    {
+      rank: 5,
+      name: "Emma Watson",
+      score: 90,
+      role: "Full Stack Engineer",
+      badge: "Strong Match",
+    },
+  ];
 
 
   return (
@@ -116,303 +66,419 @@ function Leaderboard() {
 
       <div
         className="
-          max-w-6xl
+          w-full
+          max-w-[1700px]
           mx-auto
+          pb-24
         "
       >
 
+        <PageHeader
+          badge="GLOBAL AI RANKINGS"
+          title="Recruiter Intelligence Leaderboard"
+          description="
+            Compare interview intelligence,
+            recruiter compatibility,
+            communication performance,
+            and AI-driven rankings across candidates.
+          "
+        />
+
+
+
+        {/* TOP STATS */}
+
         <div
           className="
+            grid
+            grid-cols-1
+            md:grid-cols-2
+            xl:grid-cols-4
+            gap-6
             mb-10
+          "
+        >
+
+          <Card className="p-7">
+
+            <Trophy
+              className="
+                text-yellow-400
+                mb-6
+              "
+              size={34}
+            />
+
+            <h2
+              className="
+                text-5xl
+                font-black
+                mb-3
+              "
+            >
+              #4
+            </h2>
+
+            <p className="text-zinc-500">
+              Your Current Rank
+            </p>
+
+          </Card>
+
+
+
+          <Card className="p-7">
+
+            <Brain
+              className="
+                text-red-400
+                mb-6
+              "
+              size={34}
+            />
+
+            <h2
+              className="
+                text-5xl
+                font-black
+                mb-3
+              "
+            >
+              92%
+            </h2>
+
+            <p className="text-zinc-500">
+              AI Recruiter Score
+            </p>
+
+          </Card>
+
+
+
+          <Card className="p-7">
+
+            <TrendingUp
+              className="
+                text-green-400
+                mb-6
+              "
+              size={34}
+            />
+
+            <h2
+              className="
+                text-5xl
+                font-black
+                mb-3
+              "
+            >
+              +14%
+            </h2>
+
+            <p className="text-zinc-500">
+              Weekly Improvement
+            </p>
+
+          </Card>
+
+
+
+          <Card className="p-7">
+
+            <ShieldCheck
+              className="
+                text-cyan-400
+                mb-6
+              "
+              size={34}
+            />
+
+            <h2
+              className="
+                text-5xl
+                font-black
+                mb-3
+              "
+            >
+              Elite
+            </h2>
+
+            <p className="text-zinc-500">
+              Recruiter Tier
+            </p>
+
+          </Card>
+
+        </div>
+
+
+
+        {/* LEADERBOARD */}
+
+        <Card
+          className="
+            p-8
           "
         >
 
           <div
             className="
               flex
-              items-center
-              gap-4
-              mb-3
+              flex-col
+              md:flex-row
+              md:items-center
+              md:justify-between
+              gap-5
+              mb-10
             "
           >
 
-            <div
-              className="
-                w-14
-                h-14
-                rounded-2xl
-                bg-yellow-400
-                text-black
-                flex
-                items-center
-                justify-center
-              "
-            >
+            <div>
 
-              <Trophy size={28} />
+              <p
+                className="
+                  text-red-400
+                  uppercase
+                  tracking-[0.3em]
+                  text-xs
+                  mb-3
+                "
+              >
+                GLOBAL RANKINGS
+              </p>
+
+              <h2
+                className="
+                  text-4xl
+                  font-black
+                "
+              >
+                AI Candidate Rankings
+              </h2>
 
             </div>
 
 
-            <div>
 
-              <h1
-                className="
-                  text-4xl
-                  font-black
-                  text-white
-                "
-              >
-                Leaderboard
-              </h1>
-
-              <p
-                className="
-                  text-gray-400
-                "
-              >
-                Top AI interview performers
-              </p>
-
+            <div
+              className="
+                px-5
+                py-3
+                rounded-2xl
+                bg-green-500/10
+                border
+                border-green-500/20
+                text-green-400
+                font-semibold
+              "
+            >
+              Live Recruiter Data
             </div>
 
           </div>
 
-        </div>
 
 
-        <div
-          className="
-            grid
-            gap-5
-          "
-        >
+          <div className="space-y-5">
 
-          {leaders.map((
-            user,
-            index
-          ) => (
-
-            <div
-              key={index}
-              className={`
-                rounded-3xl
-                p-6
-                border
-                transition-all
-
-                ${
-                  index === 0
-
-                    ? `
-                      bg-linear-to-r
-                      from-yellow-500/20
-                      to-orange-500/20
-                      border-yellow-400/30
-                    `
-
-                    : `
-                      bg-white/5
-                      border-white/10
-                    `
-                }
-              `}
-            >
+            {users.map((user) => (
 
               <div
+                key={user.rank}
+
                 className="
-                  flex
-                  flex-col
-                  md:flex-row
-                  md:items-center
-                  md:justify-between
-                  gap-5
+                  p-6
+                  rounded-3xl
+                  bg-[#0b0b0b]
+                  border
+                  border-white/5
+                  hover:border-red-500/20
+                  transition-all
+                  duration-300
                 "
               >
 
                 <div
                   className="
                     flex
-                    items-center
-                    gap-5
+                    flex-col
+                    xl:flex-row
+                    xl:items-center
+                    xl:justify-between
+                    gap-6
                   "
                 >
 
-                  {getRankIcon(
-                    index + 1
-                  )}
-
-
-                  <div>
-
-                    <h2
-                      className="
-                        text-2xl
-                        font-bold
-                        text-white
-                        mb-1
-                      "
-                    >
-                      {
-                        user.username ||
-                        `User ${index + 1}`
-                      }
-                    </h2>
-
-                    <p
-                      className="
-                        text-gray-400
-                      "
-                    >
-                      AI Interview Candidate
-                    </p>
-
-                  </div>
-
-                </div>
-
-
-                <div
-                  className="
-                    grid
-                    grid-cols-2
-                    md:grid-cols-4
-                    gap-4
-                  "
-                >
+                  {/* LEFT */}
 
                   <div
                     className="
-                      bg-black/20
-                      rounded-2xl
-                      px-5
-                      py-4
+                      flex
+                      items-center
+                      gap-5
                     "
                   >
 
-                    <p
-                      className="
-                        text-gray-400
-                        text-sm
-                        mb-2
-                      "
-                    >
-                      Confidence
-                    </p>
+                    {/* RANK */}
 
-                    <h3
-                      className="
+                    <div
+                      className={`
+                        w-20
+                        h-20
+                        rounded-3xl
+                        flex
+                        items-center
+                        justify-center
+                        font-black
                         text-2xl
-                        font-bold
-                        text-cyan-400
-                      "
+
+                        ${
+                          user.rank === 1
+                            ? "bg-yellow-500/10 text-yellow-400"
+
+                            : user.rank === 2
+                            ? "bg-zinc-500/10 text-zinc-300"
+
+                            : user.rank === 3
+                            ? "bg-orange-500/10 text-orange-400"
+
+                            : "bg-red-500/10 text-red-400"
+                        }
+                      `}
                     >
-                      {
-                        user.confidence_score || 0
-                      }%
-                    </h3>
+
+                      #{user.rank}
+
+                    </div>
+
+
+
+                    {/* USER */}
+
+                    <div>
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-3
+                          mb-2
+                        "
+                      >
+
+                        <h3
+                          className="
+                            text-2xl
+                            font-black
+                          "
+                        >
+                          {user.name}
+                        </h3>
+
+                        {
+                          user.rank === 1 && (
+
+                            <Crown
+                              className="
+                                text-yellow-400
+                              "
+                            />
+
+                          )
+                        }
+
+                        {
+                          user.rank <= 3 && (
+
+                            <Medal
+                              className="
+                                text-red-400
+                              "
+                            />
+
+                          )
+                        }
+
+                      </div>
+
+                      <p
+                        className="
+                          text-zinc-500
+                        "
+                      >
+                        {user.role}
+                      </p>
+
+                    </div>
 
                   </div>
 
 
+
+                  {/* RIGHT */}
+
                   <div
                     className="
-                      bg-black/20
-                      rounded-2xl
-                      px-5
-                      py-4
+                      flex
+                      flex-wrap
+                      items-center
+                      gap-4
                     "
                   >
 
-                    <p
+                    <div
                       className="
-                        text-gray-400
-                        text-sm
-                        mb-2
-                      "
-                    >
-                      Communication
-                    </p>
-
-                    <h3
-                      className="
-                        text-2xl
-                        font-bold
+                        px-5
+                        py-3
+                        rounded-2xl
+                        bg-green-500/10
                         text-green-400
-                      "
-                    >
-                      {
-                        user.communication_score || 0
-                      }%
-                    </h3>
-
-                  </div>
-
-
-                  <div
-                    className="
-                      bg-black/20
-                      rounded-2xl
-                      px-5
-                      py-4
-                    "
-                  >
-
-                    <p
-                      className="
-                        text-gray-400
-                        text-sm
-                        mb-2
-                      "
-                    >
-                      Eye Contact
-                    </p>
-
-                    <h3
-                      className="
-                        text-2xl
                         font-bold
-                        text-pink-400
                       "
                     >
-                      {
-                        user.eye_contact_score || 0
-                      }%
-                    </h3>
-
-                  </div>
+                      {user.score}% Match
+                    </div>
 
 
-                  <div
-                    className="
-                      bg-black/20
-                      rounded-2xl
-                      px-5
-                      py-4
-                    "
-                  >
 
-                    <p
+                    <div
                       className="
-                        text-gray-400
-                        text-sm
-                        mb-2
-                      "
-                    >
-                      WPM
-                    </p>
-
-                    <h3
-                      className="
-                        text-2xl
+                        px-5
+                        py-3
+                        rounded-2xl
+                        bg-red-500/10
+                        text-red-400
                         font-bold
-                        text-orange-400
                       "
                     >
-                      {
-                        user.words_per_minute || 0
-                      }
-                    </h3>
+                      {user.badge}
+                    </div>
+
+
+
+                    <button
+                      className="
+                        h-14
+                        px-5
+                        rounded-2xl
+                        bg-white/5
+                        border
+                        border-white/10
+                        hover:border-red-500/20
+                        transition-all
+                        duration-300
+                        flex
+                        items-center
+                        gap-3
+                        font-semibold
+                      "
+                    >
+
+                      <Sparkles size={18} />
+
+                      View Profile
+
+                    </button>
 
                   </div>
 
@@ -420,26 +486,11 @@ function Leaderboard() {
 
               </div>
 
-            </div>
-          ))}
+            ))}
 
+          </div>
 
-          {!leaders.length && (
-
-            <div
-              className="
-                text-center
-                py-20
-                text-gray-400
-              "
-            >
-
-              No leaderboard data available
-
-            </div>
-          )}
-
-        </div>
+        </Card>
 
       </div>
 

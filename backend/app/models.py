@@ -1,109 +1,37 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Float,
-    Text,
-    DateTime,
-)
+from sqlalchemy import Column, Integer, String, Text
 
-from sqlalchemy.sql import func
-
-from .database import Base
+from app.database import Base
 
 
 class User(Base):
 
     __tablename__ = "users"
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
-    )
+    id = Column(Integer, primary_key=True, index=True)
 
-    username = Column(
-        String,
-        nullable=False
-    )
+    username = Column(String, unique=True)
 
-    email = Column(
-        String,
-        unique=True,
-        nullable=False
-    )
+    email = Column(String, unique=True)
 
-    password = Column(
-        String,
-        nullable=False
-    )
-
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now()
-    )
+    password = Column(String)
 
 
 class InterviewSession(Base):
 
     __tablename__ = "interview_sessions"
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
-    )
+    id = Column(Integer, primary_key=True, index=True)
 
-    user_id = Column(
-        Integer,
-        nullable=False
-    )
+    role = Column(String)
 
-    role = Column(
-        String,
-        default="General"
-    )
+    level = Column(String)
 
-    transcript = Column(
-        Text
-    )
+    questions = Column(Text)
 
-    confidence_score = Column(
-        Float,
-        default=0
-    )
+    answers = Column(Text)
 
-    communication_score = Column(
-        Float,
-        default=0
-    )
+    evaluations = Column(Text)
 
-    words_per_minute = Column(
-        Float,
-        default=0
-    )
+    final_report = Column(Text)
 
-    eye_contact_score = Column(
-        Float,
-        default=0
-    )
-
-    technical_score = Column(
-        Float,
-        default=0
-    )
-
-    attention_status = Column(
-        String,
-        default="Focused"
-    )
-
-    ai_feedback = Column(
-        Text,
-        default=""
-    )
-
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now()
-    )
+    created_at = Column(String)

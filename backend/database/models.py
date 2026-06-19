@@ -5,7 +5,7 @@ from sqlalchemy import (
     Text
 )
 
-from .database import Base
+from database.database import Base
 
 
 class User(Base):
@@ -28,9 +28,7 @@ class User(Base):
         unique=True
     )
 
-    password = Column(
-        String
-    )
+    password = Column(String)
 
 
 class InterviewSession(Base):
