@@ -1,12 +1,16 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-
+from groq import Groq
+from app.config import GROQ_API_KEY
 
 router = APIRouter()
 
+client = Groq(
+    api_key=GROQ_API_KEY
+)
+
 
 class CopilotRequest(BaseModel):
-
     prompt: str
 
 
@@ -15,55 +19,46 @@ async def ai_copilot(
     data: CopilotRequest
 ):
 
-    prompt = data.prompt.lower()
+    completion = client.chat.completions.create(
 
+        model="llama-3.3-70b-versatile",
 
-    if "dsa" in prompt:
+        messages=[
 
-        response = (
-            "Focus on arrays, binary search, recursion, "
-            "dynamic programming, trees, and graphs. "
-            "Practice LeetCode medium problems consistently."
-        )
+            {
+                "role": "system",
 
+                "content": """
+You are HireSense AI.
 
-    elif "resume" in prompt:
+You are an expert recruiter,
+software engineer,
+career coach,
+interview mentor.
 
-        response = (
-            "Your resume should prioritize measurable impact, "
-            "production-grade projects, scalable systems, "
-            "and recruiter-friendly formatting."
-        )
+Help users prepare for:
 
+- DSA
+- System Design
+- HR Interviews
+- Behavioral Interviews
+- Resume Reviews
+- Career Guidance
 
-    elif "system design" in prompt:
+Always provide practical,
+recruiter-focused answers.
+"""
+            },
 
-        response = (
-            "Start with requirements, traffic estimation, "
-            "database selection, scaling strategy, caching, "
-            "load balancing, and failure handling."
-        )
-
-
-    elif "interview" in prompt:
-
-        response = (
-            "Structure answers using STAR format, "
-            "speak clearly, explain tradeoffs, "
-            "and communicate your decision-making process."
-        )
-
-
-    else:
-
-        response = (
-            "HireSense AI recommends focusing on "
-            "communication clarity, technical depth, "
-            "problem-solving, and confidence during interviews."
-        )
-
+            {
+                "role": "user",
+                "content": data.prompt
+            }
+        ]
+    )
 
     return {
-
-        "response": response
+        "response":
+        completion.choices[0]
+        .message.content
     }
