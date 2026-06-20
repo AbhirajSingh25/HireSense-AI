@@ -11,7 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 from sqlalchemy.orm import Session
-
+from app.routes.hiring import (
+    router as hiring_router
+)
 from pydantic import BaseModel
 
 from app.database import (
@@ -87,7 +89,9 @@ app.include_router(
     tags=["Interview"],
 )
 
-
+app.include_router(
+    hiring_router
+)
 # =========================
 # REQUEST MODELS
 # =========================
