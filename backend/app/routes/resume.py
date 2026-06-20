@@ -122,3 +122,72 @@ Keep the response structured and professional.
 
         "resume_text": text[:3000]
     }
+from pydantic import BaseModel
+
+
+class JDMatchRequest(BaseModel):
+
+    resume_text: str
+
+    job_description: str
+
+
+@router.post("/match-jd")
+async def match_job_description(
+    data: JDMatchRequest
+):
+
+    completion = client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+
+            {
+                "role": "system",
+
+                "content": """
+You are a senior recruiter.
+
+Compare the resume against the job description.
+
+Return:
+
+1. Match Percentage
+
+2. Missing Skills
+
+3. Strengths
+
+4. Weaknesses
+
+5. Hiring Recommendation
+
+6. Interview Readiness
+
+Keep it concise.
+"""
+            },
+
+            {
+                "role": "user",
+
+                "content":
+                f"""
+Resume:
+
+{data.resume_text}
+
+
+Job Description:
+
+{data.job_description}
+"""
+            }
+        ]
+    )
+
+    return {
+        "analysis":
+        completion.choices[0].message.content
+    }
