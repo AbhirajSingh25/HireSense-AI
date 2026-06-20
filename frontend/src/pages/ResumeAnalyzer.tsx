@@ -329,6 +329,14 @@ function ResumeAnalyzer() {
   {/* ATS SCORE */}
 
   <div
+  className="
+    grid
+    md:grid-cols-3
+    gap-6
+  "
+>
+
+  <div
     className="
       p-8
       rounded-3xl
@@ -344,7 +352,7 @@ function ResumeAnalyzer() {
 
     <h1
       className="
-        text-7xl
+        text-6xl
         font-black
         text-cyan-400
       "
@@ -353,6 +361,60 @@ function ResumeAnalyzer() {
     </h1>
 
   </div>
+
+  <div
+    className="
+      p-8
+      rounded-3xl
+      bg-green-500/10
+      border
+      border-green-500/20
+    "
+  >
+
+    <p className="text-zinc-400 mb-3">
+      SKILLS FOUND
+    </p>
+
+    <h1
+      className="
+        text-6xl
+        font-black
+        text-green-400
+      "
+    >
+      {result.skills?.length}
+    </h1>
+
+  </div>
+
+  <div
+    className="
+      p-8
+      rounded-3xl
+      bg-red-500/10
+      border
+      border-red-500/20
+    "
+  >
+
+    <p className="text-zinc-400 mb-3">
+      MISSING SKILLS
+    </p>
+
+    <h1
+      className="
+        text-6xl
+        font-black
+        text-red-400
+      "
+    >
+      {result.missing_skills?.length}
+    </h1>
+
+  </div>
+
+</div>
 
 
 
@@ -456,20 +518,11 @@ function ResumeAnalyzer() {
 
   {/* SUGGESTIONS */}
 
-  <div>
+  {/* AI RECRUITER REVIEW */}
 
-    <h3
-      className="
-        text-2xl
-        font-bold
-        mb-4
-      "
-    >
-      AI Suggestions
-    </h3>
 <div
   className="
-    mt-10
+    mt-8
     p-8
     rounded-3xl
     bg-white/5
@@ -482,7 +535,7 @@ function ResumeAnalyzer() {
     className="
       text-3xl
       font-black
-      mb-5
+      mb-6
     "
   >
     AI Recruiter Review
@@ -499,33 +552,6 @@ function ResumeAnalyzer() {
   </div>
 
 </div>
-    <div className="space-y-3">
-
-      {result.suggestions?.map(
-        (
-          suggestion: string,
-          index: number
-        ) => (
-
-          <div
-            key={index}
-            className="
-              p-4
-              rounded-2xl
-              bg-white/5
-              border
-              border-white/10
-            "
-          >
-            {suggestion}
-          </div>
-
-        )
-      )}
-
-    </div>
-
-  </div>
 
 </div>
 
