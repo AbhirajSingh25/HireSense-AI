@@ -25,7 +25,14 @@ function ResumeAnalyzer() {
   ] = useState<File | null>(
     null
   );
-
+const [
+  jobDescription,
+  setJobDescription,
+] = useState("");
+const [
+  jdResult,
+  setJdResult,
+] = useState("");
   const [
     loading,
     setLoading,
@@ -120,7 +127,61 @@ function ResumeAnalyzer() {
       setLoading(false);
     }
   }
+async function matchJobDescription() {
 
+  if (
+    !result?.resume_text
+  ) {
+
+    toast.error(
+      "Analyze resume first"
+    );
+
+    return;
+  }
+
+  try {
+
+    const response =
+      await fetch(
+
+        `${API_URL}/resume/match-jd`,
+
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+
+            resume_text:
+              result.resume_text,
+
+            job_description:
+              jobDescription,
+          }),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    setJdResult(
+      data.analysis
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+      "JD Match failed"
+    );
+  }
+}
 
   return (
 
@@ -519,7 +580,81 @@ function ResumeAnalyzer() {
   {/* SUGGESTIONS */}
 
   {/* AI RECRUITER REVIEW */}
+<div
+  className="
+    mt-10
+    p-8
+    rounded-3xl
+    bg-white/5
+    border
+    border-white/10
+  "
+>
 
+  <h2
+    className="
+      text-3xl
+      font-black
+      mb-6
+    "
+  >
+    Job Description Matcher
+  </h2>
+
+  <textarea
+    value={jobDescription}
+    onChange={(e) =>
+      setJobDescription(
+        e.target.value
+      )
+    }
+    placeholder="
+Paste Job Description Here
+"
+    className="
+      w-full
+      h-48
+      bg-black/40
+      border
+      border-zinc-800
+      rounded-2xl
+      p-4
+      mb-6
+    "
+  />
+
+  <button
+    onClick={
+      matchJobDescription
+    }
+    className="
+      bg-red-500
+      hover:bg-red-400
+      px-8
+      py-3
+      rounded-2xl
+      font-bold
+    "
+  >
+    Match Resume
+  </button>
+
+  {jdResult && (
+
+    <div
+      className="
+        mt-8
+        whitespace-pre-wrap
+        text-zinc-300
+        leading-8
+      "
+    >
+      {jdResult}
+    </div>
+
+  )}
+
+</div>
 <div
   className="
     mt-8
