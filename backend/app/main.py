@@ -60,10 +60,14 @@ Base.metadata.create_all(
 # MIDDLEWARE
 # =========================
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=[
+        "*"
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -243,7 +247,11 @@ def login(
         }
     }
 
-
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
+    }
 # =========================
 # INTERVIEW
 # =========================

@@ -78,9 +78,8 @@ const [
 
 
       const response =
-        await fetch(
-
-          `${API_URL}/resume/analyze`,
+  await fetch(
+    `${API_URL}/api/resume/analyze`,
 
           {
             method: "POST",
@@ -145,7 +144,7 @@ async function matchJobDescription() {
     const response =
       await fetch(
 
-        `${API_URL}/resume/match-jd`,
+        `${API_URL}/api/resume/match-jd`,
 
         {
           method: "POST",
