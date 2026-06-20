@@ -77,9 +77,8 @@ const [
       );
 
 
-      const response =
-  await fetch(
-    `${API_URL}/api/resume/analyze`,
+      const response = await fetch(
+  `${API_URL}/api/resume/analyze`,
 
           {
             method: "POST",
