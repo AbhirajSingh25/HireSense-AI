@@ -16,7 +16,8 @@ import RecruiterDashboard from "./pages/RecruiterDashboard";
 import Settings from "./pages/Settings";
 import PracticeMode from "./pages/PracticeMode";
 import AICopilot from "./pages/AICopilot";
-
+import HiringProbability
+from "./pages/HiringProbability";
 import {
   useAuth,
 } from "./context/AuthContext";
@@ -242,7 +243,14 @@ function App() {
 
 
         {/* FALLBACK */}
-
+<Route
+  path="/hiring-probability"
+  element={
+    <ProtectedRoute>
+      <HiringProbability />
+    </ProtectedRoute>
+  }
+/>
         <Route
           path="*"
           element={
