@@ -1,10 +1,20 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from random import randint
+from groq import Groq
+from app.config import GROQ_API_KEY
+import json
 
 
 router = APIRouter()
 
+client = Groq(
+    api_key=GROQ_API_KEY
+)
+
+
+# =========================
+# REQUEST MODELS
+# =========================
 
 class EvaluationRequest(BaseModel):
 
@@ -29,75 +39,191 @@ class InterviewSaveRequest(BaseModel):
     evaluations: list
 
 
+# =========================
+# EVALUATE ANSWER
+# =========================
+
 @router.post("/evaluate-answer")
 async def evaluate_answer(
     data: EvaluationRequest
 ):
 
-    answer_length = len(data.answer.split())
+    completion = client.chat.completions.create(
 
+        model="llama-3.3-70b-versatile",
 
-    confidence = min(
-        98,
-        max(65, answer_length // 2)
+        messages=[
+
+            {
+                "role": "system",
+
+                "content": """
+You are a senior technical interviewer.
+
+Evaluate the candidate answer.
+
+Return ONLY valid JSON.
+
+{
+  "confidence": 85,
+  "communication": 90,
+  "technical": 88,
+  "feedback": "Detailed feedback here"
+}
+"""
+            },
+
+            {
+                "role": "user",
+
+                "content":
+                f"""
+Question:
+{data.question}
+
+Answer:
+{data.answer}
+"""
+            }
+        ]
     )
 
-    communication = randint(80, 95)
-
-    technical = randint(78, 96)
-
-
-    feedback = (
-        "Good communication clarity and structured response. "
-        "Try adding more measurable technical achievements "
-        "and deeper system-level reasoning."
+    result = json.loads(
+        completion.choices[0]
+        .message.content
     )
 
+    return result
 
-    return {
 
-        "confidence": confidence,
-
-        "communication": communication,
-
-        "technical": technical,
-
-        "feedback": feedback,
-    }
-
+# =========================
+# FOLLOWUP QUESTION
+# =========================
 
 @router.post("/generate-followup")
 async def generate_followup(
     data: FollowupRequest
 ):
 
-    followups = [
+    completion = client.chat.completions.create(
 
-        "Explain a difficult production bug you solved recently.",
+        model="llama-3.3-70b-versatile",
 
-        "Describe a scalable system you designed.",
+        messages=[
 
-        "How would you optimize a slow API endpoint?",
+            {
+                "role": "system",
 
-        "Tell me about a challenging team conflict.",
+                "content": """
+Generate ONE recruiter followup question.
 
-        "How do you handle system failures in production?",
+The question must be based on the
+candidate answer.
 
-        "Explain your database optimization strategy.",
-    ]
+Return ONLY the question.
+"""
+            },
 
+            {
+                "role": "user",
+
+                "content":
+                f"""
+Role:
+{data.role}
+
+Level:
+{data.level}
+
+Question:
+{data.question}
+
+Answer:
+{data.answer}
+"""
+            }
+        ]
+    )
 
     return {
-
         "question":
-            followups[
-                randint(
-                    0,
-                    len(followups) - 1
-                )
-            ]
+        completion.choices[0]
+        .message.content
     }
 
+
+# =========================
+# FINAL REPORT
+# =========================
+
+@router.post("/generate-report")
+async def generate_report(
+    data: InterviewSaveRequest
+):
+
+    completion = client.chat.completions.create(
+
+        model="llama-3.3-70b-versatile",
+
+        messages=[
+
+            {
+                "role": "system",
+
+                "content": """
+You are a senior recruiter.
+
+Analyze the complete interview.
+
+Provide:
+
+1. Overall Score
+2. Communication Score
+3. Technical Score
+4. Confidence Score
+5. Strengths
+6. Weaknesses
+7. Hiring Recommendation
+8. Recruiter Verdict
+
+Return a professional report.
+"""
+            },
+
+            {
+                "role": "user",
+
+                "content":
+                f"""
+Role:
+{data.role}
+
+Level:
+{data.level}
+
+Questions:
+{data.questions}
+
+Answers:
+{data.answers}
+
+Evaluations:
+{data.evaluations}
+"""
+            }
+        ]
+    )
+
+    return {
+        "report":
+        completion.choices[0]
+        .message.content
+    }
+
+
+# =========================
+# SAVE INTERVIEW
+# =========================
 
 @router.post("/save-interview")
 async def save_interview(
