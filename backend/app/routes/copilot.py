@@ -1,64 +1,30 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from groq import Groq
-from app.config import GROQ_API_KEY
+
+from app.services.groq_service import (
+    ask_copilot
+)
 
 router = APIRouter()
 
-client = Groq(
-    api_key=GROQ_API_KEY
+
+class CopilotRequest(
+    BaseModel
+):
+    message: str
+
+
+@router.post(
+    "/ai-copilot"
 )
-
-
-class CopilotRequest(BaseModel):
-    prompt: str
-
-
-@router.post("/ai-copilot")
-async def ai_copilot(
+def ai_copilot(
     data: CopilotRequest
 ):
 
-    completion = client.chat.completions.create(
-
-        model="llama-3.3-70b-versatile",
-
-        messages=[
-
-            {
-                "role": "system",
-
-                "content": """
-You are HireSense AI.
-
-You are an expert recruiter,
-software engineer,
-career coach,
-interview mentor.
-
-Help users prepare for:
-
-- DSA
-- System Design
-- HR Interviews
-- Behavioral Interviews
-- Resume Reviews
-- Career Guidance
-
-Always provide practical,
-recruiter-focused answers.
-"""
-            },
-
-            {
-                "role": "user",
-                "content": data.prompt
-            }
-        ]
+    response = ask_copilot(
+        data.message
     )
 
     return {
-        "response":
-        completion.choices[0]
-        .message.content
+        "reply": response
     }

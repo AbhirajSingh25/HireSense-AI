@@ -392,6 +392,7 @@ async function matchJobDescription() {
     grid
     md:grid-cols-3
     gap-6
+    mb-10
   "
 >
 
@@ -410,12 +411,13 @@ async function matchJobDescription() {
     </p>
 
     <h1
-      className="
-        text-6xl
-        font-black
-        text-cyan-400
-      "
-    >
+  className="
+    text-7xl
+    font-black
+    text-cyan-400
+    leading-none
+  "
+>
       {result.ats_score}%
     </h1>
 
@@ -436,12 +438,13 @@ async function matchJobDescription() {
     </p>
 
     <h1
-      className="
-        text-6xl
-        font-black
-        text-green-400
-      "
-    >
+  className="
+    text-7xl
+    font-black
+    text-cyan-400
+    leading-none
+  "
+>
       {result.skills?.length}
     </h1>
 
@@ -462,12 +465,13 @@ async function matchJobDescription() {
     </p>
 
     <h1
-      className="
-        text-6xl
-        font-black
-        text-red-400
-      "
-    >
+  className="
+    text-7xl
+    font-black
+    text-red-400
+    leading-none
+  "
+>
       {result.missing_skills?.length}
     </h1>
 
@@ -653,35 +657,284 @@ Paste Job Description Here
   )}
 
 </div>
-<div
-  className="
-    mt-8
-    p-8
-    rounded-3xl
-    bg-white/5
-    border
-    border-white/10
-  "
->
+{/* AI INSIGHTS */}
+
+<div className="mt-10">
 
   <h2
     className="
-      text-3xl
+      text-4xl
       font-black
-      mb-6
+      mb-8
     "
   >
-    AI Recruiter Review
+    Recruiter Insights
   </h2>
 
   <div
     className="
-      whitespace-pre-wrap
-      leading-8
-      text-zinc-300
+      grid
+      lg:grid-cols-3
+      gap-6
+      mb-8
     "
   >
-    {result.ai_review}
+
+    {/* READINESS */}
+
+    <div
+      className="
+        rounded-3xl
+        p-8
+        bg-cyan-500/10
+        border
+        border-cyan-500/20
+      "
+    >
+
+      <p className="text-zinc-400 mb-3">
+        INTERVIEW READINESS
+      </p>
+
+      <h1
+  className="
+    text-7xl
+    font-black
+    text-cyan-400
+    leading-none
+  "
+>
+        {result.readiness}%
+      </h1>
+
+    </div>
+
+    {/* VERDICT */}
+
+    <div
+      className="
+        rounded-3xl
+        p-8
+        bg-green-500/10
+        border
+        border-green-500/20
+      "
+    >
+
+      <p className="text-zinc-400 mb-3">
+        RECRUITER VERDICT
+      </p>
+
+      <h2
+        className="
+          text-2xl
+          font-bold
+          text-green-400
+        "
+      >
+        {result.verdict}
+      </h2>
+
+    </div>
+
+    {/* RECOMMENDED ROLES */}
+
+    <div
+      className="
+        rounded-3xl
+        p-8
+        bg-purple-500/10
+        border
+        border-purple-500/20
+      "
+    >
+
+      <p className="text-zinc-400 mb-3">
+        RECOMMENDED ROLES
+      </p>
+
+      <p
+        className="
+          text-purple-400
+          font-semibold
+        "
+      >
+        {result.recommended_roles?.length}
+        {" "}Roles
+      </p>
+
+    </div>
+
+  </div>
+
+
+
+  {/* STRENGTHS */}
+
+  <div className="mb-10">
+
+    <h3
+      className="
+        text-3xl
+        font-bold
+        mb-6
+      "
+    >
+      Strengths
+    </h3>
+
+    <div
+  className="
+    grid
+    md:grid-cols-2
+    gap-4
+  "
+>
+
+      {result.strengths?.map(
+        (
+          item: string,
+          index: number
+        ) => (
+
+          <div
+            key={index}
+            className="
+              p-5
+              rounded-2xl
+              bg-green-500/10
+              border
+              border-green-500/20
+            "
+          >
+
+            <p
+              className="
+                text-green-400
+                font-medium
+              "
+            >
+              ✓ {item}
+            </p>
+
+          </div>
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+
+
+  {/* WEAKNESSES */}
+
+  <div className="mb-10">
+
+    <h3
+      className="
+        text-3xl
+        font-bold
+        mb-6
+      "
+    >
+      Areas To Improve
+    </h3>
+
+    <div
+  className="
+    grid
+    md:grid-cols-2
+    gap-4
+  "
+>
+
+      {result.weaknesses?.map(
+        (
+          item: string,
+          index: number
+        ) => (
+
+          <div
+            key={index}
+            className="
+              p-5
+              rounded-2xl
+              bg-red-500/10
+              border
+              border-red-500/20
+            "
+          >
+
+            <p
+              className="
+                text-red-400
+                font-medium
+              "
+            >
+              ⚠ {item}
+            </p>
+
+          </div>
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+
+
+  {/* RECOMMENDED ROLES */}
+
+  <div>
+
+    <h3
+      className="
+        text-3xl
+        font-bold
+        mb-6
+      "
+    >
+      Recommended Roles
+    </h3>
+
+    <div
+      className="
+        flex
+        flex-wrap
+        gap-4
+      "
+    >
+
+      {result.recommended_roles?.map(
+        (
+          role: string,
+          index: number
+        ) => (
+
+          <div
+            key={index}
+            className="
+              px-5
+              py-3
+              rounded-2xl
+              bg-red-500/10
+border-red-500/20
+text-red-400
+              font-semibold
+            "
+          >
+            {role}
+          </div>
+
+        )
+      )}
+
+    </div>
+
   </div>
 
 </div>

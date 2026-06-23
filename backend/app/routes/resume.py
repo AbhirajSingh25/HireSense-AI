@@ -1,16 +1,30 @@
-from fastapi import APIRouter, UploadFile, File
+import json
+
+from fastapi import (
+    APIRouter,
+    UploadFile,
+    File,
+)
+
+from pydantic import BaseModel
+
 from groq import Groq
+
 from app.config import GROQ_API_KEY
+
 import fitz
+
 
 router = APIRouter(
     prefix="/resume",
     tags=["Resume"]
 )
 
+
 client = Groq(
     api_key=GROQ_API_KEY
 )
+
 
 COMMON_SKILLS = [
     "python",
@@ -27,6 +41,10 @@ COMMON_SKILLS = [
     "fastapi",
 ]
 
+
+# ==================================================
+# RESUME ANALYZER
+# ==================================================
 
 @router.post("/analyze")
 async def analyze_resume(
@@ -75,23 +93,35 @@ async def analyze_resume(
                 "role": "system",
 
                 "content": """
-You are an expert technical recruiter.
+You are a senior technical recruiter.
 
-Analyze this resume and provide:
+Return ONLY valid JSON.
 
-1. ATS Score (0-100)
+{
+    "strengths": [
+        "Strong backend development"
+    ],
 
-2. Strengths
+    "weaknesses": [
+        "Limited cloud exposure"
+    ],
 
-3. Weaknesses
+    "verdict":
+        "Strong Candidate",
 
-4. Missing Skills
+    "readiness":
+        85,
 
-5. Recruiter Verdict
+    "recommended_roles": [
+        "Backend Developer",
+        "Software Engineer"
+    ]
+}
 
-6. Interview Readiness Score
-
-Keep the response structured and professional.
+Return ONLY JSON.
+No markdown.
+No explanations.
+No code blocks.
 """
             },
 
@@ -99,31 +129,88 @@ Keep the response structured and professional.
                 "role": "user",
                 "content": text[:6000]
             }
-
         ]
     )
 
-    ai_review = (
+    raw_response = (
         completion
         .choices[0]
         .message
         .content
     )
 
+    try:
+
+        ai_review = json.loads(
+            raw_response
+        )
+
+    except Exception:
+
+        ai_review = {
+
+            "strengths": [],
+
+            "weaknesses": [],
+
+            "verdict":
+                "Unable to Generate",
+
+            "readiness":
+                0,
+
+            "recommended_roles": [],
+        }
+
     return {
 
-        "ats_score": ats_score,
+        "ats_score":
+            ats_score,
 
-        "skills": found_skills,
+        "skills":
+            found_skills,
 
-        "missing_skills": missing_skills,
+        "missing_skills":
+            missing_skills,
 
-        "ai_review": ai_review,
+        "strengths":
+            ai_review.get(
+                "strengths",
+                []
+            ),
 
-        "resume_text": text[:3000]
+        "weaknesses":
+            ai_review.get(
+                "weaknesses",
+                []
+            ),
+
+        "verdict":
+            ai_review.get(
+                "verdict",
+                ""
+            ),
+
+        "readiness":
+            ai_review.get(
+                "readiness",
+                0
+            ),
+
+        "recommended_roles":
+            ai_review.get(
+                "recommended_roles",
+                []
+            ),
+
+        "resume_text":
+            text[:3000]
     }
-from pydantic import BaseModel
 
+
+# ==================================================
+# JD MATCHER
+# ==================================================
 
 class JDMatchRequest(BaseModel):
 
@@ -149,31 +236,25 @@ async def match_job_description(
                 "content": """
 You are a senior recruiter.
 
-Compare the resume against the job description.
+Compare resume with job description.
 
 Return:
 
 1. Match Percentage
-
 2. Missing Skills
-
 3. Strengths
-
 4. Weaknesses
-
 5. Hiring Recommendation
-
 6. Interview Readiness
 
-Keep it concise.
+Keep response concise.
 """
             },
 
             {
                 "role": "user",
 
-                "content":
-                f"""
+                "content": f"""
 Resume:
 
 {data.resume_text}
@@ -188,6 +269,10 @@ Job Description:
     )
 
     return {
+
         "analysis":
-        completion.choices[0].message.content
+            completion
+            .choices[0]
+            .message
+            .content
     }

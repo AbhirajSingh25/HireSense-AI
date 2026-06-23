@@ -2,14 +2,11 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   "http://127.0.0.1:8000";
 
-
 async function request(
   endpoint: string,
   options: RequestInit = {}
 ) {
-
   try {
-
     const response = await fetch(
       `${API_BASE_URL}${endpoint}`,
       {
@@ -17,15 +14,13 @@ async function request(
           "Content-Type":
             "application/json",
         },
-
         ...options,
       }
     );
 
     if (!response.ok) {
-
       throw new Error(
-        `API Error: ${response.status}`
+        `API Error ${response.status}`
       );
     }
 
@@ -34,7 +29,7 @@ async function request(
   } catch (error) {
 
     console.error(
-      "API REQUEST FAILED:",
+      "API Error:",
       error
     );
 
@@ -42,23 +37,19 @@ async function request(
   }
 }
 
-
-
-/* =========================
+/* ====================================
    AUTH
-========================= */
+==================================== */
 
 export async function signup(
   username: string,
   email: string,
   password: string
 ) {
-
   return request(
     "/auth/signup",
     {
       method: "POST",
-
       body: JSON.stringify({
         username,
         email,
@@ -68,17 +59,14 @@ export async function signup(
   );
 }
 
-
 export async function login(
   email: string,
   password: string
 ) {
-
   return request(
     "/auth/login",
     {
       method: "POST",
-
       body: JSON.stringify({
         email,
         password,
@@ -87,35 +75,28 @@ export async function login(
   );
 }
 
-
-
-/* =========================
+/* ====================================
    DASHBOARD
-========================= */
+==================================== */
 
 export async function getDashboardStats() {
-
   return request(
     "/dashboard"
   );
 }
 
-
-
-/* =========================
+/* ====================================
    INTERVIEW
-========================= */
+==================================== */
 
 export async function generateQuestions(
   role: string,
   level: string
 ) {
-
   return request(
     "/generate-questions",
     {
       method: "POST",
-
       body: JSON.stringify({
         role,
         level,
@@ -124,17 +105,14 @@ export async function generateQuestions(
   );
 }
 
-
 export async function aiEvaluate(
   question: string,
   answer: string
 ) {
-
   return request(
-    "/evaluate-answer",
+    "/api/interview/evaluate-answer",
     {
       method: "POST",
-
       body: JSON.stringify({
         question,
         answer,
@@ -143,21 +121,18 @@ export async function aiEvaluate(
   );
 }
 
-
 export async function generateFollowupQuestion(
-  previous_question: string,
+  question: string,
   answer: string,
   role: string,
   level: string
 ) {
-
   return request(
-    "/followup-question",
+    "/api/interview/generate-followup",
     {
       method: "POST",
-
       body: JSON.stringify({
-        previous_question,
+        question,
         answer,
         role,
         level,
@@ -166,39 +141,55 @@ export async function generateFollowupQuestion(
   );
 }
 
-
-export async function getFinalReport() {
-
-  return request(
-    "/final-report"
-  );
-}
-
-
-export async function saveInterview(
-  data: any
+export async function generateInterviewReport(
+  data: {
+    role: string;
+    level: string;
+    questions: string[];
+    answers: string[];
+    evaluations: any[];
+  }
 ) {
-
   return request(
-    "/save-interview",
+    "/api/interview/generate-report",
     {
       method: "POST",
-
       body: JSON.stringify(data),
     }
   );
 }
-export async function getInterviewHistory() {
-  return request("/interview-history");
+
+export async function saveInterview(
+  data: {
+    role: string;
+    level: string;
+    questions: string[];
+    answers: string[];
+    evaluations: any[];
+  }
+) {
+  return request(
+    "/api/interview/save-interview",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    }
+  );
 }
 
-export async function getInterviewSessions() {
-  return request("/interview-history");
+export async function getInterviewHistory() {
+  return request(
+    "/api/interview/history"
+  );
 }
+
+/* ====================================
+   SPEECH AI
+==================================== */
+
 export async function analyzeSpeech(
   formData: FormData
 ) {
-
   const response = await fetch(
     `${API_BASE_URL}/speech/analyze`,
     {
@@ -215,10 +206,14 @@ export async function analyzeSpeech(
 
   return response.json();
 }
+
+/* ====================================
+   VISION AI
+==================================== */
+
 export async function analyzeVision(
   formData: FormData
 ) {
-
   const response = await fetch(
     `${API_BASE_URL}/vision/analyze`,
     {
@@ -236,25 +231,27 @@ export async function analyzeVision(
   return response.json();
 }
 
-
-
-
+/* ====================================
+   LEADERBOARD
+==================================== */
 
 export async function getLeaderboard() {
-
   return request(
     "/leaderboard"
   );
 }
+
+/* ====================================
+   AI COPILOT
+==================================== */
+
 export async function askAICopilot(
   message: string
 ) {
-
   return request(
-    "/ai-copilot",
+    "/api/ai-copilot",
     {
       method: "POST",
-
       body: JSON.stringify({
         message,
       }),

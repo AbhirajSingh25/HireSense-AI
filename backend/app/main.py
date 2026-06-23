@@ -3,6 +3,10 @@ from fastapi import (
     Depends,
     Body,
 )
+from app.routes.history import (
+    router as history_router
+)
+from app.routes.dashboard import router as dashboard_router
 from app.routes.resume import router as resume_router
 from fastapi.middleware.cors import (
     CORSMiddleware,
@@ -96,6 +100,10 @@ app.include_router(
 app.include_router(
     hiring_router
 )
+app.include_router(
+    history_router
+)
+app.include_router(dashboard_router)
 # =========================
 # REQUEST MODELS
 # =========================
@@ -279,72 +287,7 @@ def generate_questions(
     }
 
 
-@app.post("/evaluate-answer")
-def evaluate_answer(
-    data: EvaluationRequest
-):
 
-    score = random.randint(75, 95)
-
-    return {
-        "score": score,
-        "confidence": random.randint(80, 95),
-        "communication": random.randint(78, 96),
-        "technical": random.randint(76, 97),
-        "feedback":
-            "Strong response with good communication and technical clarity.",
-    }
-
-
-@app.post("/followup-question")
-def next_question(
-    data: NextQuestionRequest
-):
-
-    next_questions = [
-
-        "Explain your biggest strength.",
-
-        "Describe a time you handled pressure.",
-
-        "How do you approach debugging?",
-
-        "Tell me about leadership experience.",
-
-        "Explain a difficult technical decision.",
-    ]
-
-    return {
-        "question": random.choice(next_questions)
-    }
-
-
-# =========================
-# REPORTS
-# =========================
-
-@app.post("/generate-report")
-def generate_report():
-
-    return {
-        "overall_score": 88,
-        "communication": 90,
-        "technical": 85,
-        "confidence": 87,
-        "summary": "Excellent interview performance.",
-    }
-
-
-@app.get("/final-report")
-def final_report():
-
-    return {
-        "overall_score": 88,
-        "communication": 90,
-        "technical": 85,
-        "confidence": 87,
-        "summary": "Excellent interview performance.",
-    }
 
 
 # =========================
@@ -455,77 +398,3 @@ def get_interview_history(
 # AI COPILOT
 # =========================
 
-@app.post("/ai-copilot")
-def ai_copilot(
-    data: dict = Body(...)
-):
-
-    message = data.get(
-        "message",
-        ""
-    ).lower()
-
-
-    if (
-        "hi" in message
-        or "hello" in message
-        or "hey" in message
-    ):
-
-        reply = (
-            "Hello. I am your AI Interview Copilot. "
-            "Ask me about technical interviews, "
-            "system design, behavioral preparation, "
-            "resume reviews, or recruiter expectations."
-        )
-
-
-    elif "scalability" in message:
-
-        reply = (
-            "Focus on load balancing, "
-            "caching, horizontal scaling, "
-            "database optimization, "
-            "and architecture tradeoffs."
-        )
-
-
-    elif "system design" in message:
-
-        reply = (
-            "Discuss scalability, APIs, "
-            "microservices, databases, "
-            "caching, and fault tolerance."
-        )
-
-
-    elif "behavioral" in message:
-
-        reply = (
-            "Use the STAR method: "
-            "Situation, Task, Action, Result."
-        )
-
-
-    elif "resume" in message:
-
-        reply = (
-            "Focus on measurable impact, "
-            "technical depth, "
-            "projects, and achievements."
-        )
-
-
-    else:
-
-        reply = (
-            "AI Copilot recommends focusing on "
-            "clear communication, "
-            "technical reasoning, "
-            "and structured problem solving."
-        )
-
-
-    return {
-        "reply": reply
-    }
