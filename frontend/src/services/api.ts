@@ -258,3 +258,11 @@ export async function askAICopilot(
     }
   );
 }
+export async function getFinalReport() {
+  return request("/final-report");
+}
+
+export async function getInterviewSessions() {
+  return request("/interview-history");
+}
+
