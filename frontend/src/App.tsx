@@ -5,6 +5,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
+import InterviewPlayback from "./pages/InterviewPlayback";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -248,6 +249,14 @@ function App() {
   element={
     <ProtectedRoute>
       <HiringProbability />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/playback/:id"
+  element={
+    <ProtectedRoute>
+      <InterviewPlayback />
     </ProtectedRoute>
   }
 />

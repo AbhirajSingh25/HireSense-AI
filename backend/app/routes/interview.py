@@ -1,12 +1,6 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-)
-
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-
 from sqlalchemy.orm import Session
-
 from groq import Groq
 
 from app.config import GROQ_API_KEY
@@ -15,9 +9,7 @@ from app.models import InterviewSession
 
 import json
 
-
 router = APIRouter()
-
 
 client = Groq(
     api_key=GROQ_API_KEY
@@ -29,38 +21,27 @@ client = Groq(
 # ==================================================
 
 class EvaluationRequest(BaseModel):
-
     question: str
-
     answer: str
 
 
 class FollowupRequest(BaseModel):
-
     question: str
-
     answer: str
-
     role: str
-
     level: str
 
 
 class InterviewSaveRequest(BaseModel):
-
     role: str
-
     level: str
-
     questions: list
-
     answers: list
-
     evaluations: list
 
 
 # ==================================================
-# ANSWER EVALUATION
+# EVALUATE ANSWER
 # ==================================================
 
 @router.post("/evaluate-answer")
@@ -78,33 +59,17 @@ async def evaluate_answer(
                 "role": "system",
 
                 "content": """
-You are a senior technical interviewer.
-
-Evaluate the candidate answer.
-
-Return ONLY valid JSON.
+Return ONLY JSON.
 
 {
-    "confidence": 85,
-    "communication": 90,
-    "technical": 88,
-    "overall_score": 87,
-
-    "strengths": [
-        "Clear explanation"
-    ],
-
-    "improvements": [
-        "Add more technical depth"
-    ],
-
-    "feedback":
-        "Detailed recruiter feedback"
+    "confidence":85,
+    "communication":90,
+    "technical":88,
+    "overall_score":87,
+    "strengths":["Strong explanation"],
+    "improvements":["Add examples"],
+    "feedback":"Detailed feedback"
 }
-
-Return JSON only.
-No markdown.
-No explanations.
 """
             },
 
@@ -113,32 +78,20 @@ No explanations.
 
                 "content": f"""
 Question:
-
 {data.question}
 
-
 Answer:
-
 {data.answer}
 """
             }
         ]
     )
 
-    raw_response = (
-        completion
-        .choices[0]
-        .message
-        .content
-    )
-
     try:
 
-        result = json.loads(
-            raw_response
+        return json.loads(
+            completion.choices[0].message.content
         )
-
-        return result
 
     except Exception:
 
@@ -157,7 +110,7 @@ Answer:
             "improvements": [],
 
             "feedback":
-                raw_response,
+                completion.choices[0].message.content,
         }
 
 
@@ -180,16 +133,7 @@ async def generate_followup(
                 "role": "system",
 
                 "content": """
-You are a senior interviewer.
-
-Generate ONE intelligent follow-up question.
-
-The follow-up should depend on:
-
-- previous question
-- candidate answer
-- role
-- experience level
+Generate ONE interview follow-up question.
 
 Return ONLY the question.
 """
@@ -218,6 +162,7 @@ Answer:
     return {
 
         "question":
+
             completion
             .choices[0]
             .message
@@ -227,7 +172,7 @@ Answer:
 
 
 # ==================================================
-# FINAL REPORT
+# GENERATE FINAL REPORT
 # ==================================================
 
 @router.post("/generate-report")
@@ -245,38 +190,18 @@ async def generate_report(
                 "role": "system",
 
                 "content": """
-You are a senior recruiter.
-
-Generate a final interview report.
-
-Return ONLY valid JSON.
+Return ONLY JSON.
 
 {
-    "overall_score": 88,
-
-    "communication": 90,
-
-    "technical": 85,
-
-    "confidence": 87,
-
-    "strengths": [
-        "Strong backend knowledge"
-    ],
-
-    "weaknesses": [
-        "Limited cloud exposure"
-    ],
-
-    "recommendation":
-        "Proceed to next round",
-
-    "verdict":
-        "Strong Candidate"
+    "overall_score":88,
+    "communication":90,
+    "technical":85,
+    "confidence":87,
+    "strengths":["Strong backend"],
+    "weaknesses":["Cloud exposure"],
+    "recommendation":"Proceed",
+    "verdict":"Strong Candidate"
 }
-
-Return JSON only.
-No markdown.
 """
             },
 
@@ -303,20 +228,11 @@ Evaluations:
         ]
     )
 
-    raw_response = (
-        completion
-        .choices[0]
-        .message
-        .content
-    )
-
     try:
 
-        report = json.loads(
-            raw_response
+        return json.loads(
+            completion.choices[0].message.content
         )
-
-        return report
 
     except Exception:
 
@@ -338,7 +254,7 @@ Evaluations:
                 "Review Required",
 
             "verdict":
-                "Unable to Generate"
+                "Unable To Generate"
         }
 
 
@@ -352,27 +268,27 @@ async def save_interview(
     db: Session = Depends(get_db)
 ):
 
-    overall_score = 0
+    scores = [
 
-    if data.evaluations:
+        item.get(
+            "overall_score",
+            0
+        )
 
-        scores = []
+        for item in data.evaluations
+    ]
 
-        for item in data.evaluations:
+    overall_score = (
 
-            score = item.get(
-                "overall_score",
-                0
-            )
+        int(
+            sum(scores)
+            / len(scores)
+        )
 
-            scores.append(score)
+        if scores
 
-        if scores:
-
-            overall_score = int(
-                sum(scores)
-                / len(scores)
-            )
+        else 0
+    )
 
     session = InterviewSession(
 
@@ -438,3 +354,131 @@ async def get_history(
     )
 
     return interviews
+
+
+# ==================================================
+# LATEST REPORT
+# ==================================================
+
+@router.get("/latest-report")
+async def latest_report(
+    db: Session = Depends(get_db)
+):
+
+    session = (
+
+        db.query(
+            InterviewSession
+        )
+
+        .order_by(
+            InterviewSession.id.desc()
+        )
+
+        .first()
+    )
+
+    if not session:
+
+        return None
+
+    return {
+
+        "id":
+            session.id,
+
+        "role":
+            session.role,
+
+        "level":
+            session.level,
+
+        "overall_score":
+            session.overall_score,
+
+        "questions":
+            json.loads(
+                session.questions
+            ),
+
+        "answers":
+            json.loads(
+                session.answers
+            ),
+
+        "evaluations":
+            json.loads(
+                session.evaluations
+            ),
+
+        "created_at":
+            str(
+                session.created_at
+            )
+    }
+
+
+# ==================================================
+# SESSION DETAILS
+# ==================================================
+
+@router.get("/session/{session_id}")
+async def get_session(
+    session_id: int,
+    db: Session = Depends(get_db)
+):
+
+    session = (
+
+        db.query(
+            InterviewSession
+        )
+
+        .filter(
+            InterviewSession.id == session_id
+        )
+
+        .first()
+    )
+
+    if not session:
+
+        return {
+            "error":
+                "Session not found"
+        }
+
+    return {
+
+        "id":
+            session.id,
+
+        "role":
+            session.role,
+
+        "level":
+            session.level,
+
+        "overall_score":
+            session.overall_score,
+
+        "questions":
+            json.loads(
+                session.questions
+            ),
+
+        "answers":
+            json.loads(
+                session.answers
+            ),
+
+        "evaluations":
+            json.loads(
+                session.evaluations
+            ),
+
+        "created_at":
+            str(
+                session.created_at
+            )
+    }

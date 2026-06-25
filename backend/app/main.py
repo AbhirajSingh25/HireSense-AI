@@ -331,67 +331,7 @@ def leaderboard():
 # SAVE INTERVIEW
 # =========================
 
-@app.post("/save-interview")
-def save_interview(
-    data: SaveInterviewRequest,
-    db: Session = Depends(get_db),
-):
 
-    session = InterviewSession(
-
-        role=data.role,
-
-        level=data.level,
-
-        question=data.questions[0]
-        if data.questions else "",
-
-        answer=data.answers[0]
-        if data.answers else "",
-
-        feedback=data.evaluations[0].get(
-            "feedback",
-            "",
-        ) if data.evaluations else "",
-
-        confidence=data.evaluations[0].get(
-            "confidence",
-            0,
-        ) if data.evaluations else 0,
-
-        communication=data.evaluations[0].get(
-            "communication",
-            0,
-        ) if data.evaluations else 0,
-
-        technical=data.evaluations[0].get(
-            "technical",
-            0,
-        ) if data.evaluations else 0,
-    )
-
-    db.add(session)
-
-    db.commit()
-
-    db.refresh(session)
-
-    return {
-        "message": "Interview saved successfully",
-        "session_id": session.id,
-    }
-
-
-@app.get("/interview-history")
-def get_interview_history(
-    db: Session = Depends(get_db),
-):
-
-    interviews = db.query(
-        InterviewSession
-    ).all()
-
-    return interviews
 
 
 # =========================

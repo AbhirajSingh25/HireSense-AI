@@ -657,3 +657,5 @@ def dashboard():
 
         "technical": 85
     }
+for route in app.routes:
+    print(route.path)

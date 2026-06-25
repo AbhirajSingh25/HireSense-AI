@@ -3,36 +3,41 @@ import {
   useState,
 } from "react";
 
+import {
+  useParams,
+} from "react-router-dom";
+
 import MainLayout from "../components/MainLayout";
 
 import {
-  getFinalReport,
+  getInterviewSession,
 } from "../services/api";
-
 
 function InterviewPlayback() {
 
-  const [
-    report,
-    setReport,
-  ] = useState<any>(null);
+  const { id } = useParams();
 
+  const [
+    session,
+    setSession,
+  ] = useState<any>(null);
 
   useEffect(() => {
 
-    loadPlayback();
+    loadSession();
 
   }, []);
 
-
-  async function loadPlayback() {
+  async function loadSession() {
 
     try {
 
       const data =
-        await getFinalReport();
+        await getInterviewSession(
+          id || ""
+        );
 
-      setReport(data);
+      setSession(data);
 
     } catch (error) {
 
@@ -40,46 +45,131 @@ function InterviewPlayback() {
     }
   }
 
+  if (!session) {
+
+    return (
+
+      <MainLayout>
+
+        <div className="p-10">
+
+          Loading Session...
+
+        </div>
+
+      </MainLayout>
+    );
+  }
 
   return (
 
     <MainLayout>
 
-      <div>
+      <div className="max-w-6xl mx-auto">
 
         <h1
           className="
-            text-4xl
-            font-bold
-            text-white
-            mb-8
+            text-5xl
+            font-black
+            mb-10
           "
         >
           Interview Playback
         </h1>
 
-
         <div
           className="
-            bg-white/5
+            bg-zinc-900
             border
-            border-white/10
-            rounded-2xl
-            p-6
+            border-zinc-800
+            rounded-3xl
+            p-8
           "
         >
 
-          <p
+          <h2
             className="
-              text-gray-300
-              leading-8
+              text-3xl
+              font-bold
+              mb-2
             "
           >
-            {
-              report?.transcript ||
-              "No transcript"
-            }
+            {session.role}
+          </h2>
+
+          <p
+            className="
+              text-zinc-400
+              mb-8
+            "
+          >
+            {session.level}
           </p>
+
+          <div
+            className="
+              space-y-8
+            "
+          >
+
+            {
+              session.questions?.map(
+                (
+                  q: string,
+                  index: number
+                ) => (
+
+                  <div
+                    key={index}
+                    className="
+                      border-b
+                      border-zinc-800
+                      pb-6
+                    "
+                  >
+
+                    <h3
+                      className="
+                        text-cyan-400
+                        font-bold
+                        mb-2
+                      "
+                    >
+                      Question {index + 1}
+                    </h3>
+
+                    <p
+                      className="
+                        mb-4
+                      "
+                    >
+                      {q}
+                    </p>
+
+                    <h3
+                      className="
+                        text-green-400
+                        font-bold
+                        mb-2
+                      "
+                    >
+                      Candidate Answer
+                    </h3>
+
+                    <p>
+                      {
+                        session.answers[
+                          index
+                        ]
+                      }
+                    </p>
+
+                  </div>
+                )
+              )
+            }
+
+          </div>
 
         </div>
 

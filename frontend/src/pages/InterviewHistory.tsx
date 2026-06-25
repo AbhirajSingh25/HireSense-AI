@@ -3,6 +3,10 @@ import {
   useState,
 } from "react";
 
+import {
+  useNavigate,
+} from "react-router-dom";
+
 import MainLayout from "../components/MainLayout";
 
 import Card from "../components/ui/Card";
@@ -10,6 +14,8 @@ import Card from "../components/ui/Card";
 import {
   Clock,
   Brain,
+  PlayCircle,
+  Trophy,
 } from "lucide-react";
 
 import {
@@ -18,6 +24,9 @@ import {
 
 
 function InterviewHistory() {
+
+  const navigate =
+    useNavigate();
 
   const [
     sessions,
@@ -86,7 +95,7 @@ function InterviewHistory() {
               text-xl
             "
           >
-            Review your previous interview sessions
+            Review and replay previous interview sessions
           </p>
 
         </div>
@@ -126,20 +135,23 @@ function InterviewHistory() {
                   ) => (
 
                     <Card
-                      key={index}
-                      className="
-                        p-8
-                      "
-                    >
+  key={index}
+  className="
+    p-8
+  "
+>
 
-                      <div
-                        className="
-                          flex
-                          items-center
-                          justify-between
-                          mb-6
-                        "
-                      >
+  <div
+    onClick={() =>
+      window.location.href =
+      `/playback/${session.id}`
+    }
+    className="
+      cursor-pointer
+      hover:scale-[1.02]
+      transition-all
+    "
+  >
 
                         <Brain
                           className="
@@ -150,11 +162,15 @@ function InterviewHistory() {
 
                         <span
                           className="
-                            text-sm
-                            text-zinc-500
+                            text-xs
+                            px-3
+                            py-1
+                            rounded-full
+                            bg-red-500/10
+                            text-red-400
                           "
                         >
-                          Session
+                          Session #{session.id}
                         </span>
 
                       </div>
@@ -164,12 +180,12 @@ function InterviewHistory() {
                         className="
                           text-2xl
                           font-bold
-                          mb-3
+                          mb-2
                         "
                       >
                         {
                           session.role ||
-                          "Frontend Developer"
+                          "Interview"
                         }
                       </h2>
 
@@ -177,7 +193,7 @@ function InterviewHistory() {
                       <p
                         className="
                           text-zinc-500
-                          mb-6
+                          mb-5
                         "
                       >
                         {
@@ -191,20 +207,93 @@ function InterviewHistory() {
                         className="
                           flex
                           items-center
+                          gap-2
+                          mb-5
+                        "
+                      >
+
+                        <Trophy
+                          size={18}
+                          className="
+                            text-yellow-400
+                          "
+                        />
+
+                        <span
+                          className="
+                            text-white
+                            font-semibold
+                          "
+                        >
+                          Score:
+                          {" "}
+                          {
+                            session.overall_score || 0
+                          }
+                        </span>
+
+                      </div>
+
+
+                      <div
+                        className="
+                          flex
+                          items-center
                           gap-3
                           text-zinc-400
+                          mb-6
                         "
                       >
 
                         <Clock size={18} />
 
-                        {
-                          session.created_at ||
-
-                          "Recently"
-                        }
+                        <span
+                          className="
+                            text-sm
+                          "
+                        >
+                          {
+                            session.created_at
+                              ? new Date(
+                                  session.created_at
+                                ).toLocaleString()
+                              : "Recently"
+                          }
+                        </span>
 
                       </div>
+
+
+                      <button
+
+                        onClick={() =>
+                          navigate(
+                            `/playback/${session.id}`
+                          )
+                        }
+
+                        className="
+                          w-full
+                          h-12
+                          rounded-2xl
+                          bg-red-500
+                          hover:bg-red-600
+                          transition-all
+                          flex
+                          items-center
+                          justify-center
+                          gap-2
+                          font-semibold
+                        "
+                      >
+
+                        <PlayCircle
+                          size={18}
+                        />
+
+                        Replay Interview
+
+                      </button>
 
                     </Card>
                   )
