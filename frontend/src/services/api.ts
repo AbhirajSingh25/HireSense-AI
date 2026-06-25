@@ -280,4 +280,17 @@ export async function getLatestReport() {
     "/api/interview/latest-report"
   );
 }
+export async function getAnalytics() {
+
+  return request(
+    "/analytics"
+  );
+}
+export async function getRecruiterDashboard() {
+
+  return request(
+    "/recruiter-dashboard"
+  );
+}
+
 

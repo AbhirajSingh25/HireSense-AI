@@ -9,9 +9,11 @@ import {
 
 import MainLayout from "../components/MainLayout";
 
-import {
-  getInterviewSession,
-} from "../services/api";
+import Card from "../components/ui/Card";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:8000";
 
 function InterviewPlayback() {
 
@@ -22,27 +24,52 @@ function InterviewPlayback() {
     setSession,
   ] = useState<any>(null);
 
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
+
   useEffect(() => {
 
     loadSession();
 
-  }, []);
+  }, [id]);
 
   async function loadSession() {
 
     try {
 
+      const response = await fetch(
+        `${API_BASE_URL}/api/interview/session/${id}`
+      );
+
       const data =
-        await getInterviewSession(
-          id || ""
-        );
+        await response.json();
 
       setSession(data);
 
     } catch (error) {
 
       console.error(error);
+
+    } finally {
+
+      setLoading(false);
     }
+  }
+
+  if (loading) {
+
+    return (
+
+      <MainLayout>
+
+        <div className="p-10">
+          Loading Session...
+        </div>
+
+      </MainLayout>
+    );
   }
 
   if (!session) {
@@ -52,9 +79,7 @@ function InterviewPlayback() {
       <MainLayout>
 
         <div className="p-10">
-
-          Loading Session...
-
+          Session Not Found
         </div>
 
       </MainLayout>
@@ -71,105 +96,113 @@ function InterviewPlayback() {
           className="
             text-5xl
             font-black
-            mb-10
+            mb-8
           "
         >
           Interview Playback
         </h1>
 
-        <div
-          className="
-            bg-zinc-900
-            border
-            border-zinc-800
-            rounded-3xl
-            p-8
-          "
-        >
+        <Card className="p-6 mb-6">
 
-          <h2
-            className="
-              text-3xl
-              font-bold
-              mb-2
-            "
-          >
+          <h2 className="text-2xl font-bold">
             {session.role}
           </h2>
 
-          <p
-            className="
-              text-zinc-400
-              mb-8
-            "
-          >
+          <p className="text-zinc-500">
             {session.level}
           </p>
 
-          <div
-            className="
-              space-y-8
-            "
-          >
+          <p className="mt-4">
+            Overall Score:
+            {" "}
+            {session.overall_score}
+          </p>
 
-            {
-              session.questions?.map(
-                (
-                  q: string,
-                  index: number
-                ) => (
+        </Card>
 
-                  <div
+        <div className="space-y-6">
+
+          {
+            session.questions?.map(
+              (
+                question: string,
+                index: number
+              ) => {
+
+                const answer =
+                  session.answers?.[index];
+
+                const evaluation =
+                  session.evaluations?.[index];
+
+                return (
+
+                  <Card
                     key={index}
-                    className="
-                      border-b
-                      border-zinc-800
-                      pb-6
-                    "
+                    className="p-6"
                   >
 
                     <h3
                       className="
-                        text-cyan-400
+                        text-xl
                         font-bold
-                        mb-2
+                        mb-4
                       "
                     >
-                      Question {index + 1}
+                      Q{index + 1}: {question}
                     </h3>
 
                     <p
                       className="
+                        text-zinc-300
                         mb-4
                       "
                     >
-                      {q}
+                      {answer}
                     </p>
 
-                    <h3
+                    <div
                       className="
-                        text-green-400
-                        font-bold
-                        mb-2
+                        grid
+                        md:grid-cols-3
+                        gap-4
+                        mb-4
                       "
                     >
-                      Candidate Answer
-                    </h3>
 
-                    <p>
-                      {
-                        session.answers[
-                          index
-                        ]
-                      }
+                      <div>
+                        Confidence:
+                        {" "}
+                        {evaluation?.confidence}
+                      </div>
+
+                      <div>
+                        Communication:
+                        {" "}
+                        {evaluation?.communication}
+                      </div>
+
+                      <div>
+                        Technical:
+                        {" "}
+                        {evaluation?.technical}
+                      </div>
+
+                    </div>
+
+                    <p
+                      className="
+                        text-green-400
+                      "
+                    >
+                      {evaluation?.feedback}
                     </p>
 
-                  </div>
-                )
-              )
-            }
-
-          </div>
+                  </Card>
+                );
+              }
+            )
+          }
 
         </div>
 

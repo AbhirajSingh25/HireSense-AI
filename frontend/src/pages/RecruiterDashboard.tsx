@@ -3,7 +3,14 @@ import MainLayout from "../components/MainLayout";
 import PageContainer from "../components/ui/PageContainer";
 import PageHeader from "../components/ui/PageHeader";
 import Card from "../components/ui/Card";
+import {
+  useEffect,
+  useState,
+} from "react";
 
+import {
+  getRecruiterDashboard,
+} from "../services/api";
 import {
   Users,
   Brain,
@@ -19,36 +26,31 @@ import {
 
 function RecruiterDashboard() {
 
-  const candidates = [
+  const [
+  candidates,
+  setCandidates,
+] = useState<any[]>([]);
 
-    {
-      name: "Sarah Chen",
-      role: "AI Engineer",
-      score: 98,
-      status: "Recommended",
-    },
+useEffect(() => {
 
-    {
-      name: "Michael Lee",
-      role: "Frontend Engineer",
-      score: 95,
-      status: "Strong Match",
-    },
+  loadCandidates();
 
-    {
-      name: "Alex Johnson",
-      role: "Backend Developer",
-      score: 93,
-      status: "High Potential",
-    },
+}, []);
 
-    {
-      name: "Abhiraj Singh",
-      role: "Software Engineer",
-      score: 92,
-      status: "Elite Candidate",
-    },
-  ];
+async function loadCandidates() {
+
+  try {
+
+    const data =
+      await getRecruiterDashboard();
+
+    setCandidates(data);
+
+  } catch (error) {
+
+    console.error(error);
+  }
+}
 
 
   return (

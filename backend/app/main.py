@@ -3,8 +3,17 @@ from fastapi import (
     Depends,
     Body,
 )
+from app.routes.analytics import (
+    router as analytics_router
+)
 from app.routes.history import (
     router as history_router
+)
+from app.routes.recruiter import (
+    router as recruiter_router
+)
+from app.routes.recruiter import (
+    router as recruiter_router
 )
 from app.routes.dashboard import router as dashboard_router
 from app.routes.resume import router as resume_router
@@ -102,6 +111,15 @@ app.include_router(
 )
 app.include_router(
     history_router
+)
+app.include_router(
+    analytics_router
+)
+app.include_router(
+    recruiter_router
+)
+app.include_router(
+    recruiter_router
 )
 app.include_router(dashboard_router)
 # =========================
