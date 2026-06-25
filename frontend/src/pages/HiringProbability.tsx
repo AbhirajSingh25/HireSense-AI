@@ -1,69 +1,134 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import MainLayout from "../components/MainLayout";
+
+import {
+  getLatestReport,
+  getHiringProbability,
+} from "../services/api";
 
 function HiringProbability() {
 
   const [
-    ats,
-    setAts
-  ] = useState("");
-
-  const [
-    interview,
-    setInterview
-  ] = useState("");
-
-  const [
-    jd,
-    setJd
-  ] = useState("");
+    loading,
+    setLoading,
+  ] = useState(true);
 
   const [
     result,
-    setResult
+    setResult,
   ] = useState<any>(null);
 
-  async function calculate() {
+  const [
+    report,
+    setReport,
+  ] = useState<any>(null);
 
-    const response =
-      await fetch(
+  useEffect(() => {
 
-        "http://127.0.0.1:8000/hiring/probability",
+    loadProbability();
 
-        {
-          method: "POST",
+  }, []);
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+  async function loadProbability() {
 
-          body: JSON.stringify({
+    try {
 
-            ats_score:
-              Number(ats),
+      const latestReport =
+        await getLatestReport();
 
-            interview_score:
-              Number(interview),
-
-            jd_match_score:
-              Number(jd),
-          }),
-        }
+      setReport(
+        latestReport
       );
 
-    const data =
-      await response.json();
+      const evaluation =
+        latestReport
+          ?.evaluations?.[0];
 
-    setResult(data);
+      if (!evaluation) {
+
+        setLoading(false);
+
+        return;
+      }
+
+      const probabilityResult =
+        await getHiringProbability(
+
+          evaluation.confidence || 0,
+
+          evaluation.communication || 0,
+
+          evaluation.technical || 0
+        );
+
+      setResult(
+        probabilityResult
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+    } finally {
+
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+
+    return (
+
+      <MainLayout>
+
+        <div
+          className="
+            max-w-5xl
+            mx-auto
+            text-white
+          "
+        >
+          Loading...
+        </div>
+
+      </MainLayout>
+    );
+  }
+
+  if (!report || !result) {
+
+    return (
+
+      <MainLayout>
+
+        <div
+          className="
+            max-w-5xl
+            mx-auto
+            text-white
+          "
+        >
+          No Interview Data Found
+        </div>
+
+      </MainLayout>
+    );
   }
 
   return (
 
     <MainLayout>
 
-      <div className="max-w-5xl mx-auto">
+      <div
+        className="
+          max-w-5xl
+          mx-auto
+        "
+      >
 
         <h1
           className="
@@ -75,61 +140,111 @@ function HiringProbability() {
           Hiring Probability
         </h1>
 
-        <div className="space-y-4">
+        <div
+          className="
+            bg-white/5
+            border
+            border-white/10
+            rounded-3xl
+            p-10
+          "
+        >
 
-          <input
-            placeholder="ATS Score"
-            value={ats}
-            onChange={(e)=>
-              setAts(
-                e.target.value
-              )
-            }
-          />
-
-          <input
-            placeholder="Interview Score"
-            value={interview}
-            onChange={(e)=>
-              setInterview(
-                e.target.value
-              )
-            }
-          />
-
-          <input
-            placeholder="JD Match Score"
-            value={jd}
-            onChange={(e)=>
-              setJd(
-                e.target.value
-              )
-            }
-          />
-
-          <button
-            onClick={calculate}
+          <div
+            className="
+              text-center
+              mb-10
+            "
           >
-            Calculate
-          </button>
 
-        </div>
-
-        {result && (
-
-          <div className="mt-10">
-
-            <h2>
+            <h2
+              className="
+                text-8xl
+                font-black
+                text-red-400
+              "
+            >
               {result.probability}%
             </h2>
 
-            <p>
-              {result.verdict}
+            <p
+              className="
+                text-2xl
+                text-zinc-400
+                mt-4
+              "
+            >
+              Selection Probability
             </p>
 
           </div>
 
-        )}
+          <div
+            className="
+              grid
+              md:grid-cols-2
+              gap-8
+            "
+          >
+
+            <div>
+
+              <h3
+                className="
+                  text-2xl
+                  font-bold
+                  mb-4
+                "
+              >
+                Interview Summary
+              </h3>
+
+              <p>
+                Role:
+                {" "}
+                {report.role}
+              </p>
+
+              <p>
+                Level:
+                {" "}
+                {report.level}
+              </p>
+
+              <p>
+                Score:
+                {" "}
+                {report.overall_score}
+              </p>
+
+            </div>
+
+            <div>
+
+              <h3
+                className="
+                  text-2xl
+                  font-bold
+                  mb-4
+                "
+              >
+                AI Verdict
+              </h3>
+
+              <p
+                className="
+                  text-green-400
+                  text-xl
+                "
+              >
+                {result.verdict}
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
 

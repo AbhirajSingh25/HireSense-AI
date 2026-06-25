@@ -1,44 +1,47 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-router = APIRouter(
-    prefix="/hiring",
-    tags=["Hiring"]
-)
+router = APIRouter()
 
 
 class HiringRequest(BaseModel):
 
-    ats_score: int
+    confidence: int
 
-    interview_score: int
+    communication: int
 
-    jd_match_score: int
+    technical: int
 
 
-@router.post("/probability")
-async def calculate_hiring_probability(
+@router.post("/api/hiring-probability")
+def hiring_probability(
     data: HiringRequest
 ):
 
     probability = int(
 
         (
-            data.ats_score * 0.3 +
-
-            data.interview_score * 0.4 +
-
-            data.jd_match_score * 0.3
+            data.confidence * 0.30
+            +
+            data.communication * 0.30
+            +
+            data.technical * 0.40
         )
     )
 
-    verdict = "Strong Hire"
+    if probability >= 85:
 
-    if probability < 75:
+        verdict = "Highly Recommended"
 
-        verdict = "Potential Hire"
+    elif probability >= 70:
 
-    if probability < 60:
+        verdict = "Recommended"
+
+    elif probability >= 50:
+
+        verdict = "Potential"
+
+    else:
 
         verdict = "Needs Improvement"
 
@@ -48,5 +51,5 @@ async def calculate_hiring_probability(
             probability,
 
         "verdict":
-            verdict
+            verdict,
     }

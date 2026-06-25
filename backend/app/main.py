@@ -9,6 +9,9 @@ from app.routes.analytics import (
 from app.routes.history import (
     router as history_router
 )
+from app.routes.certificate import (
+    router as certificate_router
+)
 from app.routes.leaderboard import (
     router as leaderboard_router
 )
@@ -126,6 +129,9 @@ app.include_router(
 )
 app.include_router(
     leaderboard_router
+)
+app.include_router(
+    certificate_router
 )
 app.include_router(dashboard_router)
 # =========================

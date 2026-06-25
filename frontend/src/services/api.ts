@@ -294,4 +294,37 @@ export async function getLeaderboard() {
     "/leaderboard"
   );
 }
+export function downloadCertificate(
+  name: string,
+  score: number
+) {
 
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL ||
+    "http://127.0.0.1:8000";
+
+  window.open(
+    `${API_BASE_URL}/certificate/${name}/${score}`,
+    "_blank"
+  );
+}
+export async function getHiringProbability(
+  confidence: number,
+  communication: number,
+  technical: number
+) {
+
+  return request(
+    "/api/hiring-probability",
+    {
+      method: "POST",
+
+      body: JSON.stringify({
+
+        confidence,
+        communication,
+        technical,
+      }),
+    }
+  );
+}

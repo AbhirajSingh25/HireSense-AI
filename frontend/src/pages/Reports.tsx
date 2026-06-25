@@ -2,7 +2,9 @@ import {
   useEffect,
   useState,
 } from "react";
-
+import {
+  downloadCertificate,
+} from "../services/api";
 import MainLayout from "../components/MainLayout";
 import PageContainer from "../components/ui/PageContainer";
 import PageHeader from "../components/ui/PageHeader";
@@ -304,12 +306,34 @@ function Reports() {
 
           </div>
 
-        </Card>
+               </Card>
+
+        <button
+          onClick={() =>
+            downloadCertificate(
+              "Abhiraj Singh",
+              report.overall_score
+            )
+          }
+          className="
+            mt-8
+            h-14
+            px-6
+            rounded-2xl
+            bg-red-500
+            hover:bg-red-400
+            font-bold
+            transition-all
+          "
+        >
+          Download Certificate
+        </button>
 
       </PageContainer>
 
     </MainLayout>
   );
 }
+
 
 export default Reports;
