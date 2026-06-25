@@ -263,7 +263,9 @@ export async function getFinalReport() {
 }
 
 export async function getInterviewSessions() {
-  return request("/interview-history");
+  return request(
+    "/api/interview/history"
+  );
 }
 export async function getInterviewSession(
   id: string
@@ -275,7 +277,7 @@ export async function getInterviewSession(
 
 export async function getLatestReport() {
   return request(
-    "/final-report"
+    "/api/interview/latest-report"
   );
 }
 
