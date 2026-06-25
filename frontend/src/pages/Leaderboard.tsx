@@ -1,7 +1,16 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import MainLayout from "../components/MainLayout";
 
 import PageHeader from "../components/ui/PageHeader";
 import Card from "../components/ui/Card";
+
+import {
+  getLeaderboard,
+} from "../services/api";
 
 import {
   Trophy,
@@ -16,49 +25,31 @@ import {
 
 function Leaderboard() {
 
-  const users = [
+ const [
+  users,
+  setUsers,
+] = useState<any[]>([]);
 
-    {
-      rank: 1,
-      name: "Sarah Chen",
-      score: 98,
-      role: "AI Engineer",
-      badge: "Elite",
-    },
+useEffect(() => {
 
-    {
-      rank: 2,
-      name: "Michael Lee",
-      score: 95,
-      role: "Frontend Engineer",
-      badge: "Expert",
-    },
+  loadLeaderboard();
 
-    {
-      rank: 3,
-      name: "Alex Johnson",
-      score: 93,
-      role: "Backend Developer",
-      badge: "Advanced",
-    },
+}, []);
 
-    {
-      rank: 4,
-      name: "Abhiraj Singh",
-      score: 92,
-      role: "Software Engineer",
-      badge: "High Potential",
-    },
+async function loadLeaderboard() {
 
-    {
-      rank: 5,
-      name: "Emma Watson",
-      score: 90,
-      role: "Full Stack Engineer",
-      badge: "Strong Match",
-    },
-  ];
+  try {
 
+    const data =
+      await getLeaderboard();
+
+    setUsers(data);
+
+  } catch (error) {
+
+    console.error(error);
+  }
+}
 
   return (
 
@@ -436,7 +427,7 @@ function Leaderboard() {
                         font-bold
                       "
                     >
-                      {user.score}% Match
+                      {user.score}% Score
                     </div>
 
 
@@ -451,7 +442,18 @@ function Leaderboard() {
                         font-bold
                       "
                     >
-                      {user.badge}
+                      {
+  user.score >= 90
+    ? "Elite"
+
+    : user.score >= 80
+    ? "Expert"
+
+    : user.score >= 70
+    ? "Advanced"
+
+    : "Rising"
+}
                     </div>
 
 

@@ -9,6 +9,9 @@ from app.routes.analytics import (
 from app.routes.history import (
     router as history_router
 )
+from app.routes.leaderboard import (
+    router as leaderboard_router
+)
 from app.routes.recruiter import (
     router as recruiter_router
 )
@@ -120,6 +123,9 @@ app.include_router(
 )
 app.include_router(
     recruiter_router
+)
+app.include_router(
+    leaderboard_router
 )
 app.include_router(dashboard_router)
 # =========================

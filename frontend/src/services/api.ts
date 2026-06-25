@@ -235,11 +235,7 @@ export async function analyzeVision(
    LEADERBOARD
 ==================================== */
 
-export async function getLeaderboard() {
-  return request(
-    "/leaderboard"
-  );
-}
+
 
 /* ====================================
    AI COPILOT
@@ -292,5 +288,10 @@ export async function getRecruiterDashboard() {
     "/recruiter-dashboard"
   );
 }
+export async function getLeaderboard() {
 
+  return request(
+    "/leaderboard"
+  );
+}
 
