@@ -7,6 +7,8 @@ import {
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 import InterviewPlayback from "./pages/InterviewPlayback";
 import Dashboard from "./pages/Dashboard";
+import Certificate from "./pages/Certificate";
+import Achievements from "./pages/Achievements";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import LiveInterview from "./pages/LiveInterview";
@@ -107,7 +109,14 @@ function App() {
             </PublicRoute>
           }
         />
-
+<Route
+  path="/certificate"
+  element={
+    <ProtectedRoute>
+      <Certificate />
+    </ProtectedRoute>
+  }
+/>
         <Route
           path="/signup"
           element={
@@ -116,7 +125,14 @@ function App() {
             </PublicRoute>
           }
         />
-
+<Route
+  path="/achievements"
+  element={
+    <ProtectedRoute>
+      <Achievements />
+    </ProtectedRoute>
+  }
+/>
 
 
         {/* DASHBOARD */}

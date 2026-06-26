@@ -14,6 +14,8 @@ import {
   PlayCircle,
   Settings,
   LogOut,
+  Award,
+  Medal,
 } from "lucide-react";
 
 
@@ -52,6 +54,16 @@ const navItems = [
     path: "/reports",
     icon: FileText,
   },
+  {
+  label: "Certificate",
+  path: "/certificate",
+  icon: Award,
+},
+{
+  label: "Achievements",
+  path: "/achievements",
+  icon: Medal,
+},
 
   {
     label: "Leaderboard",

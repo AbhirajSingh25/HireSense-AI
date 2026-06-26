@@ -6,9 +6,9 @@ import {
 import MainLayout from "../components/MainLayout";
 
 import {
-  getFinalReport,
+  downloadCertificate,
+  getLatestReport,
 } from "../services/api";
-
 
 function Certificate() {
 
@@ -17,20 +17,18 @@ function Certificate() {
     setReport,
   ] = useState<any>(null);
 
-
   useEffect(() => {
 
     loadCertificate();
 
   }, []);
 
-
   async function loadCertificate() {
 
     try {
 
       const data =
-        await getFinalReport();
+        await getLatestReport();
 
       setReport(data);
 
@@ -40,17 +38,32 @@ function Certificate() {
     }
   }
 
+  if (!report) {
+
+    return (
+
+      <MainLayout>
+
+        <div className="p-10 text-white">
+
+          Loading Certificate...
+
+        </div>
+
+      </MainLayout>
+    );
+  }
 
   return (
 
     <MainLayout>
 
-      <div>
+      <div className="max-w-5xl mx-auto p-10">
 
         <h1
           className="
-            text-4xl
-            font-bold
+            text-5xl
+            font-black
             text-white
             mb-8
           "
@@ -58,12 +71,11 @@ function Certificate() {
           Certificate
         </h1>
 
-
         <div
           className="
-            bg-linear-to-r
+            bg-gradient-to-r
             from-cyan-500
-            to-blue-500
+            to-blue-600
             rounded-3xl
             p-10
             text-black
@@ -72,25 +84,56 @@ function Certificate() {
 
           <h2
             className="
-              text-3xl
+              text-4xl
               font-black
-              mb-4
+              mb-6
             "
           >
-            AI Interview Completion
+            HireSense AI
           </h2>
 
-          <p
+          <p className="text-xl mb-3">
+            Candidate:
+            {" "}
+            Abhiraj Singh
+          </p>
+
+          <p className="text-xl mb-3">
+            Role:
+            {" "}
+            {report.role}
+          </p>
+
+          <p className="text-xl mb-3">
+            Level:
+            {" "}
+            {report.level}
+          </p>
+
+          <p className="text-xl mb-6">
+            Score:
+            {" "}
+            {report.overall_score}%
+          </p>
+
+          <button
+            onClick={() =>
+              downloadCertificate(
+                "Abhiraj Singh",
+                report.overall_score
+              )
+            }
             className="
-              text-xl
+              bg-black
+              text-white
+              px-6
+              py-3
+              rounded-xl
+              font-bold
             "
           >
-            Confidence:
-            {" "}
-            {
-              report?.confidence_score || 0
-            }%
-          </p>
+            Download PDF Certificate
+          </button>
 
         </div>
 

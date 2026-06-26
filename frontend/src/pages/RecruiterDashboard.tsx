@@ -30,7 +30,40 @@ function RecruiterDashboard() {
   candidates,
   setCandidates,
 ] = useState<any[]>([]);
+const totalCandidates =
+  candidates.length;
 
+const averageScore =
+  candidates.length
+    ? Math.round(
+        candidates.reduce(
+          (
+            sum,
+            candidate
+          ) =>
+            sum +
+            candidate.score,
+          0
+        ) /
+          candidates.length
+      )
+    : 0;
+
+const recommendedCandidates =
+  candidates.filter(
+    (candidate) =>
+      candidate.score >= 70
+  ).length;
+
+const topCandidate =
+  candidates.length
+    ? Math.max(
+        ...candidates.map(
+          (candidate) =>
+            candidate.score
+        )
+      )
+    : 0;
 useEffect(() => {
 
   loadCandidates();
@@ -103,7 +136,7 @@ async function loadCandidates() {
                 mb-2
               "
             >
-              248
+              {totalCandidates}
             </h2>
 
             <p className="text-zinc-500">
@@ -131,7 +164,7 @@ async function loadCandidates() {
                 mb-2
               "
             >
-              91%
+              {averageScore}%
             </h2>
 
             <p className="text-zinc-500">
@@ -159,11 +192,11 @@ async function loadCandidates() {
                 mb-2
               "
             >
-              +18%
+              {recommendedCandidates}
             </h2>
 
             <p className="text-zinc-500">
-              Hiring Efficiency
+              Recommended
             </p>
 
           </Card>
@@ -187,11 +220,11 @@ async function loadCandidates() {
                 mb-2
               "
             >
-              Elite
+              {topCandidate}%
             </h2>
 
             <p className="text-zinc-500">
-              Recruiter Tier
+              Top Score
             </p>
 
           </Card>

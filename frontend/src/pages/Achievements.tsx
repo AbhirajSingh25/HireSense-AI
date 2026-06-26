@@ -1,147 +1,77 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import MainLayout from "../components/MainLayout";
 
 import {
-
   Trophy,
-
-  Star,
-
-  Brain,
-
   Flame,
-
   Crown,
-
   Target,
-
 } from "lucide-react";
 
+import {
+  getAchievements,
+} from "../services/api";
 
-const achievements = [
 
-  {
+const achievementIcons: any = {
 
-    title:
-      "Interview Starter",
+  "First Interview":
+    Trophy,
 
-    description:
-      "Completed first AI interview",
+  "Practice Warrior":
+    Flame,
 
-    icon: Trophy,
+  "Strong Candidate":
+    Target,
 
-    color:
-      "text-yellow-400",
-
-    bg:
-      "bg-yellow-400/10",
-
-    border:
-      "border-yellow-400/20",
-  },
-
-  {
-
-    title:
-      "Communication Expert",
-
-    description:
-      "Scored above 90% communication",
-
-    icon: Star,
-
-    color:
-      "text-cyan-400",
-
-    bg:
-      "bg-cyan-400/10",
-
-    border:
-      "border-cyan-400/20",
-  },
-
-  {
-
-    title:
-      "AI Problem Solver",
-
-    description:
-      "Achieved strong technical score",
-
-    icon: Brain,
-
-    color:
-      "text-purple-400",
-
-    bg:
-      "bg-purple-400/10",
-
-    border:
-      "border-purple-400/20",
-  },
-
-  {
-
-    title:
-      "Consistency Streak",
-
-    description:
-      "Completed multiple interview sessions",
-
-    icon: Flame,
-
-    color:
-      "text-orange-400",
-
-    bg:
-      "bg-orange-400/10",
-
-    border:
-      "border-orange-400/20",
-  },
-
-  {
-
-    title:
-      "Elite Candidate",
-
-    description:
-      "Reached top leaderboard ranking",
-
-    icon: Crown,
-
-    color:
-      "text-pink-400",
-
-    bg:
-      "bg-pink-400/10",
-
-    border:
-      "border-pink-400/20",
-  },
-
-  {
-
-    title:
-      "Precision Performer",
-
-    description:
-      "Maintained high confidence score",
-
-    icon: Target,
-
-    color:
-      "text-green-400",
-
-    bg:
-      "bg-green-400/10",
-
-    border:
-      "border-green-400/20",
-  },
-];
+  "Interview Master":
+    Crown,
+};
 
 
 function Achievements() {
+
+  const [
+    achievements,
+    setAchievements,
+  ] = useState<any[]>([]);
+
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
+
+
+  useEffect(() => {
+
+    loadAchievements();
+
+  }, []);
+
+
+  async function loadAchievements() {
+
+    try {
+
+      const data =
+        await getAchievements();
+
+      setAchievements(data);
+
+    } catch (error) {
+
+      console.error(error);
+
+    } finally {
+
+      setLoading(false);
+    }
+  }
+
 
   return (
 
@@ -190,11 +120,10 @@ function Achievements() {
                   text-lg
                 "
               >
-                Candidate progression and milestone intelligence
+                Real achievements earned from interview performance
               </p>
 
             </div>
-
 
             <div
               className="
@@ -213,7 +142,7 @@ function Achievements() {
                   text-sm
                 "
               >
-                Total Badges
+                Unlocked
               </div>
 
               <div
@@ -223,9 +152,7 @@ function Achievements() {
                   text-cyan-400
                 "
               >
-
                 {achievements.length}
-
               </div>
 
             </div>
@@ -233,126 +160,132 @@ function Achievements() {
           </div>
 
 
-          <div
-            className="
-              grid
-              md:grid-cols-2
-              xl:grid-cols-3
-              gap-8
-            "
-          >
+          {
+            loading ? (
 
-            {
-              achievements.map(
-                (
-                  item,
-                  index
-                ) => {
+              <div
+                className="
+                  text-zinc-400
+                  text-xl
+                "
+              >
+                Loading achievements...
+              </div>
 
-                  const Icon =
-                    item.icon;
+            ) : (
 
-                  return (
+              <div
+                className="
+                  grid
+                  md:grid-cols-2
+                  xl:grid-cols-3
+                  gap-8
+                "
+              >
 
-                    <div
-                      key={index}
-                      className={`
+                {
+                  achievements.map(
+                    (
+                      item,
+                      index
+                    ) => {
 
-                        ${item.bg}
-                        ${item.border}
+                      const Icon =
 
-                        border
-                        rounded-3xl
-                        p-8
-                        transition-all
-                        hover:scale-[1.02]
-                      `}
-                    >
+                        achievementIcons[
+                          item.title
+                        ] || Trophy;
 
-                      <div
-                        className="
-                          flex
-                          items-center
-                          justify-between
-                          mb-8
-                        "
-                      >
+                      return (
 
                         <div
-                          className={`
-
-                            ${item.bg}
-
-                            w-20
-                            h-20
-                            rounded-3xl
-                            flex
-                            items-center
-                            justify-center
-                          `}
-                        >
-
-                          <Icon
-                            className={
-                              item.color
-                            }
-                            size={38}
-                          />
-
-                        </div>
-
-
-                        <div
+                          key={index}
                           className="
-                            text-zinc-500
-                            text-sm
+                            border
+                            border-cyan-400/20
+                            bg-cyan-400/5
+                            rounded-3xl
+                            p-8
                           "
                         >
-                          UNLOCKED
+
+                          <div
+                            className="
+                              flex
+                              justify-between
+                              items-center
+                              mb-8
+                            "
+                          >
+
+                            <div
+                              className="
+                                w-20
+                                h-20
+                                rounded-3xl
+                                bg-cyan-400/10
+                                flex
+                                items-center
+                                justify-center
+                              "
+                            >
+
+                              <Icon
+                                className="
+                                  text-cyan-400
+                                "
+                                size={38}
+                              />
+
+                            </div>
+
+                            <span
+                              className="
+                                text-green-400
+                                text-sm
+                              "
+                            >
+                              UNLOCKED
+                            </span>
+
+                          </div>
+
+                          <h2
+                            className="
+                              text-3xl
+                              font-bold
+                              mb-4
+                            "
+                          >
+                            {item.title}
+                          </h2>
+
+                          <p
+                            className="
+                              text-zinc-400
+                            "
+                          >
+                            Achievement earned through interview performance.
+                                                    </p>
+
                         </div>
 
-                      </div>
-
-
-                      <h2
-                        className="
-                          text-3xl
-                          font-bold
-                          mb-4
-                        "
-                      >
-
-                        {item.title}
-
-                      </h2>
-
-
-                      <p
-                        className="
-                          text-zinc-400
-                          leading-7
-                        "
-                      >
-
-                        {
-                          item.description
-                        }
-
-                      </p>
-
-                    </div>
-                  );
+                      );
+                    }
+                  )
                 }
-              )
-            }
 
-          </div>
+              </div>
+
+            )
+          }
 
         </div>
 
       </div>
 
     </MainLayout>
+
   );
 }
 

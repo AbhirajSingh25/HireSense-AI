@@ -1,55 +1,72 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import InterviewSession
+
+import json
 
 router = APIRouter()
 
 
-class HiringRequest(BaseModel):
-
-    confidence: int
-
-    communication: int
-
-    technical: int
-
-
-@router.post("/api/hiring-probability")
-def hiring_probability(
-    data: HiringRequest
+@router.get("/api/recruiter-dashboard")
+def recruiter_dashboard(
+    db: Session = Depends(get_db)
 ):
 
-    probability = int(
+    interviews = (
 
-        (
-            data.confidence * 0.30
-            +
-            data.communication * 0.30
-            +
-            data.technical * 0.40
+        db.query(
+            InterviewSession
         )
+
+        .order_by(
+            InterviewSession.id.desc()
+        )
+
+        .all()
     )
 
-    if probability >= 85:
+    candidates = []
 
-        verdict = "Highly Recommended"
+    for interview in interviews:
 
-    elif probability >= 70:
+        score = (
+            interview.overall_score
+            or 0
+        )
 
-        verdict = "Recommended"
+        if score >= 85:
 
-    elif probability >= 50:
+            status = (
+                "Highly Recommended"
+            )
 
-        verdict = "Potential"
+        elif score >= 70:
 
-    else:
+            status = (
+                "Recommended"
+            )
 
-        verdict = "Needs Improvement"
+        else:
 
-    return {
+            status = (
+                "Needs Improvement"
+            )
 
-        "probability":
-            probability,
+        candidates.append({
 
-        "verdict":
-            verdict,
-    }
+            "name":
+                f"Candidate {interview.id}",
+
+            "role":
+                interview.role,
+
+            "score":
+                score,
+
+            "status":
+                status,
+        })
+
+    return candidates

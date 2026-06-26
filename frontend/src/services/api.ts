@@ -282,32 +282,14 @@ export async function getAnalytics() {
     "/analytics"
   );
 }
-export async function getRecruiterDashboard() {
 
-  return request(
-    "/recruiter-dashboard"
-  );
-}
 export async function getLeaderboard() {
 
   return request(
     "/leaderboard"
   );
 }
-export function downloadCertificate(
-  name: string,
-  score: number
-) {
 
-  const API_BASE_URL =
-    import.meta.env.VITE_API_URL ||
-    "http://127.0.0.1:8000";
-
-  window.open(
-    `${API_BASE_URL}/certificate/${name}/${score}`,
-    "_blank"
-  );
-}
 export async function getHiringProbability(
   confidence: number,
   communication: number,
@@ -326,5 +308,26 @@ export async function getHiringProbability(
         technical,
       }),
     }
+  );
+}
+export async function getRecruiterDashboard() {
+
+  return request(
+    "/api/recruiter-dashboard"
+  );
+}
+export async function getAchievements() {
+
+  return request(
+    "/achievements"
+  );
+}
+export function downloadCertificate(
+  candidateName: string,
+  score: number
+) {
+  window.open(
+    `${API_BASE_URL}/certificate/${candidateName}/${score}`,
+    "_blank"
   );
 }
