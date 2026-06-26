@@ -3,7 +3,14 @@ import MainLayout from "../components/MainLayout";
 import PageContainer from "../components/ui/PageContainer";
 import PageHeader from "../components/ui/PageHeader";
 import Card from "../components/ui/Card";
+import {
+  useEffect,
+  useState,
+} from "react";
 
+import {
+  getAnalytics,
+} from "../services/api";
 import {
   Brain,
   TrendingUp,
@@ -140,7 +147,52 @@ const growthData = [
 
 
 function Analytics() {
+const [
+  analytics,
+  setAnalytics,
+] = useState<any>(null);
 
+const [
+  loading,
+  setLoading,
+] = useState(true);
+
+useEffect(() => {
+
+  loadAnalytics();
+
+}, []);
+
+async function loadAnalytics() {
+if (loading) {
+
+  return (
+
+    <MainLayout>
+
+      <div className="p-10">
+        Loading Analytics...
+      </div>
+
+    </MainLayout>
+  );
+}
+  try {
+
+    const data =
+      await getAnalytics();
+
+    setAnalytics(data);
+
+  } catch (error) {
+
+    console.error(error);
+
+  } finally {
+
+    setLoading(false);
+  }
+}
   return (
 
     <MainLayout>
@@ -191,7 +243,7 @@ function Analytics() {
                 mb-2
               "
             >
-              94%
+              {analytics?.stats?.overall || 0}%
             </h2>
 
             <p className="text-zinc-500">
@@ -219,11 +271,13 @@ function Analytics() {
                 mb-2
               "
             >
-              +18%
+              {
+  analytics?.performance?.length || 0
+}
             </h2>
 
             <p className="text-zinc-500">
-              Weekly Growth
+              Interview Sessions
             </p>
 
           </Card>
@@ -247,7 +301,9 @@ function Analytics() {
                 mb-2
               "
             >
-              88%
+              {
+  analytics?.stats?.communication || 0
+}%
             </h2>
 
             <p className="text-zinc-500">
@@ -275,11 +331,13 @@ function Analytics() {
                 mb-2
               "
             >
-              Elite
+              {
+  analytics?.stats?.technical || 0
+}%
             </h2>
 
             <p className="text-zinc-500">
-              Candidate Tier
+              Technical Score
             </p>
 
           </Card>
@@ -361,7 +419,9 @@ function Analytics() {
                   height="100%"
                 >
 
-                  <AreaChart data={performanceData}>
+                  <AreaChart data={
+  analytics?.performance || []
+}>
 
                     <defs>
 
@@ -459,7 +519,9 @@ function Analytics() {
                   height="100%"
                 >
 
-                  <RadarChart data={radarData}>
+                  <RadarChart data={
+  analytics?.radar || []
+}>
 
                     <PolarGrid />
 
@@ -470,7 +532,7 @@ function Analytics() {
                     <PolarRadiusAxis />
 
                     <Radar
-                      dataKey="A"
+                      dataKey="value"
                       stroke="#06b6d4"
                       fill="#06b6d4"
                       fillOpacity={0.6}
@@ -562,9 +624,11 @@ function Analytics() {
                   height="100%"
                 >
 
-                  <LineChart data={growthData}>
+                  <LineChart data={
+  analytics?.performance || []
+}>
 
-                    <XAxis dataKey="month" />
+                    <XAxis dataKey="session" />
 
                     <YAxis />
 
@@ -572,7 +636,7 @@ function Analytics() {
 
                     <Line
                       type="monotone"
-                      dataKey="growth"
+                      dataKey="score"
                       stroke="#22c55e"
                       strokeWidth={4}
                     />

@@ -276,12 +276,7 @@ export async function getLatestReport() {
     "/api/interview/latest-report"
   );
 }
-export async function getAnalytics() {
 
-  return request(
-    "/analytics"
-  );
-}
 
 export async function getLeaderboard() {
 
@@ -329,5 +324,17 @@ export function downloadCertificate(
   window.open(
     `${API_BASE_URL}/certificate/${candidateName}/${score}`,
     "_blank"
+  );
+}
+export async function getRecruiterInsights() {
+
+  return request(
+    "/recruiter-insights"
+  );
+}
+export async function getAnalytics() {
+
+  return request(
+    "/analytics"
   );
 }

@@ -10,6 +10,7 @@ import {
 
 import {
   getRecruiterDashboard,
+  getRecruiterInsights,
 } from "../services/api";
 import {
   Users,
@@ -32,7 +33,10 @@ function RecruiterDashboard() {
 ] = useState<any[]>([]);
 const totalCandidates =
   candidates.length;
-
+const [
+  insights,
+  setInsights,
+] = useState<any>(null);
 const averageScore =
   candidates.length
     ? Math.round(
@@ -74,10 +78,19 @@ async function loadCandidates() {
 
   try {
 
-    const data =
+    const candidateData =
       await getRecruiterDashboard();
 
-    setCandidates(data);
+    setCandidates(
+      candidateData
+    );
+
+    const insightsData =
+      await getRecruiterInsights();
+
+    setInsights(
+      insightsData
+    );
 
   } catch (error) {
 
@@ -577,9 +590,9 @@ async function loadCandidates() {
                       text-sm
                     "
                   >
-                    AI detected high-performing
-                    architecture reasoning patterns
-                    among top-ranked candidates.
+                    {
+  insights?.technical
+}
                   </p>
 
                 </div>
@@ -629,9 +642,9 @@ async function loadCandidates() {
                       text-sm
                     "
                   >
-                    Communication confidence
-                    strongly correlates with
-                    recruiter recommendation scores.
+{
+  insights?.communication
+}
                   </p>
 
                 </div>
@@ -681,9 +694,9 @@ async function loadCandidates() {
                       text-sm
                     "
                   >
-                    Real-time behavioral analysis
-                    continuously updates recruiter
-                    compatibility signals.
+                    {
+  insights?.recommendation
+}
                   </p>
 
                 </div>
